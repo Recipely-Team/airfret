@@ -18,4 +18,5 @@ description: Promoting Airfret from dev to main (production on Vercel). Use when
 4. Merge on green with a **merge commit** (not squash; `dev` stays):
    `if gh pr checks <n> --watch --fail-fast; then gh pr merge <n> --merge; fi`
 5. Tag: `git checkout main && git pull && git tag v<x.y.z> && git push origin v<x.y.z>`.
-6. Report the PR, merge commit, tag and the production URL.
+6. Deploy: until Vercel is connected to GitHub (`docs/deploy.md`), run `vercel deploy --prod --yes --scope recepeksi` from `main`.
+7. Report the PR, merge commit, tag and the production URL.
