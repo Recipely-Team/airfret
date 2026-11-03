@@ -8,8 +8,10 @@ export interface Instrument {
   readonly name: string;
   readonly tuning: readonly number[];
   readonly maxFret: number;
-  /** Seconds to decay to -60 dB at 110 Hz; higher notes decay faster. */
+  /** Seconds for the fundamental to decay to −60 dB at 110 Hz. */
   readonly t60: number;
+  /** Higher notes ring shorter: T60(f) = t60 · (110 / f)^t60Exponent. */
+  readonly t60Exponent: number;
   /** 0 = dark and soft, 1 = bright and metallic. */
   readonly bright: number;
   /** Pluck point as a fraction of string length (0.5 = middle, warm). */

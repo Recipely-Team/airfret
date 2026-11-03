@@ -18,25 +18,18 @@ const HAVE_CURRENT_DATA = 2;
  * @remarks
  * - Prefers the GPU delegate and falls back to CPU.
  * - Landmarks are mirrored on x so they line up with the mirrored video the player sees.
+ * - `pause` stops the camera tracks outright (the camera light goes off) when no instrument is open.
  */
 export class MediaPipeHandTracker implements HandTrackerInterface {
   private landmarker: HandLandmarker | null = null;
   private lastVideoTime = -1;
+  private stream: MediaStream | null = null;
 
   constructor(private readonly video: HTMLVideoElement) {}
 
   async start(): Promise<Result<void, Failure>> {
-    try {
-      this.video.srcObject = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: { width: { ideal: CAMERA.width }, height: { ideal: CAMERA.height }, frameRate: { ideal: CAMERA.frameRate }, facingMode: 'user' },
-      });
-      this.video.muted = true;
-      this.video.playsInline = true;
-      await this.video.play();
-    } catch (e) {
-      return fail(new Failure(FailureCode.cameraUnavailable, String(e)));
-    }
+    const camera = await this.openCamera();
+    if (!camera.isOk) return camera;
     try {
       this.landmarker = await this.load();
       return ok(undefined);
@@ -45,9 +38,35 @@ export class MediaPipeHandTracker implements HandTrackerInterface {
     }
   }
 
+  pause(): void {
+    for (const track of this.stream?.getTracks() ?? []) track.stop();
+    this.stream = null;
+    this.video.srcObject = null;
+  }
+
+  async resume(): Promise<Result<void, Failure>> {
+    return this.stream ? ok(undefined) : this.openCamera();
+  }
+
+  private async openCamera(): Promise<Result<void, Failure>> {
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: { width: { ideal: CAMERA.width }, height: { ideal: CAMERA.height }, frameRate: { ideal: CAMERA.frameRate }, facingMode: 'user' },
+      });
+      this.video.srcObject = this.stream;
+      this.video.muted = true;
+      this.video.playsInline = true;
+      await this.video.play();
+      return ok(undefined);
+    } catch (e) {
+      return fail(new Failure(FailureCode.cameraUnavailable, String(e)));
+    }
+  }
+
   detect(nowMs: number): TrackedHand[] | null {
     const v = this.video;
-    if (!this.landmarker || v.readyState < HAVE_CURRENT_DATA || v.currentTime === this.lastVideoTime) return null;
+    if (!this.stream || !this.landmarker || v.readyState < HAVE_CURRENT_DATA || v.currentTime === this.lastVideoTime) return null;
     this.lastVideoTime = v.currentTime;
     return this.landmarker.detectForVideo(v, nowMs).landmarks.map((lm) => ({ landmarks: lm.map((p) => ({ x: 1 - p.x, y: p.y, z: p.z })) }));
   }

@@ -38,6 +38,10 @@ export const SONGS: readonly Song[] = [
   // Songs
   { id: 'happy-birthday', title: 'Happy Birthday', credit: 'credit.traditional', level: 1, bpm: 100, beatsPerBar: 3, mode: PlayMode.chord, instrument: 'acoustic',
     chords: 'G:3 D7:3 D7:3 G:3 G7:3 C:3 G:3 D7:3 G:6', pattern: WALTZ, subdiv: 2, about: 'about.birthday' },
+  { id: 'jingle-bells', title: 'Jingle Bells', credit: 'credit.pierpont', level: 1, bpm: 112, beatsPerBar: 4, mode: PlayMode.chord, instrument: 'acoustic',
+    chords: 'G:16 C:4 G:4 A7:4 D7:4 G:16 C:4 G:4 D7:4 G:4', pattern: 'D.DUD.DU', subdiv: 2, about: 'about.jingle' },
+  { id: 'silent-night', title: 'Silent Night', credit: 'credit.gruber', level: 1, bpm: 84, beatsPerBar: 3, mode: PlayMode.chord, instrument: 'nylon',
+    chords: 'C:6 G7:3 C:3 F:3 C:3 F:3 C:3 G7:3 C:3 G7:3 C:3', pattern: 'D.D.D.', subdiv: 2, about: 'about.silentNight' },
   { id: 'saints', title: 'When the Saints Go Marching In', credit: 'credit.traditional', level: 2, bpm: 104, beatsPerBar: 4, mode: PlayMode.chord, instrument: 'acoustic',
     chords: 'C:16 G7:8 C:8 C7:4 F:4 C:4 G7:4 C:8', pattern: STEADY, subdiv: 2, about: 'about.saints' },
   { id: 'susanna', title: 'Oh! Susanna', credit: 'credit.foster', level: 2, bpm: 100, beatsPerBar: 4, mode: PlayMode.chord, instrument: 'acoustic',

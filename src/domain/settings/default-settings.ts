@@ -25,6 +25,7 @@ export const DEFAULT_SETTINGS: Settings = {
   isLessonEasy: true,
   hasLessonDrums: false,
   pedalBindings: DEFAULT_PEDAL_BINDINGS,
+  customSongs: [],
   hihatMode: HiHatPedalMode.holdToOpen,
   hasSeenExplore: false,
   best: {},

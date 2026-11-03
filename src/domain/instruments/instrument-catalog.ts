@@ -5,13 +5,20 @@ import { BASS_TUNING, GUITAR_TUNING } from '@domain/music/tunings';
 
 const MAX_FRET = 12;
 
-/** Every instrument the app offers, in toolbar order. */
+/**
+ * Every instrument the app offers, in menu order.
+ *
+ * @remarks
+ * - Electric and bass decay laws are measured from CC0 FreePats recordings with `tools/calibrate`
+ *   (clean electric: T60 = 21.4 s·(110/f)^0.8; bass: 7.9 s·(110/f)^0.49). Acoustic and nylon have no
+ *   reference recording yet and keep hand-tuned values.
+ */
 export const INSTRUMENTS: readonly Instrument[] = [
-  { id: 'acoustic', name: 'inst.acoustic', tuning: GUITAR_TUNING, maxFret: MAX_FRET, t60: 4.5, bright: 0.62, pick: 0.12, level: 0.42, chain: ChainKind.acoustic, defaultMode: PlayMode.chord },
-  { id: 'nylon', name: 'inst.nylon', tuning: GUITAR_TUNING, maxFret: MAX_FRET, t60: 3.2, bright: 0.3, pick: 0.2, level: 0.5, chain: ChainKind.nylon, defaultMode: PlayMode.chord },
-  { id: 'clean', name: 'inst.clean', tuning: GUITAR_TUNING, maxFret: MAX_FRET, t60: 5.5, bright: 0.7, pick: 0.1, level: 0.38, chain: ChainKind.clean, defaultMode: PlayMode.chord },
-  { id: 'drive', name: 'inst.drive', tuning: GUITAR_TUNING, maxFret: MAX_FRET, t60: 6, bright: 0.72, pick: 0.11, level: 0.3, chain: ChainKind.drive, defaultMode: PlayMode.chord },
-  { id: 'bass', name: 'inst.bass', tuning: BASS_TUNING, maxFret: MAX_FRET, t60: 3.5, bright: 0.22, pick: 0.22, level: 0.85, chain: ChainKind.bass, defaultMode: PlayMode.note },
+  { id: 'acoustic', name: 'inst.acoustic', tuning: GUITAR_TUNING, maxFret: MAX_FRET, t60: 4.5, t60Exponent: 0.45, bright: 0.62, pick: 0.12, level: 0.42, chain: ChainKind.acoustic, defaultMode: PlayMode.chord },
+  { id: 'nylon', name: 'inst.nylon', tuning: GUITAR_TUNING, maxFret: MAX_FRET, t60: 3.2, t60Exponent: 0.45, bright: 0.3, pick: 0.2, level: 0.5, chain: ChainKind.nylon, defaultMode: PlayMode.chord },
+  { id: 'clean', name: 'inst.clean', tuning: GUITAR_TUNING, maxFret: MAX_FRET, t60: 21.4, t60Exponent: 0.8, bright: 0.7, pick: 0.1, level: 0.38, chain: ChainKind.clean, defaultMode: PlayMode.chord },
+  { id: 'drive', name: 'inst.drive', tuning: GUITAR_TUNING, maxFret: MAX_FRET, t60: 21.4, t60Exponent: 0.8, bright: 0.72, pick: 0.11, level: 0.3, chain: ChainKind.drive, defaultMode: PlayMode.chord },
+  { id: 'bass', name: 'inst.bass', tuning: BASS_TUNING, maxFret: MAX_FRET, t60: 7.9, t60Exponent: 0.49, bright: 0.22, pick: 0.22, level: 0.85, chain: ChainKind.bass, defaultMode: PlayMode.note },
 ];
 
 const FALLBACK: Instrument = INSTRUMENTS[0] as Instrument;

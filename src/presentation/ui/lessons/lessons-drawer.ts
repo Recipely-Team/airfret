@@ -23,7 +23,12 @@ export class LessonsDrawer {
     private readonly onPick: (song: Song) => void,
     onTour: () => void,
     onClose: () => void,
+    onAddSong: () => void,
   ) {
+    byId('customBtn').onclick = () => {
+      this.close();
+      onAddSong();
+    };
     byId('lessonsClose').onclick = () => {
       this.close();
       onClose();
@@ -46,7 +51,9 @@ export class LessonsDrawer {
   render(): void {
     const list = byId('songList');
     list.replaceChildren();
+    const mine = this.store.value.customSongs;
     const groups: [string, readonly Song[]][] = [
+      ...(mine.length ? [['lesson.mine', mine] as [string, readonly Song[]]] : []),
       ['lesson.course', SONGS.filter((s) => s.course !== undefined)],
       ['lesson.songs', SONGS.filter((s) => s.course === undefined && s.mode === PlayMode.chord)],
       ['lesson.noteMode', SONGS.filter((s) => s.mode === PlayMode.note && s.instrument !== 'bass')],
@@ -73,9 +80,20 @@ export class LessonsDrawer {
     const dots = cell('dots', '●'.repeat(song.level));
     dots.append(cell('off', '●'.repeat(MAX_LEVEL - song.level)));
     level.append(dots);
-    const meta = cell('meta wide', `${t(song.credit)} · ${song.bpm} BPM · ${t(instrumentById(song.instrument).name)}`);
+    const meta = cell('meta wide', song.id.startsWith('my-') ? `${song.bpm} BPM · ${song.chords ?? ''}` : `${t(song.credit)} · ${song.bpm} BPM · ${t(instrumentById(song.instrument).name)}`);
     if (best !== undefined) meta.append(cell('best', ` · ${t('lesson.best')} ${Math.round(best * PERCENT)}%`));
     el.append(name, level, cell('about', t(song.about)), meta);
+    if (song.id.startsWith('my-')) {
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'delete';
+      del.textContent = t('custom.delete');
+      del.onclick = (e) => {
+        e.stopPropagation();
+        this.store.update({ customSongs: this.store.value.customSongs.filter((s) => s.id !== song.id) });
+      };
+      el.append(del);
+    }
     el.onclick = () => this.onPick(song);
     el.onkeydown = (e) => {
       if (e.key === 'Enter') this.onPick(song);

@@ -333,3 +333,31 @@ a.btn, a.brand { text-decoration: none; color: inherit; display: inline-flex; al
 .learn-card span { color: var(--muted); font-size: 13px; }
 .home-privacy { margin-top: 32px; }
 @media (max-width: 900px) { .page-title { display: none; } .bar-context { margin-left: 0; } }
+
+/* Header: what you play (left) · this page's controls · what you learn · settings (right) */
+.picker {
+  display: inline-flex; align-items: center; gap: 8px; padding: 5px 10px 5px 6px; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--line-strong); background: rgba(236, 232, 225, 0.04); color: var(--ink); font-weight: 500;
+}
+.picker:hover, .picker[aria-expanded='true'] { border-color: rgba(224, 164, 88, 0.6); background: rgba(224, 164, 88, 0.06); }
+.picker-icon { display: grid; place-items: center; color: var(--accent); }
+.picker-icon svg { width: 44px; height: 18px; }
+.picker-icon:empty { display: none; }
+.picker .chevron { color: var(--muted); }
+.learn-group { display: inline-flex; gap: 2px; padding: 2px; border-radius: 10px; border: 1px solid var(--line); }
+.learn-link { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 8px; color: var(--muted); text-decoration: none; }
+.learn-link:hover { color: var(--ink); background: rgba(236, 232, 225, 0.05); }
+.learn-link svg { color: var(--accent); }
+.bar-divider { width: 1px; height: 22px; background: var(--line-strong); margin: 0 4px; }
+.page-title { display: none; }
+@media (max-width: 900px) { .learn-link span { display: none; } .picker-name { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } }
+
+/* Custom song form */
+.field { display: grid; gap: 5px; margin: 10px 0 4px; }
+.field span { color: var(--muted); font-size: 12.5px; }
+.field input, .field textarea { background: rgba(11, 11, 12, 0.6); border: 1px solid var(--line-strong); border-radius: 8px; padding: 8px 10px; color: var(--ink); font: inherit; }
+.field textarea { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 13px; resize: vertical; }
+.field.small input { width: 90px; }
+.field input:focus, .field textarea:focus { outline: 1px solid var(--accent); border-color: transparent; }
+.song .delete { grid-column: 2; grid-row: 1; justify-self: end; background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 12px; }
+.song .delete:hover { color: var(--miss); }

@@ -1,5 +1,7 @@
 import type { DrumPlayer } from '@application/drums/drum-player';
 import type { BackingTrack } from '@application/lessons/backing-track';
+import { songLibrary } from '@application/lessons/song-library';
+import { voiceMix } from '@application/lessons/voice-mix';
 import type { GuidePlayer } from '@application/lessons/guide-player';
 import type { StartLessonUseCase } from '@application/lessons/start-lesson-use-case';
 import type { Player } from '@application/play/player';
@@ -23,6 +25,7 @@ import { effectiveTuning } from '@domain/music/tuning-catalog';
 import type { HandTrackerInterface } from '@domain/tracking/hand-tracker-interface';
 import type { AppUi } from '@presentation/app/app-ui';
 import { launchFeature } from '@presentation/app/launch-feature';
+import { stageHint } from '@presentation/app/stage-hint';
 import { TourController } from '@presentation/app/tour-controller';
 import type { Route } from '@presentation/routing/route';
 import { videoToScreen } from '@presentation/canvas/screen-mapping';
@@ -30,7 +33,6 @@ import type { StageRenderer } from '@presentation/canvas/stage-renderer';
 import { t } from '@presentation/i18n/translator';
 
 const MS_PER_SECOND = 1000;
-const NO_HANDS_HINT_AFTER = 2.5;
 const ERROR_TOAST_MS = 6000;
 
 interface Services {
@@ -79,14 +81,13 @@ export class AirfretApp {
     return this.s.store.value.instrument === DRUMS_ID;
   }
 
-  get isOnStage(): boolean {
-    return this.base.kind === 'instrument';
+  /** The page under any overlay (home or an instrument) — what the instrument picker shows. */
+  get baseRoute(): Route {
+    return this.base;
   }
 
-  /** Page title for the header. */
-  title(): string {
-    if (!this.isOnStage) return '';
-    return this.isDrums ? t('inst.drums') : t(instrumentById(this.s.store.value.instrument).name);
+  get isOnStage(): boolean {
+    return this.base.kind === 'instrument';
   }
 
   /** Shows a route: home, an instrument page, or an overlay (lessons, a lesson, Explore) on top of the current page. */
@@ -105,13 +106,21 @@ export class AirfretApp {
     if ((route.kind === 'lessons' || route.kind === 'lesson') && this.base.kind === 'home') this.base = { kind: 'instrument', instrument: this.s.store.value.instrument };
     if (route.kind === 'lessons') this.ui.drawer.open();
     if (route.kind === 'lesson') {
-      const song = SONGS.find((x) => x.id === route.songId);
+      const song = songLibrary(this.s.store.value).find((x) => x.id === route.songId);
       if (song) this.ui.intro.show(song);
     }
     if (route.kind === 'explore') this.ui.explore.open();
     this.ui.home.show(this.base.kind === 'home');
+    this.syncCamera();
     this.ui.start.show(this.isOnStage && !this.isStarted);
     this.s.store.update({});
+  }
+
+  /** The camera runs only on an instrument page: nothing is watched while no instrument is open. */
+  private syncCamera(): void {
+    if (!this.hasCamera) return;
+    if (this.isOnStage) void this.s.tracker.resume();
+    else this.s.tracker.pause();
   }
 
   /** Back to the page under the overlays. */
@@ -157,8 +166,9 @@ export class AirfretApp {
     const inst = this.instrument();
     this.s.sound.setInstrument(inst);
     this.s.sound.setVolume(st.volume);
-    this.s.sound.setVoiceVolume(Voice.player, st.playerVolume);
-    this.s.sound.setVoiceVolume(Voice.guide, this.lesson?.opts.hasGuide ? st.guideVolume : 0);
+    const mix = voiceMix(st, this.lesson !== null, this.lesson?.opts.hasGuide ?? false);
+    this.s.sound.setVoiceVolume(Voice.player, mix.player);
+    this.s.sound.setVoiceVolume(Voice.guide, mix.guide);
     const w = window.innerWidth;
     const h = window.innerHeight;
     this.s.renderer.resize(w, h);
@@ -245,13 +255,13 @@ export class AirfretApp {
       requestAnimationFrame(this.frame);
       return;
     }
-    if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, this.hint(now), st.brightness);
-    else this.s.renderer.draw(this.s.player, this.lesson, this.tours.session, audioNow, now, this.hint(now), st.brightness);
+    if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, stageHint({ isStarted: this.isStarted, hasCamera: this.hasCamera, isDrums: this.isDrums, secondsWithoutHands: now - this.lastHandsAt }), st.brightness);
+    else this.s.renderer.draw(this.s.player, this.lesson, this.tours.session, audioNow, now, stageHint({ isStarted: this.isStarted, hasCamera: this.hasCamera, isDrums: this.isDrums, secondsWithoutHands: now - this.lastHandsAt }), st.brightness);
     requestAnimationFrame(this.frame);
   };
 
   private track(nowMs: number, now: number, audioNow: number): void {
-    if (!this.hasCamera) return;
+    if (!this.hasCamera || !this.isOnStage) return;
     const hands = this.s.tracker.detect(nowMs);
     if (!hands) return;
     if (hands.length) this.lastHandsAt = now;
@@ -286,9 +296,4 @@ export class AirfretApp {
     });
   }
 
-  private hint(now: number): string | null {
-    if (!this.isStarted) return null;
-    if (!this.hasCamera) return t(this.isDrums ? 'app.mouseHintDrums' : 'app.mouseHint');
-    return now - this.lastHandsAt > NO_HANDS_HINT_AFTER ? t('app.noHands') : null;
-  }
 }
