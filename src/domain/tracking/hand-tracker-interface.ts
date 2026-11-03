@@ -12,6 +12,10 @@ import type { TrackedHand } from '@domain/tracking/tracked-hand';
 export interface HandTrackerInterface {
   start(): Promise<Result<void, Failure>>;
   detect(nowMs: number): TrackedHand[] | null;
+  /** Stops the camera (its light goes off); the model stays loaded. */
+  pause(): void;
+  /** Reopens the camera after `pause`; a no-op while running. */
+  resume(): Promise<Result<void, Failure>>;
   /** Size of the camera frame in pixels, for mapping landmarks onto the screen. */
   frameSize(): { width: number; height: number };
 }

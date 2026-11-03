@@ -28,6 +28,13 @@ strokes blur) removed it, and when one hand dropped out the other hand's stick t
 *Guard:* `StickTracker` keeps each stick bound to its hand by nearest wrist, holds it for 0.4 s through
 dropouts, and smooths it; `stick-tracker.test.ts` covers dropout, swap and crossing hands.
 
+**Strumming up and down cut the notes off instead of letting them ring.**
+Two things fought a real guitar's behaviour: a new pluck on a ringing string faded the old vibration out
+in 35 ms and started a fresh voice (a cut and restart), and the fingertip merely passing over a string on
+its way damped it. *Guard:* the worklet re-strikes the same waveguide, blending the new stroke into the
+vibration (`string-worklet.test.ts`: one voice, a light brush keeps ~full ring); only a fingertip resting
+≥ 0.15 s damps (`player.test.ts`: passing over doesn't cut, resting does).
+
 ## Navigation
 
 **The ☰ next to the logo looked like a menu and did nothing.**

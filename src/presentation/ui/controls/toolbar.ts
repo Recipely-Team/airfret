@@ -17,7 +17,6 @@ export class Toolbar {
     private readonly store: SettingsStore,
     private readonly isLessonActive: () => boolean,
     private readonly isOnStage: () => boolean,
-    private readonly title: () => string,
   ) {
     byId<HTMLSelectElement>('chordSet').onchange = (e) => store.update({ chordSet: (e.target as HTMLSelectElement).value });
   }
@@ -26,7 +25,6 @@ export class Toolbar {
     const s = this.store.value;
     const isLocked = this.isLessonActive();
     const isDrums = s.instrument === DRUMS_ID;
-    byId('pageTitle').textContent = this.title();
     byId('barContext').hidden = !this.isOnStage();
     byId('modes').hidden = isDrums;
     byId('pedalsBtn').hidden = !isDrums;
