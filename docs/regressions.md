@@ -20,6 +20,14 @@ milliseconds summed above full scale, which the master compressor let through as
 *Guard:* `string-worklet.test.ts` counts allocations during `process()` while strumming fast (must be 0)
 and checks the bank's peak; the master output now ends in a hard-knee limiter plus a `0.97·tanh` soft clip.
 
+## Drums
+
+**Drumsticks vanished and reappeared, or jumped to the other hand.**
+A stick was rebuilt from scratch every frame from hands sorted left to right: one lost frame (fast
+strokes blur) removed it, and when one hand dropped out the other hand's stick took its slot.
+*Guard:* `StickTracker` keeps each stick bound to its hand by nearest wrist, holds it for 0.4 s through
+dropouts, and smooths it; `stick-tracker.test.ts` covers dropout, swap and crossing hands.
+
 ## Navigation
 
 **The ☰ next to the logo looked like a menu and did nothing.**
