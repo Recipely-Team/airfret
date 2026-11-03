@@ -3,3 +3,4 @@ dist
 public/mediapipe
 .vercel
 .DS_Store
+coverage
