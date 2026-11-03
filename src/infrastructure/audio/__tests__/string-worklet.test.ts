@@ -91,6 +91,44 @@ function rapidStrums(count: number, amp: number): Record<string, unknown>[] {
   return msgs;
 }
 
+/** Renders with access to the processor, to inspect its voices. */
+function renderWithVoices(messages: Record<string, unknown>[], seconds: number): { out: Float32Array; activeVoices: number } {
+  let Proc: (new () => Processor & { voices: { active: boolean }[] }) | undefined;
+  const scope = {
+    sampleRate: SR,
+    currentTime: 0,
+    AudioWorkletProcessor: class { port = { onmessage: (_e: { data: unknown }) => {} }; },
+    registerProcessor: (_name: string, c: new () => Processor & { voices: { active: boolean }[] }) => (Proc = c),
+  };
+  new Function('scope', `with (scope) { ${SOURCE} }`)(scope);
+  const p = new Proc!();
+  for (const m of messages) p.port.onmessage({ data: m });
+  const out = new Float32Array(SR * seconds);
+  for (let i = 0; i < out.length; i += BLOCK) {
+    const L = new Float32Array(BLOCK);
+    p.process([], [[L, new Float32Array(BLOCK)]]);
+    scope.currentTime += BLOCK / SR;
+    out.set(L.subarray(0, Math.min(BLOCK, out.length - i)), i);
+  }
+  return { out, activeVoices: p.voices.filter((v) => v.active).length };
+}
+
+const rms = (x: Float32Array, from: number, to: number) => Math.sqrt(x.subarray(from * SR, to * SR).reduce((s, v) => s + v * v, 0) / ((to - from) * SR));
+
+describe('string worklet — re-plucking a ringing string', () => {
+  const pluck = (when: number, amp: number) => ({ type: 'pluck', when, string: 3, freq: 196, amp, t60: 4, bright: 0.6, pick: 0.15, pan: 0, stiffness: 0.1 });
+
+  it('adds to the ringing vibration on one voice instead of cutting it and starting another', () => {
+    const { activeVoices } = renderWithVoices([pluck(0, 0.8), pluck(0.5, 0.4)], 0.51);
+    expect(activeVoices).toBe(1);
+  });
+
+  it('keeps ringing through a light brush: one sound does not cut the one before it', () => {
+    const { out } = renderWithVoices([pluck(0, 0.8), pluck(0.5, 0.05)], 0.6);
+    expect(rms(out, 0.52, 0.58)).toBeGreaterThan(rms(out, 0.44, 0.5) * 0.7);
+  });
+});
+
 describe('string worklet under rapid playing', () => {
   it('allocates nothing inside the audio thread, so rapid strumming cannot cause GC crackles', () => {
     expect(renderMany(rapidStrums(12, 1), 1.4).allocations).toBe(0);

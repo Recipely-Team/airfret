@@ -39,6 +39,8 @@ const Timing = {
   trail: 0.25,
 } as const;
 const FIST_FRAMES = 2;
+/** A fingertip resting on a string this long stops it; passing over it on the way does not. */
+const REST_TO_DAMP_SECONDS = 0.15;
 const MUTED_ENERGY = 0.3;
 const FRET_FILTER = { minCutoff: 1, beta: 0.02 } as const;
 const STRUM_FILTER = { minCutoff: 4, beta: 0.05 } as const;
@@ -59,7 +61,7 @@ interface PlayerSetup {
  * @remarks
  * - The fretting hand selects a chord (chord mode) or a fret (note mode); a fist mutes; changing chord squeaks the wound strings.
  * - The strumming fingertip bends each string it presses and plucks it when it slips off; where along the string it plucks sets the tone.
- * - A fingertip landing on a ringing string stops it, like a real pick does.
+ * - Re-strumming lets strings ring on; only a fingertip *resting* on a string (≥ 0.15 s) stops it.
  * - Exposes its state read-only for the renderer: points, hands, touched strings, per-string energy.
  */
 export class Player {
@@ -104,6 +106,8 @@ export class Player {
   private fistFrames = 0;
   private lastCross = { when: -1, dir: 0 };
   private lastFrame = 0;
+  /** When each currently touched string was first touched, and whether it has been damped. */
+  private readonly touchedSince = new Map<number, { since: number; isDamped: boolean }>();
 
   constructor(private readonly sound: SoundOutputInterface) {
     this.legato = new LegatoTracker(sound);
@@ -212,10 +216,22 @@ export class Player {
     this.isPalmMuted = isPalmMuting(this.layout, this.strumHand);
     const crossings = this.strum.update(p, t, ys, this.layout.h);
     for (const c of crossings) this.play(c, audioNow + Timing.scheduleLead + c.frac * Math.min(dt, Timing.maxSpread));
-    const touching = this.strum.touching(p, ys, this.layout.h);
-    for (const s of touching) if (!this.touching.includes(s)) this.sound.touch(s, audioNow);
-    this.touching = touching;
+    this.touching = this.strum.touching(p, ys, this.layout.h);
+    this.dampRestingStrings(t, audioNow);
     this.gestures.tick(t);
+  }
+
+  /** Only a fingertip that stays on a string mutes it — a hand sweeping past lets everything ring. */
+  private dampRestingStrings(t: number, audioNow: number): void {
+    for (const s of [...this.touchedSince.keys()]) if (!this.touching.includes(s)) this.touchedSince.delete(s);
+    for (const s of this.touching) {
+      const touch = this.touchedSince.get(s) ?? { since: t, isDamped: false };
+      if (!touch.isDamped && t - touch.since >= REST_TO_DAMP_SECONDS) {
+        this.sound.touch(s, audioNow);
+        touch.isDamped = true;
+      }
+      this.touchedSince.set(s, touch);
+    }
   }
 
   private play(c: Crossing, when: number): void {

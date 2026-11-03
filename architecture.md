@@ -75,7 +75,8 @@ Domain is grouped by what the code is *for*:
   perpendicular to the finger axis. Nail facing the stroke → nail (brighter, pick tick); otherwise pad.
 - **Won't play**: a curled finger, a finger pointing up away from the strings, or one pointing at the camera.
 - **Contact**: crossing a string's line bends it under the fingertip (drawn as a tent); it plucks when the
-  tip passes the release band. Touching a ringing string stops it.
+  tip passes the release band. Re-striking a ringing string adds to its vibration (same waveguide), so
+  strumming up and down lets everything ring; only a fingertip *resting* on a string (≥ 0.15 s) stops it.
 - **Palm mute**: the strumming palm edge resting on the strings by the bridge shortens and darkens notes.
 
 ## Drums
