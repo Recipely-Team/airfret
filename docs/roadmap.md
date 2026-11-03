@@ -9,6 +9,15 @@ ready, open a GitHub issue and link it here.
 | `shaped` | Approach settled, ready to issue |
 | `shipped` | Live; the entry keeps only what is still open |
 
+## Open work (as of v0.2.2, 2026-11-04)
+
+| Item | Where |
+|---|---|
+| Connect Vercel to GitHub for automatic deploys (prod is deployed by hand until then) | #6, [`deploy.md`](deploy.md) |
+| Calibrate drum sounds against real recordings (SM Drums / Big Rusty Drums) | #13 |
+| Inharmonicity: replace the single dispersion allpass; calibrate acoustic and nylon | #14 |
+| Manual QA pass with a real camera on production | #15 |
+
 ## Mac app — `idea`
 Wrap the web build with Tauri for a dock icon, offline use and no browser chrome. The camera
 permission prompt moves to macOS; the WASM model and worklet already load from local files.
