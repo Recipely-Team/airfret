@@ -68,3 +68,28 @@ describe('Player', () => {
     expect(fast.sound.plucks[0]!.amp).toBeGreaterThan(slow.sound.plucks[0]!.amp);
   });
 });
+
+describe('Player — natural contact with the strings', () => {
+  it('does not stop strings the strumming hand passes over on its way (they used to be cut)', () => {
+    const { sound, player } = setup(PlayMode.chord);
+    const ys = strumStringYs(player.layout);
+    const x = (player.layout.strumX0 + player.layout.strumX1) / 2;
+    const line = ys[2] ?? 0;
+    // One frame lands inside the string's contact band, the next is past it — a normal strum.
+    player.pointer({ x, y: line - 30 }, 1, 0);
+    player.pointer({ x, y: line + 3 }, 1.03, 0);
+    player.pointer({ x, y: line + 40 }, 1.06, 0);
+    expect(sound.touches).toEqual([]);
+  });
+
+  it('stops a string the fingertip rests on', () => {
+    const { sound, player } = setup(PlayMode.chord);
+    const ys = strumStringYs(player.layout);
+    const x = (player.layout.strumX0 + player.layout.strumX1) / 2;
+    const line = ys[2] ?? 0;
+    player.pointer({ x, y: line - 30 }, 1, 0);
+    player.pointer({ x, y: line + 3 }, 1.05, 0);
+    player.pointer({ x, y: line + 3 }, 1.3, 0);
+    expect(sound.touches).toEqual([2]);
+  });
+});
