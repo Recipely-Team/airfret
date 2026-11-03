@@ -28,9 +28,8 @@ const PalmMuted = { t60: 0.25, brightness: 0.5 } as const;
 /** Nail vs fleshy pad: the nail adds brightness and a pick-like tick; the pad rounds the attack off. */
 const ATTACK_BRIGHTNESS = { nail: 0.12, pad: -0.18 } as const;
 const STIFFNESS = { acoustic: 0.12, nylon: 0.05, clean: 0.1, drive: 0.1, bass: 0.22 } as const;
-/** Higher notes ring shorter: t60 scales with (110 Hz / f)^exponent. */
+/** Decay laws are stated at 110 Hz: T60(f) = t60 · (110 / f)^t60Exponent. */
 const DECAY_REFERENCE_HZ = 110;
-const DECAY_EXPONENT = 0.45;
 const STEREO_WIDTH = 0.5;
 const KIT_LEVEL = 0.9;
 /** Drums sit in a small room: a little of the shared reverb. */
@@ -151,7 +150,7 @@ export class WebAudioEngine implements SoundOutputInterface {
     const level = Math.min(1, Math.max(Level.minAmp, r.amp));
     const attack = r.attack === StrikeSurface.pad ? ATTACK_BRIGHTNESS.pad : ATTACK_BRIGHTNESS.nail;
     const tone = inst.bright * (0.75 + 0.25 * level) + (NEUTRAL_POSITION - r.position) * POSITION_BRIGHTNESS + attack;
-    const ring = inst.t60 * Math.pow(DECAY_REFERENCE_HZ / freq, DECAY_EXPONENT);
+    const ring = inst.t60 * Math.pow(DECAY_REFERENCE_HZ / freq, inst.t60Exponent);
     bank.port.postMessage({
       type: 'pluck',
       when: r.when,
@@ -172,7 +171,7 @@ export class WebAudioEngine implements SoundOutputInterface {
     const freq = midiToFreq(r.midi);
     this.banks.get(r.voice)?.port.postMessage({
       type: 'retune', when: r.when, string: r.string, freq, glide: r.glide, excite: r.excite,
-      t60: inst ? inst.t60 * Math.pow(DECAY_REFERENCE_HZ / freq, DECAY_EXPONENT) : 0,
+      t60: inst ? inst.t60 * Math.pow(DECAY_REFERENCE_HZ / freq, inst.t60Exponent) : 0,
     });
   }
 

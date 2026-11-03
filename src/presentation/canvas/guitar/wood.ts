@@ -1,4 +1,4 @@
-import { seededRandom } from '@presentation/canvas/guitar/random';
+import { seededRandom } from '@core/math/seeded-random';
 
 /**
  * Fills the current clip with wood: a base colour and many thin, gently waving grain lines

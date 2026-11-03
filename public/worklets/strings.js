@@ -14,6 +14,8 @@ const MAX_VOICES = 32;
 const BUF = 8192; // power of two: covers periods down to ~6 Hz at 48 kHz
 const MASK = BUF - 1;
 const SILENCE = 1e-5;
+/** A triangle carries more energy per peak than the old noise burst; this keeps loudness where it was. */
+const EXCITE_GAIN = 0.6;
 
 class Voice {
   constructor() {
@@ -31,10 +33,22 @@ class StringBank extends AudioWorkletProcessor {
     this.noise = new Float32Array(BUF);
     this.shaped = new Float32Array(BUF);
     this.queue = [];
+    // Deterministic noise (xorshift32): every stroke still differs, but runs are reproducible.
+    this.seed = 0x9e3779b9;
     this.port.onmessage = (e) => {
       this.queue.push(e.data);
       this.queue.sort((a, b) => a.when - b.when);
     };
+  }
+
+  /** Uniform random in [−1, 1) from xorshift32. */
+  noise1() {
+    let x = this.seed;
+    x ^= x << 13;
+    x ^= x >>> 17;
+    x ^= x << 5;
+    this.seed = x >>> 0;
+    return this.seed / 2147483648 - 1;
   }
 
   /**
@@ -83,34 +97,44 @@ class StringBank extends AudioWorkletProcessor {
   }
 
   /**
-   * Writes a pick-shaped noise burst into the last `period` samples of the line, blended with what is
-   * there: line = line·(1 − mix) + burst·strength.
+   * Writes the initial shape of a plucked string into the last `period` samples of the line, blended
+   * with what is there: line = line·(1 − mix) + shape·strength.
+   *
+   * The string is pulled into a triangle with its apex at the strike point β and released. In a
+   * single-delay-line waveguide one period holds the odd periodic extension of that displacement,
+   * whose Fourier series is b_k ∝ sin(π·k·β) / k² — so plucking at the middle removes every even
+   * harmonic, at a third every third one, near the bridge keeps the high ones. The apex is then
+   * rounded by the contact width (finger pad wide, nail narrow; softer strokes wider), and a little
+   * noise adds the texture of a real pick or nail.
    */
   excite(v, mix, bright, pick, strength = mix) {
-    const N = Math.max(2, Math.round(v.delay));
-    const M = Math.max(1, Math.round(pick * N));
-    const noise = this.noise;
-    for (let i = 0; i < N; i++) noise[i] = Math.random() * 2 - 1;
-    // Softer strokes are darker: the excitation lowpass closes as amplitude falls.
-    const a = Math.min(0.92, Math.max(0, 0.95 - 0.55 * Math.min(1, strength) - 0.25 * bright));
-    let lp1 = 0;
-    let lp2 = 0;
-    let mean = 0;
-    const shaped = this.shaped;
+    const N = Math.max(4, Math.round(v.delay));
+    const beta = Math.min(0.5, Math.max(0.02, pick));
+    const shape = this.noise;
+    const half = N / 2;
     for (let i = 0; i < N; i++) {
-      // Comb at the pick point: plucking at 1/k of the length removes every k-th harmonic.
-      const x = noise[i] - 0.9 * noise[(i - M + N) % N];
-      lp1 = a * lp1 + (1 - a) * x;
-      lp2 = a * lp2 + (1 - a) * lp1;
-      shaped[i] = lp2;
-      mean += lp2;
+      const z = i < half ? i / half : 2 - i / half;
+      const tri = z < beta ? z / beta : (1 - z) / (1 - beta);
+      shape[i] = i < half ? tri : -tri;
     }
-    mean /= N;
+    // Contact width: a moving average whose length grows as the stroke softens and the tone darkens.
+    const width = Math.max(1, Math.round(N * (0.004 + 0.05 * (1 - bright) + 0.03 * (1 - Math.min(1, strength)))));
+    const smooth = this.shaped;
+    let acc = 0;
+    for (let i = 0; i < N + width; i++) {
+      acc += shape[i % N];
+      if (i >= width) acc -= shape[(i - width) % N];
+      if (i >= width) smooth[(i - Math.floor(width / 2)) % N] = acc / width;
+    }
+    const grit = 0.01 + 0.025 * bright;
     let peak = 1e-9;
-    for (let i = 0; i < N; i++) peak = Math.max(peak, Math.abs(shaped[i] - mean));
+    for (let i = 0; i < N; i++) {
+      smooth[i] += this.noise1() * grit;
+      peak = Math.max(peak, Math.abs(smooth[i]));
+    }
     for (let i = 0; i < N; i++) {
       const idx = (v.w - N + i + BUF) & MASK;
-      v.buf[idx] = v.buf[idx] * (1 - mix) + ((shaped[i] - mean) / peak) * strength;
+      v.buf[idx] = v.buf[idx] * (1 - mix) + (smooth[i] / peak) * strength * EXCITE_GAIN;
     }
   }
 

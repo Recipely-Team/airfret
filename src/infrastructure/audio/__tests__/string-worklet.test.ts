@@ -115,6 +115,43 @@ function renderWithVoices(messages: Record<string, unknown>[], seconds: number):
 
 const rms = (x: Float32Array, from: number, to: number) => Math.sqrt(x.subarray(from * SR, to * SR).reduce((s, v) => s + v * v, 0) / ((to - from) * SR));
 
+/** Level (dB) of the k-th harmonic of f0 in x over [from, to) seconds (Goertzel). */
+function harmonicDb(x: Float32Array, f0: number, k: number, from: number, to: number): number {
+  const w = (2 * Math.PI * f0 * k) / SR;
+  let s1 = 0;
+  let s2 = 0;
+  for (let i = Math.floor(from * SR); i < to * SR; i++) {
+    const s0 = (x[i] ?? 0) + 2 * Math.cos(w) * s1 - s2;
+    s2 = s1;
+    s1 = s0;
+  }
+  return 10 * Math.log10(s1 * s1 + s2 * s2 - 2 * Math.cos(w) * s1 * s2 + 1e-12);
+}
+
+describe('string worklet — the tone follows where the string is struck', () => {
+  const f0 = 110;
+  const struck = (pick: number) => render({ freq: f0, pick, bright: 0.95, stiffness: 0, amp: 0.8 }, 0.3);
+
+  it('struck at the middle (β = 1/2): the even harmonics vanish, as for a real string', () => {
+    const x = struck(0.5);
+    const h = (k: number) => harmonicDb(x, f0, k, 0.02, 0.2);
+    expect(h(1) - h(2)).toBeGreaterThan(15);
+    expect(h(3) - h(4)).toBeGreaterThan(15);
+  });
+
+  it('struck at one third (β = 1/3): the 3rd and 6th harmonics vanish', () => {
+    const x = struck(1 / 3);
+    const h = (k: number) => harmonicDb(x, f0, k, 0.02, 0.2);
+    expect(h(2) - h(3)).toBeGreaterThan(15);
+    expect(h(5) - h(6)).toBeGreaterThan(15);
+  });
+
+  it('struck near the bridge, the upper harmonics are much stronger than struck at the middle', () => {
+    const tilt = (x: Float32Array) => harmonicDb(x, f0, 7, 0.02, 0.2) - harmonicDb(x, f0, 1, 0.02, 0.2);
+    expect(tilt(struck(0.08))).toBeGreaterThan(tilt(struck(0.45)) + 6);
+  });
+});
+
 describe('string worklet — re-plucking a ringing string', () => {
   const pluck = (when: number, amp: number) => ({ type: 'pluck', when, string: 3, freq: 196, amp, t60: 4, bright: 0.6, pick: 0.15, pan: 0, stiffness: 0.1 });
 

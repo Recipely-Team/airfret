@@ -24,6 +24,7 @@ import { HomeView } from '@presentation/ui/navigation/home-view';
 import { NavMenu } from '@presentation/ui/navigation/nav-menu';
 import { byId } from '@presentation/ui/dom';
 import { LessonHud } from '@presentation/ui/lessons/lesson-hud';
+import { CustomSongForm } from '@presentation/ui/lessons/custom-song-form';
 import { LessonIntro } from '@presentation/ui/lessons/lesson-intro';
 import { LessonsDrawer } from '@presentation/ui/lessons/lessons-drawer';
 import { ResultDialog } from '@presentation/ui/lessons/result-dialog';
@@ -56,7 +57,7 @@ function bootstrap(): void {
 
   let app: AirfretApp | null = null;
   const router = new Router((route) => app?.show(route));
-  const drawer = new LessonsDrawer(store, (song) => app?.openIntro(song), () => app?.tourFromAnywhere(), () => app?.closeOverlay());
+  const drawer = new LessonsDrawer(store, (song) => app?.openIntro(song), () => app?.tourFromAnywhere(), () => app?.closeOverlay(), () => ui.customSong.open());
   const ui: AppUi = {
     start: new StartScreen(() => app?.start() ?? Promise.resolve()),
     toast: new Toast(),
@@ -70,7 +71,8 @@ function bootstrap(): void {
     explore: new ExploreGuide((id) => app?.tryFeature(id), () => app?.closeOverlay()),
     openSettings: () => openPopover('settings'),
     home: new HomeView(() => app?.tourFromAnywhere()),
-    nav: new NavMenu({ onTour: () => app?.tourFromAnywhere(), onSettings: () => openPopover('settings') }),
+    customSong: new CustomSongForm(store, (song) => app?.openIntro(song)),
+    nav: new NavMenu(),
     navigate: (route) => router.navigate(route),
     replaceRoute: (route) => router.replace(route),
   };
@@ -79,7 +81,7 @@ function bootstrap(): void {
     ui,
   );
   const running = app;
-  const toolbar = new Toolbar(store, () => running.hasLesson, () => running.isOnStage, () => running.title());
+  const toolbar = new Toolbar(store, () => running.hasLesson, () => running.isOnStage);
   const settingsPanel = new SettingsPanel(store);
   const pedalRouter = new PedalRouter(store, drums, () => ({ audio: sound.now, wall: performance.now() / 1000 }));
   pedalInput.listen((e) => running.isDrums && pedalRouter.handle(e));
@@ -96,7 +98,7 @@ function bootstrap(): void {
     drawer.render();
     ui.pedals.render();
     ui.home.render();
-    ui.nav.render(router.route);
+    ui.nav.render(running.baseRoute);
     running.apply();
   };
   store.subscribe(render);
