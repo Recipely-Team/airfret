@@ -1,4 +1,7 @@
+import type { Route } from '@presentation/routing/route';
 import type { PedalPanel } from '@presentation/ui/drums/pedal-panel';
+import type { HomeView } from '@presentation/ui/navigation/home-view';
+import type { NavMenu } from '@presentation/ui/navigation/nav-menu';
 import type { ExploreGuide } from '@presentation/ui/explore/explore-guide';
 import type { LessonHud } from '@presentation/ui/lessons/lesson-hud';
 import type { LessonIntro } from '@presentation/ui/lessons/lesson-intro';
@@ -22,4 +25,8 @@ export interface AppUi {
   readonly pedals: PedalPanel;
   readonly explore: ExploreGuide;
   readonly openSettings: () => void;
+  readonly home: HomeView;
+  readonly nav: NavMenu;
+  readonly navigate: (route: Route) => void;
+  readonly replaceRoute: (route: Route) => void;
 }

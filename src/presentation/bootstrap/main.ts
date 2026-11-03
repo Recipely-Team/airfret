@@ -19,6 +19,9 @@ import { PedalPanel } from '@presentation/ui/drums/pedal-panel';
 import { ExploreGuide } from '@presentation/ui/explore/explore-guide';
 import { SettingsPanel } from '@presentation/ui/controls/settings-panel';
 import { Toolbar } from '@presentation/ui/controls/toolbar';
+import { Router } from '@presentation/routing/router';
+import { HomeView } from '@presentation/ui/navigation/home-view';
+import { NavMenu } from '@presentation/ui/navigation/nav-menu';
 import { byId } from '@presentation/ui/dom';
 import { LessonHud } from '@presentation/ui/lessons/lesson-hud';
 import { LessonIntro } from '@presentation/ui/lessons/lesson-intro';
@@ -52,29 +55,34 @@ function bootstrap(): void {
   const pedalInput = new BrowserPedalInput();
 
   let app: AirfretApp | null = null;
-  const drawer = new LessonsDrawer(store, (song) => app?.openIntro(song), () => app?.startTour());
+  const router = new Router((route) => app?.show(route));
+  const drawer = new LessonsDrawer(store, (song) => app?.openIntro(song), () => app?.tourFromAnywhere(), () => app?.closeOverlay());
   const ui: AppUi = {
     start: new StartScreen(() => app?.start() ?? Promise.resolve()),
     toast: new Toast(),
     drawer,
-    intro: new LessonIntro(store, (song) => app?.beginLesson(song), () => drawer.open()),
+    intro: new LessonIntro(store, (song) => { app?.closeOverlay(); app?.beginLesson(song); }, () => router.navigate({ kind: 'lessons' })),
     hud: new LessonHud(store, () => app?.stopLesson()),
-    result: new ResultDialog(() => { const s = ui.intro.current; if (s) app?.beginLesson(s); }, () => drawer.open()),
+    result: new ResultDialog(() => { const s = ui.intro.current; if (s) app?.beginLesson(s); }, () => router.navigate({ kind: 'lessons' })),
     pointer: new PointerInput(canvas, player, sound, drums, () => app?.isDrums ?? false),
     tourBar: new TourBar(() => app?.skipTourStep(), () => app?.endTour()),
     pedals: new PedalPanel(store, pedalInput),
-    explore: new ExploreGuide((id) => app?.tryFeature(id)),
+    explore: new ExploreGuide((id) => app?.tryFeature(id), () => app?.closeOverlay()),
     openSettings: () => openPopover('settings'),
+    home: new HomeView(() => app?.tourFromAnywhere()),
+    nav: new NavMenu({ onTour: () => app?.tourFromAnywhere(), onSettings: () => openPopover('settings') }),
+    navigate: (route) => router.navigate(route),
+    replaceRoute: (route) => router.replace(route),
   };
   app = new AirfretApp(
     { store, sound, tracker, player, drums, renderer: new StageRenderer(canvas, ctx, video), backing: new BackingTrack(sound), guide: new GuidePlayer(sound), startLesson: new StartLessonUseCase() },
     ui,
   );
   const running = app;
-  const toolbar = new Toolbar(store, (id) => running.pickInstrument(id), () => running.hasLesson);
+  const toolbar = new Toolbar(store, () => running.hasLesson, () => running.isOnStage, () => running.title());
   const settingsPanel = new SettingsPanel(store);
-  const router = new PedalRouter(store, drums, () => ({ audio: sound.now, wall: performance.now() / 1000 }));
-  pedalInput.listen((e) => running.isDrums && router.handle(e));
+  const pedalRouter = new PedalRouter(store, drums, () => ({ audio: sound.now, wall: performance.now() / 1000 }));
+  pedalInput.listen((e) => running.isDrums && pedalRouter.handle(e));
   byId('pedalsBtn').onclick = () => ui.pedals.open();
   wirePopovers(canvas, () => drawer.close());
 
@@ -87,11 +95,14 @@ function bootstrap(): void {
     settingsPanel.render();
     drawer.render();
     ui.pedals.render();
+    ui.home.render();
+    ui.nav.render(router.route);
     running.apply();
   };
   store.subscribe(render);
   window.addEventListener('resize', () => running.apply());
   render();
+  router.start();
   requestAnimationFrame(running.frame);
   if (import.meta.env.DEV) Object.assign(window, { airfret: { app: running, player, drums, sound, store, tracker } });
 }
