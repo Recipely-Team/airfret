@@ -2,6 +2,7 @@ import { Failure } from '@core/failure/failure';
 import { FailureCode } from '@core/failure/failure-code';
 import type { Result } from '@core/result/result';
 import { fail, ok } from '@core/result/result-factories';
+import type { DrumHitRequest } from '@domain/audio/drum-hit-request';
 import type { DrumKind } from '@domain/audio/drum-kind';
 import type { PluckRequest } from '@domain/audio/pluck-request';
 import type { RetuneRequest } from '@domain/audio/retune-request';
@@ -16,6 +17,7 @@ import type { AudioChain } from '@infrastructure/audio/chains/audio-chain';
 import { buildChain } from '@infrastructure/audio/chains/build-chain';
 import { impulseResponse } from '@infrastructure/audio/chains/impulse-response';
 import { DrumKit } from '@infrastructure/audio/drum-kit';
+import { AcousticKit } from '@infrastructure/audio/drums/acoustic-kit';
 import { AssetPath } from '@infrastructure/constants/assets';
 
 const Level = { master: 0.8, click: 0.5, chuck: 0.35, mutedPluck: 0.8, minAmp: 0.05 } as const;
@@ -30,6 +32,9 @@ const STIFFNESS = { acoustic: 0.12, nylon: 0.05, clean: 0.1, drive: 0.1, bass: 0
 const DECAY_REFERENCE_HZ = 110;
 const DECAY_EXPONENT = 0.45;
 const STEREO_WIDTH = 0.5;
+const KIT_LEVEL = 0.9;
+/** Drums sit in a small room: a little of the shared reverb. */
+const KIT_ROOM = 0.6;
 const SMOOTHING = 0.02;
 const CHUCK = { guitarHz: 2200, bassHz: 700, q: 1.2, attack: 0.003, length: 0.06 } as const;
 /** Pick hitting the string: a 3 ms bright tick, louder for harder strokes. */
@@ -56,6 +61,7 @@ export class WebAudioEngine implements SoundOutputInterface {
   private readonly reverbIn: GainNode;
   private readonly noise: AudioBuffer;
   private readonly drums: DrumKit;
+  private readonly kit: AcousticKit;
   private readonly chains = new Map<ChainKind, AudioChain>();
   private readonly banks = new Map<Voice, AudioWorkletNode>();
   private readonly voiceGains = new Map<Voice, GainNode>();
@@ -80,6 +86,13 @@ export class WebAudioEngine implements SoundOutputInterface {
     this.noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     this.noise.getChannelData(0).forEach((_, i, d) => (d[i] = Math.random() * 2 - 1));
     this.drums = new DrumKit(ctx, clickBus, this.noise);
+    const kitBus = ctx.createGain();
+    kitBus.gain.value = KIT_LEVEL;
+    kitBus.connect(this.master);
+    const kitRoom = ctx.createGain();
+    kitRoom.gain.value = KIT_ROOM;
+    kitBus.connect(kitRoom).connect(this.reverbIn);
+    this.kit = new AcousticKit(ctx, kitBus, this.noise);
   }
 
   get now(): number {
@@ -224,6 +237,14 @@ export class WebAudioEngine implements SoundOutputInterface {
     src.connect(bp).connect(g).connect(this.current.input);
     src.start(t);
     src.stop(t + CHUCK.length + 0.02);
+  }
+
+  hitDrum(r: DrumHitRequest): void {
+    this.kit.hit(r);
+  }
+
+  chokeHiHat(when: number): void {
+    this.kit.choke(when);
   }
 
   click(when: number, isAccent: boolean): void {

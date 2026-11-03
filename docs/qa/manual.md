@@ -63,6 +63,25 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | C3 | Bass (note mode): finger on fret 5, pluck each string | A, D, G, C | |
 | C4 | Keys 1–8 (chord mode), 0–9 (note mode) without a camera | Selection follows the keys | |
 
+## C2. Drums
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| K1 | Instrument → Davul, show both hands as loose fists | A stick appears in each hand, following it | |
+| K2 | Bring a stick down onto the snare, then the toms and cymbals | Each sounds; harder is louder; cymbals wobble | |
+| K3 | Snare edge vs centre; ride centre vs edge | Rimshot crack at the edge; ride bell at the centre | |
+| K4 | Hold a stick still on a drum | No repeated hits | |
+| K5 | Space / B | Kick; the kick pedal lights | |
+| K6 | Hi-hat with left Shift held / released (both pedal modes) | Open / closed as the mode says; closing chokes an open hat | |
+| K7 | Pedals → + Ata → press another key / controller button / MIDI pedal | It plays that pedal; removing the chip stops it; reset restores defaults | |
+
+## E. Explore
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| E1 | First start | Explore opens once by itself | |
+| E2 | Each card's "Dene" | Sets the app up for that feature and says what to do | |
+
 ## D. Lessons
 
 | # | Step | Expected | Result |

@@ -1,17 +1,22 @@
 import '@presentation/styles/style.css';
+import { DrumPlayer } from '@application/drums/drum-player';
+import { PedalRouter } from '@application/drums/pedal-router';
 import { BackingTrack } from '@application/lessons/backing-track';
 import { GuidePlayer } from '@application/lessons/guide-player';
 import { StartLessonUseCase } from '@application/lessons/start-lesson-use-case';
 import { Player } from '@application/play/player';
 import { SettingsStore } from '@application/settings/settings-store';
 import { WebAudioEngine } from '@infrastructure/audio/web-audio-engine';
+import { BrowserPedalInput } from '@infrastructure/input/browser-pedal-input';
 import { LocalStorageSettingsRepository } from '@infrastructure/storage/local-storage-settings-repository';
 import { MediaPipeHandTracker } from '@infrastructure/tracking/mediapipe-hand-tracker';
 import { AirfretApp } from '@presentation/app/airfret-app';
 import type { AppUi } from '@presentation/app/app-ui';
 import { StageRenderer } from '@presentation/canvas/stage-renderer';
 import { resolveLanguage, setLanguage } from '@presentation/i18n/translator';
-import { wirePopovers } from '@presentation/ui/controls/popovers';
+import { openPopover, wirePopovers } from '@presentation/ui/controls/popovers';
+import { PedalPanel } from '@presentation/ui/drums/pedal-panel';
+import { ExploreGuide } from '@presentation/ui/explore/explore-guide';
 import { SettingsPanel } from '@presentation/ui/controls/settings-panel';
 import { Toolbar } from '@presentation/ui/controls/toolbar';
 import { byId } from '@presentation/ui/dom';
@@ -43,6 +48,8 @@ function bootstrap(): void {
   const sound = new WebAudioEngine();
   const tracker = new MediaPipeHandTracker(video);
   const player = new Player(sound);
+  const drums = new DrumPlayer(sound);
+  const pedalInput = new BrowserPedalInput();
 
   let app: AirfretApp | null = null;
   const drawer = new LessonsDrawer(store, (song) => app?.openIntro(song), () => app?.startTour());
@@ -53,16 +60,22 @@ function bootstrap(): void {
     intro: new LessonIntro(store, (song) => app?.beginLesson(song), () => drawer.open()),
     hud: new LessonHud(store, () => app?.stopLesson()),
     result: new ResultDialog(() => { const s = ui.intro.current; if (s) app?.beginLesson(s); }, () => drawer.open()),
-    pointer: new PointerInput(canvas, player, sound),
+    pointer: new PointerInput(canvas, player, sound, drums, () => app?.isDrums ?? false),
     tourBar: new TourBar(() => app?.skipTourStep(), () => app?.endTour()),
+    pedals: new PedalPanel(store, pedalInput),
+    explore: new ExploreGuide((id) => app?.tryFeature(id)),
+    openSettings: () => openPopover('settings'),
   };
   app = new AirfretApp(
-    { store, sound, tracker, player, renderer: new StageRenderer(canvas, ctx, video), backing: new BackingTrack(sound), guide: new GuidePlayer(sound), startLesson: new StartLessonUseCase() },
+    { store, sound, tracker, player, drums, renderer: new StageRenderer(canvas, ctx, video), backing: new BackingTrack(sound), guide: new GuidePlayer(sound), startLesson: new StartLessonUseCase() },
     ui,
   );
   const running = app;
   const toolbar = new Toolbar(store, (id) => running.pickInstrument(id), () => running.hasLesson);
   const settingsPanel = new SettingsPanel(store);
+  const router = new PedalRouter(store, drums, () => ({ audio: sound.now, wall: performance.now() / 1000 }));
+  pedalInput.listen((e) => running.isDrums && router.handle(e));
+  byId('pedalsBtn').onclick = () => ui.pedals.open();
   wirePopovers(canvas, () => drawer.close());
 
   const render = () => {
@@ -73,13 +86,14 @@ function bootstrap(): void {
     toolbar.render();
     settingsPanel.render();
     drawer.render();
+    ui.pedals.render();
     running.apply();
   };
   store.subscribe(render);
   window.addEventListener('resize', () => running.apply());
   render();
   requestAnimationFrame(running.frame);
-  if (import.meta.env.DEV) Object.assign(window, { airfret: { app: running, player, sound, store, tracker } });
+  if (import.meta.env.DEV) Object.assign(window, { airfret: { app: running, player, drums, sound, store, tracker } });
 }
 
 bootstrap();

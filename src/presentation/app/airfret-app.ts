@@ -1,3 +1,4 @@
+import type { DrumPlayer } from '@application/drums/drum-player';
 import type { BackingTrack } from '@application/lessons/backing-track';
 import type { GuidePlayer } from '@application/lessons/guide-player';
 import type { StartLessonUseCase } from '@application/lessons/start-lesson-use-case';
@@ -7,6 +8,8 @@ import { TOUR_CHORDS } from '@application/tour/tour-chords';
 import { TourSession } from '@application/tour/tour-session';
 import { Voice } from '@domain/audio/voice';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
+import { computeKitLayout } from '@domain/drums/compute-kit-layout';
+import { DRUMS_ID } from '@domain/drums/drums-id';
 import { computeLayout } from '@domain/fretboard/compute-layout';
 import type { Instrument } from '@domain/instruments/instrument';
 import { instrumentById } from '@domain/instruments/instrument-catalog';
@@ -33,6 +36,7 @@ interface Services {
   readonly sound: SoundOutputInterface;
   readonly tracker: HandTrackerInterface;
   readonly player: Player;
+  readonly drums: DrumPlayer;
   readonly renderer: StageRenderer;
   readonly backing: BackingTrack;
   readonly guide: GuidePlayer;
@@ -63,6 +67,10 @@ export class AirfretApp {
     };
   }
 
+  get isDrums(): boolean {
+    return this.s.store.value.instrument === DRUMS_ID;
+  }
+
   get hasLesson(): boolean {
     return this.lesson !== null || this.tour !== null;
   }
@@ -82,6 +90,10 @@ export class AirfretApp {
     if (!camera.isOk) this.ui.toast.show(t('app.cameraError'), ERROR_TOAST_MS);
     this.lastHandsAt = performance.now() / MS_PER_SECOND;
     this.ui.start.hide();
+    if (!this.s.store.value.hasSeenExplore) {
+      this.s.store.update({ hasSeenExplore: true });
+      this.ui.explore.open();
+    }
   }
 
   /** The selected instrument with the chosen tuning and capo applied to its open strings. */
@@ -103,6 +115,7 @@ export class AirfretApp {
     const h = window.innerHeight;
     this.s.renderer.resize(w, h);
     const chords = this.tour ? TOUR_CHORDS : this.lesson?.song.mode === PlayMode.chord ? this.lesson.chordSet : chordSetById(st.chordSet).chords.filter(knownChord);
+    this.s.drums.configure(computeKitLayout(w, h, st.isLefty), h, st.hihatMode);
     const layout = computeLayout(w, h, inst.tuning.length, st.isLefty, inst.maxFret);
     this.s.player.configure({ layout, instrument: inst, mode: st.mode, chords, strumFilter: st.strumFilter, capo: st.capo });
   }
@@ -176,7 +189,9 @@ export class AirfretApp {
     this.track(nowMs, now, audioNow);
     if (this.lesson) this.tickLesson(this.lesson, audioNow);
     if (this.tour) this.tickTour(now);
-    this.s.renderer.draw(this.s.player, this.lesson, this.tour, audioNow, now, this.hint(now), this.s.store.value.brightness);
+    const st = this.s.store.value;
+    if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, this.hint(now), st.brightness);
+    else this.s.renderer.draw(this.s.player, this.lesson, this.tour, audioNow, now, this.hint(now), st.brightness);
     requestAnimationFrame(this.frame);
   };
 
@@ -187,7 +202,8 @@ export class AirfretApp {
     if (hands.length) this.lastHandsAt = now;
     const frame = this.s.tracker.frameSize();
     const px = hands.map((hand) => hand.landmarks.map((p) => videoToScreen(p, frame, window.innerWidth, window.innerHeight)));
-    this.s.player.updateHands(px, now, audioNow, !this.ui.pointer.isDown);
+    if (this.isDrums) this.s.drums.updateHands(px, now, audioNow, now);
+    else this.s.player.updateHands(px, now, audioNow, !this.ui.pointer.isDown);
   }
 
   private tickLesson(lesson: LessonSession, audioNow: number): void {
@@ -215,9 +231,39 @@ export class AirfretApp {
     if (first) this.openIntro(first);
   }
 
+  /** Explore's "Try it": sets the app up for one feature and says what to do. */
+  tryFeature(id: string): void {
+    const st = this.s.store.value;
+    const say = () => this.ui.toast.show(t(`explore.${id}.toast`), ERROR_TOAST_MS);
+    const guitar = (instrument: string, mode: PlayMode) => {
+      this.stopLesson();
+      this.endTour();
+      this.s.store.update({ instrument, mode });
+    };
+    switch (id) {
+      case 'tour': return this.startTour();
+      case 'free': guitar('acoustic', PlayMode.free); return say();
+      case 'bends': guitar('clean', PlayMode.free); return say();
+      case 'bass': guitar('bass', PlayMode.note); return say();
+      case 'instruments': guitar(st.instrument === DRUMS_ID ? 'acoustic' : st.instrument, PlayMode.chord); return say();
+      case 'drums': guitar(DRUMS_ID, st.mode); return say();
+      case 'pedals': guitar(DRUMS_ID, st.mode); this.ui.pedals.open(); return;
+      case 'course': return this.ui.drawer.open();
+      case 'shadow': {
+        this.s.store.update({ lessonMode: LessonMode.shadow });
+        const first = SONGS.find((song) => song.course === 1);
+        if (first) this.openIntro(first);
+        return;
+      }
+      case 'capo':
+      case 'settings': this.ui.openSettings(); return say();
+      default: guitar('acoustic', PlayMode.chord); return say();
+    }
+  }
+
   private hint(now: number): string | null {
     if (!this.isStarted) return null;
-    if (!this.hasCamera) return t('app.mouseHint');
+    if (!this.hasCamera) return t(this.isDrums ? 'app.mouseHintDrums' : 'app.mouseHint');
     return now - this.lastHandsAt > NO_HANDS_HINT_AFTER ? t('app.noHands') : null;
   }
 }

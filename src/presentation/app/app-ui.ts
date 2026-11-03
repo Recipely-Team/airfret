@@ -1,3 +1,5 @@
+import type { PedalPanel } from '@presentation/ui/drums/pedal-panel';
+import type { ExploreGuide } from '@presentation/ui/explore/explore-guide';
 import type { LessonHud } from '@presentation/ui/lessons/lesson-hud';
 import type { LessonIntro } from '@presentation/ui/lessons/lesson-intro';
 import type { LessonsDrawer } from '@presentation/ui/lessons/lessons-drawer';
@@ -17,4 +19,7 @@ export interface AppUi {
   readonly result: ResultDialog;
   readonly pointer: PointerInput;
   readonly tourBar: TourBar;
+  readonly pedals: PedalPanel;
+  readonly explore: ExploreGuide;
+  readonly openSettings: () => void;
 }
