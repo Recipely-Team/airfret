@@ -4,9 +4,9 @@ const WOOD = { light: '#e9cf9c', dark: '#b98d52' } as const;
 const WIDTH = { butt: 10, tip: 5 } as const;
 
 /** Hickory sticks from grip to tip, tapering, with a bead at the tip. Drawn under the real hands. */
-export function paintSticks(ctx: CanvasRenderingContext2D, sticks: readonly (Stick | null)[]): void {
-  for (const s of sticks) {
-    if (!s) continue;
+export function paintSticks(ctx: CanvasRenderingContext2D, sticks: readonly { stick: Stick; alpha: number }[]): void {
+  for (const { stick: s, alpha } of sticks) {
+    ctx.globalAlpha = alpha;
     const dx = s.tip.x - s.grip.x;
     const dy = s.tip.y - s.grip.y;
     const len = Math.hypot(dx, dy) || 1;
@@ -36,4 +36,5 @@ export function paintSticks(ctx: CanvasRenderingContext2D, sticks: readonly (Sti
     ctx.fillStyle = WOOD.light;
     ctx.fill();
   }
+  ctx.globalAlpha = 1;
 }

@@ -1,3 +1,4 @@
+import { StickTracker } from '@application/drums/stick-tracker';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
 import { DrumArticulation } from '@domain/drums/drum-articulation';
 import type { DrumHit } from '@domain/drums/drum-hit';
@@ -5,11 +6,9 @@ import type { DrumPad } from '@domain/drums/drum-pad';
 import { DrumPiece } from '@domain/drums/drum-piece';
 import { HitDetector } from '@domain/drums/hit-detector';
 import type { Stick } from '@domain/drums/stick';
-import { stickFromHand } from '@domain/drums/stick-from-hand';
 import type { Point } from '@domain/fretboard/point';
 import { HiHatPedalMode } from '@domain/input/hihat-pedal-mode';
 import { PedalAction } from '@domain/input/pedal-action';
-import { HandLandmark } from '@domain/tracking/hand-landmark';
 
 /** Edge zone of the snare that counts as a rimshot. */
 const RIM_RADIUS = 0.85;
@@ -24,14 +23,13 @@ const MOUSE_VELOCITY = 0.7;
  * **DrumPlayer** — two sticks from two tracked hands, two feet from assignable pedals.
  *
  * @remarks
- * - Each hand holds a stick (`stickFromHand`); each stick has its own `HitDetector`.
+ * - Each hand holds a stick that stays with it through dropouts (`StickTracker`); each stick has its own `HitDetector`.
  * - Articulation: snare edge → rimshot, ride centre → bell, hi-hat open/closed from the pedal.
  * - Hi-hat pedal: in `holdToClose` (a real kit) foot down closes and "chicks"; in `holdToOpen` the hat is
  *   closed unless the pedal is held. Closing a ringing open hat chokes it.
  */
 export class DrumPlayer {
   pads: readonly DrumPad[] = [];
-  sticks: (Stick | null)[] = [null, null];
   /** Last hit per piece, for the renderer's head/cymbal animation. */
   readonly lastHit = new Map<DrumPiece, { at: number; velocity: number }>();
   readonly pedalDown = new Set<PedalAction>();
@@ -40,12 +38,16 @@ export class DrumPlayer {
   private readonly detectors = [new HitDetector(), new HitDetector()];
   private hihatMode: HiHatPedalMode = HiHatPedalMode.holdToOpen;
   private h = 1;
+  private w = 1;
+  private visibleAt = 0;
+  private readonly tracker = new StickTracker();
   private lastT = 0;
 
   constructor(private readonly sound: SoundOutputInterface) {}
 
-  configure(pads: readonly DrumPad[], h: number, hihatMode: HiHatPedalMode): void {
+  configure(pads: readonly DrumPad[], w: number, h: number, hihatMode: HiHatPedalMode): void {
     this.pads = pads;
+    this.w = w;
     this.h = h;
     this.hihatMode = hihatMode;
   }
@@ -55,19 +57,22 @@ export class DrumPlayer {
   }
 
   /** One camera frame of hands in screen px; the left-most hand holds stick 0. */
+  /** One camera frame of hands in screen px; each stick stays with its own hand (`StickTracker`). */
   updateHands(hands: readonly (readonly Point[])[], t: number, audioNow: number, now: number): void {
     const dt = this.lastT ? Math.min(MAX_SPREAD, t - this.lastT) : 0;
     this.lastT = t;
     this.hands = hands;
-    const ordered = [...hands].sort((a, b) => (a[HandLandmark.wrist]?.x ?? 0) - (b[HandLandmark.wrist]?.x ?? 0)).slice(0, 2);
-    this.sticks = [0, 1].map((i) => {
-      const hand = ordered[i];
-      return hand ? stickFromHand(hand) : null;
-    });
-    this.sticks.forEach((stick, i) => {
-      const hits = this.detectors[i]?.update(stick?.tip ?? null, t, this.pads, this.h) ?? [];
+    const tips = this.tracker.update(hands, t, this.w);
+    tips.forEach((tip, i) => {
+      const hits = this.detectors[i]?.update(tip, t, this.pads, this.h) ?? [];
       for (const hit of hits) this.play(hit, audioNow + SCHEDULE_LEAD + hit.frac * dt, now);
     });
+    this.visibleAt = t;
+  }
+
+  /** Sticks to draw, smoothed, fading while held through a tracking dropout. */
+  get sticks(): { stick: Stick; alpha: number }[] {
+    return this.tracker.visible(this.visibleAt);
   }
 
   /** Mouse fallback: a click on a pad hits it. */
