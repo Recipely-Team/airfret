@@ -9,13 +9,26 @@
     "prebuild": "node scripts/copy-mediapipe.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "map": "node scripts/project-map.mjs",
+    "check:structure": "node scripts/check-structure.mjs",
+    "check": "npm run lint && npm run typecheck && npm run test:coverage && npm run check:structure",
+    "prepare": "husky"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^1.2.0"
   },
   "devDependencies": {
-    "typescript": "^7.0.2",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.19.2",
+    "@vitest/coverage-v8": "^5.1.0",
+    "eslint": "^10.14.0",
+    "husky": "^9.1.7",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
     "vite": "^8.3.5",
     "vitest": "^5.1.0"
   }
