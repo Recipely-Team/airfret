@@ -13,6 +13,22 @@ const inst = instrumentById('acoustic');
 const layout = computeLayout(1440, 900, 6, false, 12);
 const CHORDS = ['G', 'C', 'D', 'Em'];
 
+/**
+ * A strumming hand whose index tip is at `tip`, pointing straight down at the strings, with the back
+ * of the hand facing the floor so the nail leads a downstroke. `isUp` points the finger the other way.
+ */
+function strummer(tip: Point, isUp = false): Point[] {
+  const d = isUp ? -1 : 1;
+  const pts: Point[] = Array.from({ length: 21 }, () => ({ ...tip, z: 0 }));
+  pts[HandLandmark.wrist] = { x: tip.x, y: tip.y - 130 * d, z: 0 };
+  pts[HandLandmark.indexMcp] = { x: tip.x, y: tip.y - 70 * d, z: 0 };
+  pts[HandLandmark.pinkyMcp] = { x: tip.x + 40 * d, y: tip.y - 70 * d, z: 0 };
+  pts[HandLandmark.middleMcp] = { x: tip.x + 15, y: tip.y - 70 * d, z: 0 };
+  pts[HandLandmark.indexPip] = { x: tip.x, y: tip.y - 40 * d, z: 0 };
+  pts[HandLandmark.indexTip] = tip;
+  return pts;
+}
+
 /** A 21-point hand at `at`, index finger pointing to `tip`; `isFist` curls every finger. */
 function hand(at: Point, tip: Point, isFist = false): Point[] {
   const pts: Point[] = Array.from({ length: 21 }, () => ({ x: at.x, y: at.y + 10 }));
@@ -29,7 +45,7 @@ function hand(at: Point, tip: Point, isFist = false): Point[] {
 function setup() {
   const sound = new FakeSoundOutput();
   const player = new Player(sound);
-  player.configure({ layout, instrument: inst, mode: PlayMode.chord, chords: CHORDS, strumFilter: StrumFilter.both });
+  player.configure({ layout, instrument: inst, mode: PlayMode.chord, chords: CHORDS, strumFilter: StrumFilter.both, capo: 0 });
   return { sound, player };
 }
 
@@ -57,10 +73,20 @@ describe('Player with camera hands', () => {
     const fretTip = { x: layout.nutX + 50, y: layout.centerY };
     const above = { x, y: layout.centerY - layout.spreadBody - 40 };
     const below = { x, y: layout.centerY + layout.spreadBody + 40 };
-    player.updateHands([hand(fretTip, fretTip), hand(above, above)], 0, 0, true);
-    player.updateHands([hand(fretTip, fretTip), hand(below, below)], 0.03, 0, true);
+    player.updateHands([hand(fretTip, fretTip), strummer(above)], 0, 0, true);
+    player.updateHands([hand(fretTip, fretTip), strummer(below)], 0.03, 0, true);
     expect(player.strumHand).not.toBeNull();
     expect(sound.plucks.length).toBeGreaterThan(0);
+  });
+
+  it('stays silent when the strumming finger points away from the strings', () => {
+    const { sound, player } = setup();
+    const x = (layout.strumX0 + layout.strumX1) / 2;
+    const above = { x, y: layout.centerY - layout.spreadBody - 40 };
+    const below = { x, y: layout.centerY + layout.spreadBody + 40 };
+    player.updateHands([strummer(above, true)], 0, 0, true);
+    player.updateHands([strummer(below, true)], 0.03, 0, true);
+    expect(sound.plucks).toEqual([]);
   });
 
   it('lets the mouse strum instead of the camera while it is held', () => {
@@ -68,8 +94,8 @@ describe('Player with camera hands', () => {
     const x = (layout.strumX0 + layout.strumX1) / 2;
     const above = { x, y: layout.centerY - layout.spreadBody - 40 };
     const below = { x, y: layout.centerY + layout.spreadBody + 40 };
-    player.updateHands([hand(above, above)], 0, 0, false);
-    player.updateHands([hand(below, below)], 0.03, 0, false);
+    player.updateHands([strummer(above)], 0, 0, false);
+    player.updateHands([strummer(below)], 0.03, 0, false);
     expect(sound.plucks).toEqual([]);
   });
 });

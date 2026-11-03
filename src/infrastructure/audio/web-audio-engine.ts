@@ -3,10 +3,15 @@ import { FailureCode } from '@core/failure/failure-code';
 import type { Result } from '@core/result/result';
 import { fail, ok } from '@core/result/result-factories';
 import type { DrumKind } from '@domain/audio/drum-kind';
+import type { PluckRequest } from '@domain/audio/pluck-request';
+import type { RetuneRequest } from '@domain/audio/retune-request';
+import { StrikeSurface } from '@domain/gesture/strike-surface';
+import { Voice } from '@domain/audio/voice';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
 import { ChainKind } from '@domain/instruments/chain-kind';
 import type { Instrument } from '@domain/instruments/instrument';
 import { midiToFreq } from '@domain/music/pitch';
+import { clamp } from '@core/math/clamp';
 import type { AudioChain } from '@infrastructure/audio/chains/audio-chain';
 import { buildChain } from '@infrastructure/audio/chains/build-chain';
 import { impulseResponse } from '@infrastructure/audio/chains/impulse-response';
@@ -16,12 +21,26 @@ import { AssetPath } from '@infrastructure/constants/assets';
 const Level = { master: 0.8, click: 0.5, chuck: 0.35, mutedPluck: 0.8, minAmp: 0.05 } as const;
 const Reverb = { seconds: 2.2, decay: 3.2 } as const;
 const Muted = { t60: 0.09, brightness: 0.6 } as const;
+/** Palm resting by the bridge: notes still pitch, but die in a quarter second and lose their top. */
+const PalmMuted = { t60: 0.25, brightness: 0.5 } as const;
+/** Nail vs fleshy pad: the nail adds brightness and a pick-like tick; the pad rounds the attack off. */
+const ATTACK_BRIGHTNESS = { nail: 0.12, pad: -0.18 } as const;
+const STIFFNESS = { acoustic: 0.12, nylon: 0.05, clean: 0.1, drive: 0.1, bass: 0.22 } as const;
 /** Higher notes ring shorter: t60 scales with (110 Hz / f)^exponent. */
 const DECAY_REFERENCE_HZ = 110;
 const DECAY_EXPONENT = 0.45;
 const STEREO_WIDTH = 0.5;
 const SMOOTHING = 0.02;
 const CHUCK = { guitarHz: 2200, bassHz: 700, q: 1.2, attack: 0.003, length: 0.06 } as const;
+/** Pick hitting the string: a 3 ms bright tick, louder for harder strokes. */
+const PICK = { highpassHz: 3000, level: 0.09, length: 0.004 } as const;
+/** Fingertip landing on a string. */
+const TOUCH = { bandHz: 3200, level: 0.025, length: 0.03 } as const;
+/** Fingers sliding over wound strings: a short rising squeak. */
+const SQUEAK = { fromHz: 1400, toHz: 3200, q: 6, level: 0.05, length: 0.12 } as const;
+/** Plucking nearer the bridge than this is brighter, farther is darker. */
+const NEUTRAL_POSITION = 0.2;
+const POSITION_BRIGHTNESS = 1.1;
 
 /**
  * **WebAudioEngine** — the `SoundOutputInterface` on Web Audio.
@@ -38,7 +57,8 @@ export class WebAudioEngine implements SoundOutputInterface {
   private readonly noise: AudioBuffer;
   private readonly drums: DrumKit;
   private readonly chains = new Map<ChainKind, AudioChain>();
-  private bank: AudioWorkletNode | null = null;
+  private readonly banks = new Map<Voice, AudioWorkletNode>();
+  private readonly voiceGains = new Map<Voice, GainNode>();
   private current: AudioChain | null = null;
   private instrument: Instrument | null = null;
 
@@ -73,7 +93,13 @@ export class WebAudioEngine implements SoundOutputInterface {
     } catch (e) {
       return fail(new Failure(FailureCode.audioUnavailable, String(e)));
     }
-    this.bank = new AudioWorkletNode(this.ctx, 'string-bank', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2] });
+    for (const voice of Object.values(Voice)) {
+      const bank = new AudioWorkletNode(this.ctx, 'string-bank', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2] });
+      const g = this.ctx.createGain();
+      bank.connect(g);
+      this.banks.set(voice, bank);
+      this.voiceGains.set(voice, g);
+    }
     this.setInstrument(instrument);
     return ok(undefined);
   }
@@ -82,42 +108,104 @@ export class WebAudioEngine implements SoundOutputInterface {
     this.master.gain.setTargetAtTime(volume, this.ctx.currentTime, SMOOTHING);
   }
 
+  setVoiceVolume(voice: Voice, volume: number): void {
+    this.voiceGains.get(voice)?.gain.setTargetAtTime(volume, this.ctx.currentTime, SMOOTHING);
+  }
+
   setInstrument(instrument: Instrument): void {
     this.instrument = instrument;
-    if (!this.bank) return;
-    this.damp(-1, 0);
+    if (!this.banks.size) return;
+    this.banks.forEach((b) => b.port.postMessage({ type: 'damp', when: 0, string: -1 }));
     let chain = this.chains.get(instrument.chain);
     if (!chain) {
       chain = buildChain(this.ctx, instrument.chain);
       chain.output.connect(this.chainOut);
       this.chains.set(instrument.chain, chain);
     }
-    if (this.current) this.bank.disconnect();
-    this.bank.connect(chain.input);
+    for (const g of this.voiceGains.values()) {
+      if (this.current) g.disconnect();
+      g.connect(chain.input);
+    }
     this.current = chain;
     this.reverbIn.gain.setTargetAtTime(chain.reverbSend, this.ctx.currentTime, SMOOTHING);
   }
 
-  pluck(string: number, midi: number, amp: number, when: number, isMuted: boolean): void {
+  pluck(r: PluckRequest): void {
     const inst = this.instrument;
-    if (!this.bank || !inst) return;
-    const freq = midiToFreq(midi);
-    const level = Math.min(1, Math.max(Level.minAmp, amp));
-    this.bank.port.postMessage({
+    const bank = this.banks.get(r.voice);
+    if (!bank || !inst) return;
+    const freq = midiToFreq(r.midi);
+    const level = Math.min(1, Math.max(Level.minAmp, r.amp));
+    const attack = r.attack === StrikeSurface.pad ? ATTACK_BRIGHTNESS.pad : ATTACK_BRIGHTNESS.nail;
+    const tone = inst.bright * (0.75 + 0.25 * level) + (NEUTRAL_POSITION - r.position) * POSITION_BRIGHTNESS + attack;
+    const ring = inst.t60 * Math.pow(DECAY_REFERENCE_HZ / freq, DECAY_EXPONENT);
+    bank.port.postMessage({
       type: 'pluck',
-      when,
-      string,
+      when: r.when,
+      string: r.string,
       freq,
-      amp: inst.level * level * (isMuted ? Level.mutedPluck : 1),
-      t60: isMuted ? Muted.t60 : inst.t60 * Math.pow(DECAY_REFERENCE_HZ / freq, DECAY_EXPONENT),
-      bright: isMuted ? inst.bright * Muted.brightness : inst.bright * (0.75 + 0.25 * level),
-      pick: inst.pick,
-      pan: (string / Math.max(1, inst.tuning.length - 1) - 0.5) * STEREO_WIDTH,
+      amp: inst.level * level * (r.isMuted ? Level.mutedPluck : 1),
+      t60: r.isMuted ? Muted.t60 : r.isPalmMuted ? PalmMuted.t60 : ring,
+      bright: r.isMuted ? inst.bright * Muted.brightness : clamp(r.isPalmMuted ? tone * PalmMuted.brightness : tone, 0.05, 1),
+      stiffness: STIFFNESS[inst.chain],
+      pick: r.position,
+      pan: (r.string / Math.max(1, inst.tuning.length - 1) - 0.5) * STEREO_WIDTH,
+    });
+    if (inst.chain !== ChainKind.nylon && r.attack === StrikeSurface.nail) this.noiseBurst('highpass', PICK.highpassHz, 0.7, r.when, PICK.level * level, PICK.length);
+  }
+
+  retune(r: RetuneRequest): void {
+    const inst = this.instrument;
+    const freq = midiToFreq(r.midi);
+    this.banks.get(r.voice)?.port.postMessage({
+      type: 'retune', when: r.when, string: r.string, freq, glide: r.glide, excite: r.excite,
+      t60: inst ? inst.t60 * Math.pow(DECAY_REFERENCE_HZ / freq, DECAY_EXPONENT) : 0,
     });
   }
 
+  touch(string: number, when: number): void {
+    this.banks.get(Voice.player)?.port.postMessage({ type: 'damp', when, string });
+    this.noiseBurst('bandpass', TOUCH.bandHz, 1, when, TOUCH.level, TOUCH.length);
+  }
+
+  fretNoise(when: number): void {
+    if (!this.current || this.instrument?.chain === ChainKind.nylon) return;
+    const t = Math.max(when, this.ctx.currentTime);
+    const src = this.ctx.createBufferSource();
+    src.buffer = this.noise;
+    const bp = this.ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.Q.value = SQUEAK.q;
+    bp.frequency.setValueAtTime(SQUEAK.fromHz, t);
+    bp.frequency.exponentialRampToValueAtTime(SQUEAK.toHz, t + SQUEAK.length);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(SQUEAK.level, t + SQUEAK.length * 0.3);
+    g.gain.linearRampToValueAtTime(0, t + SQUEAK.length);
+    src.connect(bp).connect(g).connect(this.current.input);
+    src.start(t, Math.random() * 0.5);
+    src.stop(t + SQUEAK.length + 0.02);
+  }
+
   damp(string: number, when: number): void {
-    this.bank?.port.postMessage({ type: 'damp', when, string });
+    this.banks.get(Voice.player)?.port.postMessage({ type: 'damp', when, string });
+  }
+
+  private noiseBurst(type: BiquadFilterType, freq: number, q: number, when: number, level: number, length: number): void {
+    if (!this.current) return;
+    const t = Math.max(when, this.ctx.currentTime);
+    const src = this.ctx.createBufferSource();
+    src.buffer = this.noise;
+    const f = this.ctx.createBiquadFilter();
+    f.type = type;
+    f.frequency.value = freq;
+    f.Q.value = q;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(level, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + length);
+    src.connect(f).connect(g).connect(this.current.input);
+    src.start(t, Math.random() * 0.5);
+    src.stop(t + length + 0.01);
   }
 
   chuck(amp: number, when: number): void {

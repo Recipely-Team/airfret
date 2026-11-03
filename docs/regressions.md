@@ -22,6 +22,12 @@ catalogue, which imports it; the helper now uses `@domain/music/pitch` instead o
 
 ## Input
 
+**A curled index finger fretting one string was read as a barre.**
+Seen from the front, an arched finger's PIP→tip segment passes over the strings between the knuckle
+and the fingertip, so "segment crosses ≥ 3 strings" fired on ordinary fretting. *Guard:* a barre must
+be flat — all three joints on the strings, nearly straight, along the fret wire. Test
+`map-fretting.test.ts` ("does not mistake an arched finger reaching one string for a barre").
+
 **Lifting the hand after a downstroke played an upstroke.** A webcam has no depth, so the
 return path crosses the strings the same way a strum does. (Also reported by other air-guitar
 projects.) *Guard:* the *Down only* strum filter, covered by `player.test.ts`

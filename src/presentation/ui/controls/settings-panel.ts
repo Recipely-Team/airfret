@@ -1,4 +1,6 @@
 import type { SettingsStore } from '@application/settings/settings-store';
+import { instrumentById } from '@domain/instruments/instrument-catalog';
+import { tuningsFor } from '@domain/music/tuning-catalog';
 import { StrumFilter } from '@domain/settings/strum-filter';
 import { Language } from '@presentation/i18n/language';
 import { currentLanguage, t } from '@presentation/i18n/translator';
@@ -6,7 +8,7 @@ import { byId } from '@presentation/ui/dom';
 import { renderSegmented } from '@presentation/ui/controls/segmented-control';
 
 /**
- * **SettingsPanel** — handedness, strum direction, volume, camera brightness, latency, language.
+ * **SettingsPanel** — handedness, strum direction, tuning, capo, volume, camera brightness, latency, language.
  */
 export class SettingsPanel {
   constructor(private readonly store: SettingsStore) {
@@ -17,11 +19,22 @@ export class SettingsPanel {
     this.slider('volume', s.volume, (v) => store.update({ volume: v }));
     this.slider('brightness', s.brightness, (v) => store.update({ brightness: v }));
     this.slider('latency', s.latencyMs, (v) => store.update({ latencyMs: v }));
+    this.slider('capo', s.capo, (v) => store.update({ capo: v }));
+    byId<HTMLSelectElement>('tuning').onchange = (e) => store.update({ tuning: (e.target as HTMLSelectElement).value });
   }
 
   render(): void {
     const s = this.store.value;
     byId('latencyVal').textContent = `${s.latencyMs} ms`;
+    byId('capoVal').textContent = s.capo === 0 ? t('ui.noCapo') : t('ui.capoAt', { n: s.capo });
+    const tuning = byId<HTMLSelectElement>('tuning');
+    tuning.replaceChildren(...tuningsFor(instrumentById(s.instrument).tuning.length).map((tu) => {
+      const o = document.createElement('option');
+      o.value = tu.id;
+      o.textContent = t(tu.name);
+      o.selected = tu.id === s.tuning;
+      return o;
+    }));
     renderSegmented(
       byId('strumFilter'),
       Object.values(StrumFilter).map((f) => ({ value: f, label: t(`strum.${f}`) })),

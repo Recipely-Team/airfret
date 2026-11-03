@@ -48,7 +48,7 @@ export class MediaPipeHandTracker implements HandTrackerInterface {
     const v = this.video;
     if (!this.landmarker || v.readyState < HAVE_CURRENT_DATA || v.currentTime === this.lastVideoTime) return null;
     this.lastVideoTime = v.currentTime;
-    return this.landmarker.detectForVideo(v, nowMs).landmarks.map((lm) => ({ landmarks: lm.map((p) => ({ x: 1 - p.x, y: p.y })) }));
+    return this.landmarker.detectForVideo(v, nowMs).landmarks.map((lm) => ({ landmarks: lm.map((p) => ({ x: 1 - p.x, y: p.y, z: p.z })) }));
   }
 
   frameSize(): { width: number; height: number } {

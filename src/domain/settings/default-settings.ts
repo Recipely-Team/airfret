@@ -1,4 +1,5 @@
 import { PlayMode } from '@domain/instruments/play-mode';
+import { LessonMode } from '@domain/lessons/session/lesson-mode';
 import type { Settings } from '@domain/settings/settings';
 import { StrumFilter } from '@domain/settings/strum-filter';
 
@@ -10,11 +11,15 @@ export const DEFAULT_SETTINGS: Settings = {
   chordSet: 'pop',
   isLefty: false,
   strumFilter: StrumFilter.both,
+  tuning: 'standard',
+  capo: 0,
   volume: 0.8,
+  playerVolume: 1,
   brightness: 0.55,
   latencyMs: 70,
   lessonTempo: 0.8,
-  shouldLessonWait: true,
+  lessonMode: LessonMode.shadow,
+  guideVolume: 0.6,
   isLessonEasy: true,
   hasLessonDrums: false,
   best: {},

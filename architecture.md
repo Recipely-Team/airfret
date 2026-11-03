@@ -50,11 +50,47 @@ Domain is grouped by what the code is *for*:
 4. A webcam has no depth: lifting the hand back after a downstroke can read as an upstroke. The
    *Strum direction → Down only* setting filters upstrokes.
 
+## Free (pro) mode — the maths
+
+- **Fretting** (`domain/fretboard/map-fretting.ts`): each fingertip snaps to the nearest string line at
+  its x (hysteresis: it changes string only when another is 25 % of the spacing closer) and to the fret
+  zone under it. A string sounds its highest pressed fret.
+- **Barre**: a *flat* index finger — PIP, DIP and tip all on the strings, bend at the DIP < 25°, lying
+  along the fret wire — frets every string it covers. An arched finger fails the first test.
+- **Bends**: pitch rises with string tension, tension with elongation, elongation with the square of the
+  sideways push δ, so bend = 2 · ((|δ| − dead zone) / range)² semitones.
+- **Legato** (`application/play/legato-tracker.ts`): a fret change on a ringing string retunes it — same
+  finger = slide (glide, no attack), another finger = hammer-on / pull-off (fast change + a little energy).
+- **Chord recognition** (`domain/music/chords/recognize-chord.ts`): every pitch class is tried as root
+  against 14 interval templates; score = 2·matched − 1.6·extra − 1.1·missing + 0.6 if the root is the bass.
+  Lessons in free mode judge the chord you actually played, by root and quality.
+
+## The strumming finger
+
+- **Pluck position** = (bridge − x) / (bridge − fretted fret): near the bridge ≈ 0.05 (thin, bright),
+  over the soundhole ≈ 0.25 (warm), near the neck ≈ 0.45 (round, dark). It sets the comb in the
+  excitation (plucking at 1/k of the length removes every k-th harmonic) and the brightness.
+- **Nail or pad** (`domain/gesture/finger-strike.ts`): back-of-hand normal
+  n = (indexMCP − wrist) × (pinkyMCP − wrist) using MediaPipe depth; the nail faces n projected
+  perpendicular to the finger axis. Nail facing the stroke → nail (brighter, pick tick); otherwise pad.
+- **Won't play**: a curled finger, a finger pointing up away from the strings, or one pointing at the camera.
+- **Contact**: crossing a string's line bends it under the fingertip (drawn as a tent); it plucks when the
+  tip passes the release band. Touching a ringing string stops it.
+- **Palm mute**: the strumming palm edge resting on the strings by the bridge shortens and darkens notes.
+
+## Shadow mode
+
+`GuidePlayer` plays every lesson target on a separate **guide voice** (its own string bank and gain),
+scheduled on the audio clock; the player's own voice has its own volume. The renderer shows the guide's
+ghost pick sweeping the strings and the target chord's shape ghosted on the neck.
+
 ## Sound
 
-`public/worklets/strings.js` is an extended Karplus–Strong string bank in an AudioWorklet:
-noise excitation shaped by pick position and velocity, a two-tap loss filter (brightness), a
-first-order allpass for exact tuning (tested to within 2 cents), and per-pluck T60 decay. Plucks
+`public/worklets/strings.js` is a digital-waveguide string bank in an AudioWorklet: a delay line read
+at a fractional, time-varying point (cubic Hermite), a two-tap loss filter (brightness), a dispersion
+allpass (string stiffness → inharmonicity), and per-note T60. The line is shortened by the filters'
+*exact* phase delay at the target frequency, so pitch is within 2 cents; because the read point can
+move, a ringing string can bend, slide and hammer on. Plucks
 are scheduled sample-accurately on the audio clock. Each instrument family then runs through
 its own chain (`infrastructure/audio/chains/build-chain.ts`): body EQ for acoustic/nylon, chorus
 for clean electric, preamp + clipper + 4x12 cabinet EQ for overdrive, compressed low end for bass.
