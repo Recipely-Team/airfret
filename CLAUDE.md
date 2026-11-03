@@ -77,6 +77,9 @@ Numbers are cited by `scripts/check-structure.mjs` (letters in brackets) — kee
 
 ## Git flow
 
+> **Open TODO:** Vercel is not connected to GitHub, so pushes don't deploy. Production is deployed by hand
+> from `main` (`vercel deploy --prod --yes --scope recepeksi`). Steps to connect: [`docs/deploy.md`](docs/deploy.md).
+
 - `main` is release-only and deploys to production. `dev` is the integration branch and gets a
   Vercel preview. All work branches from `dev`: `feat/…`, `fix/…`, `refactor/…`, `chore/…`.
 - Conventional commits (`feat(scope): …`). Every commit ends with the session's Co-Authored-By line.
