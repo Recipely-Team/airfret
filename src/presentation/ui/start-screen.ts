@@ -16,7 +16,11 @@ export class StartScreen {
     byId('startStatus').textContent = text;
   }
 
+  show(isVisible: boolean): void {
+    byId('start').hidden = !isVisible;
+  }
+
   hide(): void {
-    byId('start').hidden = true;
+    this.show(false);
   }
 }

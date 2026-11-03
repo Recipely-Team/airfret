@@ -26,6 +26,10 @@ class StringBank extends AudioWorkletProcessor {
   constructor() {
     super();
     this.voices = Array.from({ length: MAX_VOICES }, () => new Voice());
+    // Scratch space for excitations, allocated once: the audio thread must never allocate, or
+    // garbage collection pauses turn into crackles under fast playing.
+    this.noise = new Float32Array(BUF);
+    this.shaped = new Float32Array(BUF);
     this.queue = [];
     this.port.onmessage = (e) => {
       this.queue.push(e.data);
@@ -82,14 +86,14 @@ class StringBank extends AudioWorkletProcessor {
   excite(v, amp, bright, pick) {
     const N = Math.max(2, Math.round(v.delay));
     const M = Math.max(1, Math.round(pick * N));
-    const noise = new Float32Array(N);
+    const noise = this.noise;
     for (let i = 0; i < N; i++) noise[i] = Math.random() * 2 - 1;
     // Softer strokes are darker: the excitation lowpass closes as amplitude falls.
     const a = Math.min(0.92, Math.max(0, 0.95 - 0.55 * amp - 0.25 * bright));
     let lp1 = 0;
     let lp2 = 0;
     let mean = 0;
-    const shaped = new Float32Array(N);
+    const shaped = this.shaped;
     for (let i = 0; i < N; i++) {
       // Comb at the pick point: plucking at 1/k of the length removes every k-th harmonic.
       const x = noise[i] - 0.9 * noise[(i - M + N) % N];

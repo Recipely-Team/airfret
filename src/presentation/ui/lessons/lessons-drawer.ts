@@ -22,9 +22,12 @@ export class LessonsDrawer {
     private readonly store: SettingsStore,
     private readonly onPick: (song: Song) => void,
     onTour: () => void,
+    onClose: () => void,
   ) {
-    byId('lessonsBtn').onclick = () => this.open();
-    byId('lessonsClose').onclick = () => this.close();
+    byId('lessonsClose').onclick = () => {
+      this.close();
+      onClose();
+    };
     byId('tourBtn').onclick = () => {
       this.close();
       onTour();

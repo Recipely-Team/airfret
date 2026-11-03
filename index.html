@@ -16,18 +16,38 @@
       <canvas id="stage"></canvas>
 
       <header class="bar">
-        <div class="brand"><span class="mark"></span>Airfret</div>
-        <div class="seg" id="instruments" role="radiogroup"></div>
-        <div class="seg" id="modes" role="radiogroup"></div>
-        <select id="chordSet" class="select" aria-label="Chord set"></select>
+        <button class="btn icon menu" id="menuBtn" type="button" aria-controls="nav" aria-expanded="false" data-i18n-label="nav.open">
+          <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 5.5h14M3 10h14M3 14.5h14"/></svg>
+        </button>
+        <a class="brand" href="/" data-link>Airfret</a>
+        <span class="page-title" id="pageTitle"></span>
+        <div class="bar-context" id="barContext">
+          <div class="seg" id="modes" role="radiogroup"></div>
+          <select id="chordSet" class="select" data-i18n-label="ui.chordSet"></select>
+          <button class="btn ghost" id="pedalsBtn" type="button" data-i18n="pedals.title" hidden></button>
+        </div>
         <div class="spacer"></div>
-        <button class="btn ghost" id="pedalsBtn" data-i18n="pedals.title" hidden></button>
-        <button class="btn ghost" id="exploreBtn" data-i18n="explore.title"></button>
-        <button class="btn" id="lessonsBtn" data-i18n="ui.lessons"></button>
-        <button class="btn icon" id="settingsBtn" aria-label="Settings">
+        <a class="btn ghost" id="exploreBtn" href="/explore" data-link data-i18n="explore.title"></a>
+        <a class="btn" id="lessonsBtn" href="/lessons" data-link data-i18n="ui.lessons"></a>
+        <button class="btn icon" id="settingsBtn" type="button" data-i18n-label="ui.settings">
           <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="10" cy="10" r="2.6"/><path d="M10 1.8v2.4M10 15.8v2.4M1.8 10h2.4M15.8 10h2.4M4.2 4.2l1.7 1.7M14.1 14.1l1.7 1.7M4.2 15.8l1.7-1.7M14.1 5.9l1.7-1.7"/></svg>
         </button>
       </header>
+
+      <div class="scrim" id="navScrim" hidden></div>
+      <nav class="nav" id="nav" hidden></nav>
+
+      <main class="home" id="home" hidden>
+        <section class="hero">
+          <h1 data-i18n="home.title"></h1>
+          <p class="lead" data-i18n="home.lead"></p>
+        </section>
+        <h2 class="home-label" data-i18n="home.instruments"></h2>
+        <div class="instrument-grid" id="homeInstruments"></div>
+        <h2 class="home-label" data-i18n="home.learn"></h2>
+        <div class="learn-row" id="homeLearn"></div>
+        <p class="muted small home-privacy" data-i18n="app.privacy"></p>
+      </main>
 
       <div class="lesson-bar" id="lessonBar" hidden>
         <div class="lesson-title" id="lessonTitle"></div>

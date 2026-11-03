@@ -72,7 +72,7 @@ export class WebAudioEngine implements SoundOutputInterface {
     const ctx = this.ctx;
     this.master = ctx.createGain();
     this.master.gain.value = Level.master;
-    this.master.connect(limiter(ctx)).connect(ctx.destination);
+    outputStage(ctx, this.master).connect(ctx.destination);
     const reverb = ctx.createConvolver();
     reverb.buffer = impulseResponse(ctx, Reverb.seconds, Reverb.decay);
     this.reverbIn = ctx.createGain();
@@ -256,12 +256,30 @@ export class WebAudioEngine implements SoundOutputInterface {
   }
 }
 
-function limiter(ctx: AudioContext): DynamicsCompressorNode {
-  const l = ctx.createDynamicsCompressor();
-  l.threshold.value = -6;
-  l.knee.value = 6;
-  l.ratio.value = 12;
-  l.attack.value = 0.002;
-  l.release.value = 0.15;
-  return l;
+/**
+ * Master safety stage: a fast hard-knee limiter, then a tanh soft-clipper.
+ *
+ * @remarks
+ * - Six strings struck within milliseconds sum far above full scale; a compressor alone lets the first
+ *   transient through and the output clips square. The shaper rounds whatever is left: y = 0.97·tanh(u),
+ *   so the output can never pass ±0.97 and stays clean instead of crackling.
+ * - The shaper's input domain [−1, 1] stands for signals of ±2 (half-gain in front, tanh(2x) curve).
+ */
+function outputStage(ctx: AudioContext, input: AudioNode): AudioNode {
+  const limiter = ctx.createDynamicsCompressor();
+  limiter.threshold.value = -9;
+  limiter.knee.value = 0;
+  limiter.ratio.value = 20;
+  limiter.attack.value = 0.001;
+  limiter.release.value = 0.12;
+  const half = ctx.createGain();
+  half.gain.value = 0.5;
+  const clip = ctx.createWaveShaper();
+  const n = 2048;
+  const curve = new Float32Array(n);
+  for (let i = 0; i < n; i++) curve[i] = 0.97 * Math.tanh(2 * ((i / (n - 1)) * 2 - 1));
+  clip.curve = curve;
+  clip.oversample = '2x';
+  input.connect(limiter).connect(half).connect(clip);
+  return clip;
 }

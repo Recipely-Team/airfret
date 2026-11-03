@@ -13,6 +13,19 @@ row that stops teaching anything.
 the start flow forever. *Guard:* `WebAudioEngine.start()` calls `resume()` without awaiting it —
 the context starts on the gesture, and loading the worklet does not depend on it.
 
+**Fast repeated strums crackled and distorted.**
+Two causes together. The string worklet allocated two typed arrays per pluck *inside the audio thread*,
+so rapid playing triggered garbage-collection pauses there (crackles); and six strings struck within
+milliseconds summed above full scale, which the master compressor let through as square clipping.
+*Guard:* `string-worklet.test.ts` counts allocations during `process()` while strumming fast (must be 0)
+and checks the bank's peak; the master output now ends in a hard-knee limiter plus a `0.97·tanh` soft clip.
+
+## Navigation
+
+**The ☰ next to the logo looked like a menu and did nothing.**
+It was decoration in the brand mark. *Guard:* it is now a real button (`aria-expanded`, `aria-controls`)
+opening the navigation drawer; every instrument has its own path (`route-paths.test.ts`).
+
 ## Data
 
 **A module-level constant used before it was initialised crashed the whole lesson catalogue.**

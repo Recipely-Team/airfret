@@ -75,6 +75,16 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | K6 | Hi-hat with left Shift held / released (both pedal modes) | Open / closed as the mode says; closing chokes an open hat | |
 | K7 | Pedals → + Ata → press another key / controller button / MIDI pedal | It plays that pedal; removing the chip stops it; reset restores defaults | |
 
+## N. Navigation
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| N1 | ☰ | Menu opens with Home, six instruments, Learn, Settings; current page highlighted | |
+| N2 | Open `/bass`, `/drums`, `/electric` directly (reload) | That instrument's page, with the start card | |
+| N3 | Back / Forward | Moves between pages | |
+| N4 | Dersler → close | Back on the page you came from | |
+| N5 | Strum fast and repeatedly for 10 s | No crackle, no harsh distortion | |
+
 ## E. Explore
 
 | # | Step | Expected | Result |

@@ -9,9 +9,14 @@ import { EXPLORE_FEATURES } from '@presentation/ui/explore/explore-features';
 export class ExploreGuide {
   private readonly el = byId('explore');
 
-  constructor(private readonly onTry: (featureId: string) => void) {
-    byId('exploreBtn').onclick = () => this.open();
-    byId('exploreClose').onclick = () => this.close();
+  constructor(
+    private readonly onTry: (featureId: string) => void,
+    onClose: () => void,
+  ) {
+    byId('exploreClose').onclick = () => {
+      this.close();
+      onClose();
+    };
   }
 
   open(): void {

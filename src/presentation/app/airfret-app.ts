@@ -5,7 +5,6 @@ import type { StartLessonUseCase } from '@application/lessons/start-lesson-use-c
 import type { Player } from '@application/play/player';
 import type { SettingsStore } from '@application/settings/settings-store';
 import { TOUR_CHORDS } from '@application/tour/tour-chords';
-import { TourSession } from '@application/tour/tour-session';
 import { Voice } from '@domain/audio/voice';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
 import { computeKitLayout } from '@domain/drums/compute-kit-layout';
@@ -23,6 +22,9 @@ import { knownChord } from '@domain/music/chords/chord-voicing';
 import { effectiveTuning } from '@domain/music/tuning-catalog';
 import type { HandTrackerInterface } from '@domain/tracking/hand-tracker-interface';
 import type { AppUi } from '@presentation/app/app-ui';
+import { launchFeature } from '@presentation/app/launch-feature';
+import { TourController } from '@presentation/app/tour-controller';
+import type { Route } from '@presentation/routing/route';
 import { videoToScreen } from '@presentation/canvas/screen-mapping';
 import type { StageRenderer } from '@presentation/canvas/stage-renderer';
 import { t } from '@presentation/i18n/translator';
@@ -51,17 +53,23 @@ interface Services {
  */
 export class AirfretApp {
   private lesson: LessonSession | null = null;
-  private tour: TourSession | null = null;
   private isStarted = false;
   private hasCamera = false;
   private lastHandsAt = 0;
+  private readonly tours: TourController;
+  /** The page under any overlay: home or an instrument. */
+  private base: Route = { kind: 'home' };
 
   constructor(
     private readonly s: Services,
     private readonly ui: AppUi,
   ) {
+    this.tours = new TourController(ui.tourBar, () => this.apply(), () => {
+      const first = SONGS.find((song) => song.course === 1);
+      if (first) this.openIntro(first);
+    });
     s.player.onEvent = (e) => {
-      this.tour?.onEvent(e);
+      this.tours.onEvent(e);
       const played = e.recognized ? { chord: e.recognized.name, recognized: e.recognized } : e.chord !== undefined ? { chord: e.chord } : e.midi === undefined ? {} : { midi: e.midi };
       this.lesson?.input(e.when, played);
     };
@@ -71,8 +79,48 @@ export class AirfretApp {
     return this.s.store.value.instrument === DRUMS_ID;
   }
 
+  get isOnStage(): boolean {
+    return this.base.kind === 'instrument';
+  }
+
+  /** Page title for the header. */
+  title(): string {
+    if (!this.isOnStage) return '';
+    return this.isDrums ? t('inst.drums') : t(instrumentById(this.s.store.value.instrument).name);
+  }
+
+  /** Shows a route: home, an instrument page, or an overlay (lessons, a lesson, Explore) on top of the current page. */
+  show(route: Route): void {
+    if (route.kind === 'home' || route.kind === 'instrument') {
+      this.base = route;
+      this.ui.drawer.close();
+      this.ui.explore.close();
+      this.ui.intro.hide();
+    }
+    if (route.kind === 'home') {
+      this.stopLesson();
+      this.endTour();
+    }
+    if (route.kind === 'instrument' && route.instrument !== this.s.store.value.instrument) this.pickInstrument(route.instrument);
+    if ((route.kind === 'lessons' || route.kind === 'lesson') && this.base.kind === 'home') this.base = { kind: 'instrument', instrument: this.s.store.value.instrument };
+    if (route.kind === 'lessons') this.ui.drawer.open();
+    if (route.kind === 'lesson') {
+      const song = SONGS.find((x) => x.id === route.songId);
+      if (song) this.ui.intro.show(song);
+    }
+    if (route.kind === 'explore') this.ui.explore.open();
+    this.ui.home.show(this.base.kind === 'home');
+    this.ui.start.show(this.isOnStage && !this.isStarted);
+    this.s.store.update({});
+  }
+
+  /** Back to the page under the overlays. */
+  closeOverlay(): void {
+    this.ui.replaceRoute(this.base);
+  }
+
   get hasLesson(): boolean {
-    return this.lesson !== null || this.tour !== null;
+    return this.lesson !== null || this.tours.session !== null;
   }
 
   /** Called from the start button: unlocks audio, then tries the camera. */
@@ -114,9 +162,13 @@ export class AirfretApp {
     const w = window.innerWidth;
     const h = window.innerHeight;
     this.s.renderer.resize(w, h);
-    const chords = this.tour ? TOUR_CHORDS : this.lesson?.song.mode === PlayMode.chord ? this.lesson.chordSet : chordSetById(st.chordSet).chords.filter(knownChord);
+    const chords = this.tours.session ? TOUR_CHORDS : this.lesson?.song.mode === PlayMode.chord ? this.lesson.chordSet : chordSetById(st.chordSet).chords.filter(knownChord);
     this.s.drums.configure(computeKitLayout(w, h, st.isLefty), h, st.hihatMode);
     const layout = computeLayout(w, h, inst.tuning.length, st.isLefty, inst.maxFret);
+    if (this.base.kind === 'instrument' && this.base.instrument !== st.instrument) {
+      this.base = { kind: 'instrument', instrument: st.instrument };
+      this.ui.replaceRoute(this.base);
+    }
     this.s.player.configure({ layout, instrument: inst, mode: st.mode, chords, strumFilter: st.strumFilter, capo: st.capo });
   }
 
@@ -127,8 +179,7 @@ export class AirfretApp {
   }
 
   openIntro(song: Song): void {
-    this.ui.drawer.close();
-    this.ui.intro.show(song);
+    this.ui.navigate({ kind: 'lesson', songId: song.id });
   }
 
   beginLesson(song: Song): void {
@@ -163,22 +214,22 @@ export class AirfretApp {
 
   startTour(): void {
     this.stopLesson();
-    this.tour = new TourSession(this.hasCamera);
-    this.ui.tourBar.show(true);
+    this.tours.start(this.hasCamera);
     this.s.store.update({ mode: PlayMode.chord, instrument: 'acoustic' });
   }
 
-  /** Skips the current tour step; on the last card, moves on to the first lesson. */
   skipTourStep(): void {
-    if (this.tour?.isDone) this.finishTour();
-    else this.tour?.skip();
+    this.tours.skip();
   }
 
   endTour(): void {
-    if (!this.tour) return;
-    this.tour = null;
-    this.ui.tourBar.show(false);
-    this.apply();
+    this.tours.end();
+  }
+
+  /** From the home page or the menu: open the acoustic page and run the tour. */
+  tourFromAnywhere(): void {
+    this.ui.navigate({ kind: 'instrument', instrument: 'acoustic' });
+    this.startTour();
   }
 
   /** One animation frame. */
@@ -188,10 +239,14 @@ export class AirfretApp {
     const audioNow = this.s.sound.now;
     this.track(nowMs, now, audioNow);
     if (this.lesson) this.tickLesson(this.lesson, audioNow);
-    if (this.tour) this.tickTour(now);
+    this.tours.tick(this.s.player, now);
     const st = this.s.store.value;
+    if (!this.isOnStage) {
+      requestAnimationFrame(this.frame);
+      return;
+    }
     if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, this.hint(now), st.brightness);
-    else this.s.renderer.draw(this.s.player, this.lesson, this.tour, audioNow, now, this.hint(now), st.brightness);
+    else this.s.renderer.draw(this.s.player, this.lesson, this.tours.session, audioNow, now, this.hint(now), st.brightness);
     requestAnimationFrame(this.frame);
   };
 
@@ -217,48 +272,18 @@ export class AirfretApp {
     this.stopLesson();
   }
 
-  private tickTour(now: number): void {
-    const tour = this.tour;
-    if (!tour) return;
-    tour.update(this.s.player, now);
-    if (tour.isDone) this.ui.tourBar.show(true);
-  }
-
-  /** After the tour: straight into the first course lesson. */
-  finishTour(): void {
-    this.endTour();
-    const first = SONGS.find((song) => song.course === 1);
-    if (first) this.openIntro(first);
-  }
-
   /** Explore's "Try it": sets the app up for one feature and says what to do. */
   tryFeature(id: string): void {
-    const st = this.s.store.value;
-    const say = () => this.ui.toast.show(t(`explore.${id}.toast`), ERROR_TOAST_MS);
-    const guitar = (instrument: string, mode: PlayMode) => {
-      this.stopLesson();
-      this.endTour();
-      this.s.store.update({ instrument, mode });
-    };
-    switch (id) {
-      case 'tour': return this.startTour();
-      case 'free': guitar('acoustic', PlayMode.free); return say();
-      case 'bends': guitar('clean', PlayMode.free); return say();
-      case 'bass': guitar('bass', PlayMode.note); return say();
-      case 'instruments': guitar(st.instrument === DRUMS_ID ? 'acoustic' : st.instrument, PlayMode.chord); return say();
-      case 'drums': guitar(DRUMS_ID, st.mode); return say();
-      case 'pedals': guitar(DRUMS_ID, st.mode); this.ui.pedals.open(); return;
-      case 'course': return this.ui.drawer.open();
-      case 'shadow': {
-        this.s.store.update({ lessonMode: LessonMode.shadow });
-        const first = SONGS.find((song) => song.course === 1);
-        if (first) this.openIntro(first);
-        return;
-      }
-      case 'capo':
-      case 'settings': this.ui.openSettings(); return say();
-      default: guitar('acoustic', PlayMode.chord); return say();
-    }
+    launchFeature(id, {
+      store: this.s.store,
+      ui: this.ui,
+      reset: () => {
+        this.stopLesson();
+        this.endTour();
+      },
+      startTour: () => this.tourFromAnywhere(),
+      firstLesson: () => SONGS.find((song) => song.course === 1),
+    });
   }
 
   private hint(now: number): string | null {
