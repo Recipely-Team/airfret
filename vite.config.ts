@@ -24,8 +24,8 @@ export default defineConfig({
       // DOM and Web Audio code (presentation, infrastructure) is covered by docs/qa/manual.md.
       thresholds: {
         'src/core/**': { lines: 100 },
-        'src/domain/**': { lines: 96, branches: 84 },
-        'src/application/**': { lines: 93, branches: 73 },
+        'src/domain/**': { lines: 98, branches: 85 },
+        'src/application/**': { lines: 93, branches: 75 },
       },
     },
   },

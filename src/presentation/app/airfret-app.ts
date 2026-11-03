@@ -1,138 +1,218 @@
 import type { BackingTrack } from '@application/lessons/backing-track';
+import type { GuidePlayer } from '@application/lessons/guide-player';
 import type { StartLessonUseCase } from '@application/lessons/start-lesson-use-case';
 import type { Player } from '@application/play/player';
 import type { SettingsStore } from '@application/settings/settings-store';
+import { TOUR_CHORDS } from '@application/tour/tour-chords';
+import { TourSession } from '@application/tour/tour-session';
+import { Voice } from '@domain/audio/voice';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
 import { computeLayout } from '@domain/fretboard/compute-layout';
+import type { Instrument } from '@domain/instruments/instrument';
 import { instrumentById } from '@domain/instruments/instrument-catalog';
 import { PlayMode } from '@domain/instruments/play-mode';
 import { chordSetById } from '@domain/lessons/catalog/chord-set-catalog';
 import type { Song } from '@domain/lessons/catalog/song';
+import { SONGS } from '@domain/lessons/catalog/song-catalog';
+import { LessonMode } from '@domain/lessons/session/lesson-mode';
 import type { LessonSession } from '@domain/lessons/session/lesson-session';
-import { knownChord } from '@domain/music/chord-voicing';
+import { knownChord } from '@domain/music/chords/chord-voicing';
+import { effectiveTuning } from '@domain/music/tuning-catalog';
 import type { HandTrackerInterface } from '@domain/tracking/hand-tracker-interface';
+import type { AppUi } from '@presentation/app/app-ui';
 import { videoToScreen } from '@presentation/canvas/screen-mapping';
 import type { StageRenderer } from '@presentation/canvas/stage-renderer';
 import { t } from '@presentation/i18n/translator';
-import type { AppUi } from '@presentation/app/app-ui';
 
 const MS_PER_SECOND = 1000;
 const NO_HANDS_HINT_AFTER = 2.5;
 const ERROR_TOAST_MS = 6000;
 
+interface Services {
+  readonly store: SettingsStore;
+  readonly sound: SoundOutputInterface;
+  readonly tracker: HandTrackerInterface;
+  readonly player: Player;
+  readonly renderer: StageRenderer;
+  readonly backing: BackingTrack;
+  readonly guide: GuidePlayer;
+  readonly startLesson: StartLessonUseCase;
+}
+
 /**
- * **AirfretApp** — the running app: settings → instrument, camera → player, lessons, and the frame loop.
+ * **AirfretApp** — the running app: settings → instrument, camera → player, tour, lessons, frame loop.
  *
  * @remarks
- * - Owns the one mutable piece of session state: the active lesson, if any.
+ * - Owns the session state: the active lesson or tour, if any.
  */
 export class AirfretApp {
   private lesson: LessonSession | null = null;
+  private tour: TourSession | null = null;
   private isStarted = false;
   private hasCamera = false;
   private lastHandsAt = 0;
 
   constructor(
-    private readonly store: SettingsStore,
-    private readonly sound: SoundOutputInterface,
-    private readonly tracker: HandTrackerInterface,
-    private readonly player: Player,
-    private readonly renderer: StageRenderer,
-    private readonly backing: BackingTrack,
-    private readonly startLesson: StartLessonUseCase,
+    private readonly s: Services,
     private readonly ui: AppUi,
   ) {
-    player.onEvent = (e) => this.lesson?.input(e.when, e.chord === undefined ? (e.midi === undefined ? {} : { midi: e.midi }) : { chord: e.chord });
+    s.player.onEvent = (e) => {
+      this.tour?.onEvent(e);
+      const played = e.recognized ? { chord: e.recognized.name, recognized: e.recognized } : e.chord !== undefined ? { chord: e.chord } : e.midi === undefined ? {} : { midi: e.midi };
+      this.lesson?.input(e.when, played);
+    };
   }
 
   get hasLesson(): boolean {
-    return this.lesson !== null;
+    return this.lesson !== null || this.tour !== null;
   }
 
   /** Called from the start button: unlocks audio, then tries the camera. */
   async start(): Promise<void> {
-    const audio = await this.sound.start(instrumentById(this.store.value.instrument));
+    const audio = await this.s.sound.start(this.instrument());
     if (!audio.isOk) {
       this.ui.start.status(audio.failure.detail);
       return;
     }
-    this.sound.setVolume(this.store.value.volume);
     this.isStarted = true;
+    this.apply();
     this.ui.start.status(t('app.loadingModel'));
-    const camera = await this.tracker.start();
+    const camera = await this.s.tracker.start();
     this.hasCamera = camera.isOk;
     if (!camera.isOk) this.ui.toast.show(t('app.cameraError'), ERROR_TOAST_MS);
     this.lastHandsAt = performance.now() / MS_PER_SECOND;
     this.ui.start.hide();
   }
 
-  /** Re-applies instrument, layout and chords after any settings or lesson change. */
+  /** The selected instrument with the chosen tuning and capo applied to its open strings. */
+  private instrument(): Instrument {
+    const st = this.s.store.value;
+    const base = instrumentById(st.instrument);
+    return { ...base, tuning: effectiveTuning(base.tuning, st.tuning, st.capo) };
+  }
+
+  /** Re-applies instrument, layout, chords and mix after any settings, lesson or tour change. */
   apply(): void {
-    const s = this.store.value;
-    const inst = instrumentById(s.instrument);
-    this.sound.setInstrument(inst);
+    const st = this.s.store.value;
+    const inst = this.instrument();
+    this.s.sound.setInstrument(inst);
+    this.s.sound.setVolume(st.volume);
+    this.s.sound.setVoiceVolume(Voice.player, st.playerVolume);
+    this.s.sound.setVoiceVolume(Voice.guide, this.lesson?.opts.hasGuide ? st.guideVolume : 0);
     const w = window.innerWidth;
     const h = window.innerHeight;
-    this.renderer.resize(w, h);
-    const chords = this.lesson && this.lesson.song.mode === PlayMode.chord ? this.lesson.chordSet : chordSetById(s.chordSet).chords.filter(knownChord);
-    this.player.configure({ layout: computeLayout(w, h, inst.tuning.length, s.isLefty, inst.maxFret), instrument: inst, mode: s.mode, chords, strumFilter: s.strumFilter });
+    this.s.renderer.resize(w, h);
+    const chords = this.tour ? TOUR_CHORDS : this.lesson?.song.mode === PlayMode.chord ? this.lesson.chordSet : chordSetById(st.chordSet).chords.filter(knownChord);
+    const layout = computeLayout(w, h, inst.tuning.length, st.isLefty, inst.maxFret);
+    this.s.player.configure({ layout, instrument: inst, mode: st.mode, chords, strumFilter: st.strumFilter, capo: st.capo });
   }
 
   pickInstrument(id: string): void {
-    const patch = this.lesson ? { instrument: id } : { instrument: id, mode: instrumentById(id).defaultMode };
-    this.store.update(id === 'drive' && this.store.value.chordSet === 'pop' && !this.lesson ? { ...patch, chordSet: 'rock' } : patch);
+    const st = this.s.store.value;
+    const patch = this.hasLesson ? { instrument: id } : { instrument: id, mode: st.mode === PlayMode.free ? PlayMode.free : instrumentById(id).defaultMode, tuning: 'standard' };
+    this.s.store.update(id === 'drive' && st.chordSet === 'pop' && !this.hasLesson ? { ...patch, chordSet: 'rock' } : patch);
+  }
+
+  openIntro(song: Song): void {
+    this.ui.drawer.close();
+    this.ui.intro.show(song);
   }
 
   beginLesson(song: Song): void {
-    const s = this.store.value;
-    const opts = { tempo: s.lessonTempo, shouldWait: s.shouldLessonWait, isEasy: s.isLessonEasy, hasDrums: s.hasLessonDrums, latency: s.latencyMs / MS_PER_SECOND };
-    const session = this.startLesson.execute(song, opts, this.sound.now);
+    const st = this.s.store.value;
+    const opts = {
+      tempo: st.lessonTempo,
+      shouldWait: st.lessonMode === LessonMode.wait,
+      hasGuide: st.lessonMode === LessonMode.shadow,
+      // Course patterns are already simple; library songs can be thinned to one strum per bar.
+      isEasy: song.course === undefined && st.isLessonEasy,
+      hasDrums: st.hasLessonDrums,
+      latency: st.latencyMs / MS_PER_SECOND,
+    };
+    const session = this.s.startLesson.execute(song, opts, this.s.sound.now);
     if (!session.isOk) {
       this.ui.toast.show(session.failure.detail);
       return;
     }
-    this.ui.drawer.select(song);
-    this.ui.drawer.close();
+    this.endTour();
     this.lesson = session.value;
-    this.store.update({ instrument: song.instrument, mode: song.mode });
-    this.ui.hud.show(song.title);
+    this.s.guide.reset();
+    const mode = song.mode === PlayMode.chord && st.mode === PlayMode.free ? PlayMode.free : song.mode;
+    this.s.store.update({ instrument: song.instrument, mode });
+    this.ui.hud.show(song.title, opts.hasGuide);
   }
 
   stopLesson(): void {
     this.lesson = null;
     this.ui.hud.hide();
-    this.store.update({});
+    this.apply();
+  }
+
+  startTour(): void {
+    this.stopLesson();
+    this.tour = new TourSession(this.hasCamera);
+    this.ui.tourBar.show(true);
+    this.s.store.update({ mode: PlayMode.chord, instrument: 'acoustic' });
+  }
+
+  /** Skips the current tour step; on the last card, moves on to the first lesson. */
+  skipTourStep(): void {
+    if (this.tour?.isDone) this.finishTour();
+    else this.tour?.skip();
+  }
+
+  endTour(): void {
+    if (!this.tour) return;
+    this.tour = null;
+    this.ui.tourBar.show(false);
+    this.apply();
   }
 
   /** One animation frame. */
   frame = (): void => {
     const nowMs = performance.now();
     const now = nowMs / MS_PER_SECOND;
-    const audioNow = this.sound.now;
+    const audioNow = this.s.sound.now;
     this.track(nowMs, now, audioNow);
     if (this.lesson) this.tickLesson(this.lesson, audioNow);
-    this.renderer.draw(this.player, this.lesson, audioNow, now, this.hint(now));
+    if (this.tour) this.tickTour(now);
+    this.s.renderer.draw(this.s.player, this.lesson, this.tour, audioNow, now, this.hint(now), this.s.store.value.brightness);
     requestAnimationFrame(this.frame);
   };
 
   private track(nowMs: number, now: number, audioNow: number): void {
     if (!this.hasCamera) return;
-    const hands = this.tracker.detect(nowMs);
+    const hands = this.s.tracker.detect(nowMs);
     if (!hands) return;
     if (hands.length) this.lastHandsAt = now;
-    const frame = this.tracker.frameSize();
+    const frame = this.s.tracker.frameSize();
     const px = hands.map((hand) => hand.landmarks.map((p) => videoToScreen(p, frame, window.innerWidth, window.innerHeight)));
-    this.player.updateHands(px, now, audioNow, !this.ui.pointer.isDown);
+    this.s.player.updateHands(px, now, audioNow, !this.ui.pointer.isDown);
   }
 
   private tickLesson(lesson: LessonSession, audioNow: number): void {
-    lesson.update(audioNow, (beat, when) => this.backing.schedule(beat, when, lesson.song.beatsPerBar, lesson.opts.hasDrums));
+    lesson.update(audioNow, (beat, when) => this.s.backing.schedule(beat, when, lesson.song.beatsPerBar, lesson.opts.hasDrums));
+    if (lesson.opts.hasGuide) this.s.guide.update(lesson, this.s.player.instrument, audioNow);
     this.ui.hud.update(lesson, audioNow);
     if (!lesson.isDone) return;
-    const best = this.store.value.best[lesson.song.id] ?? 0;
-    if (lesson.accuracy() > best) this.store.update({ best: { ...this.store.value.best, [lesson.song.id]: lesson.accuracy() } });
+    const best = this.s.store.value.best[lesson.song.id] ?? 0;
+    if (lesson.accuracy() > best) this.s.store.update({ best: { ...this.s.store.value.best, [lesson.song.id]: lesson.accuracy() } });
     this.ui.result.show(lesson);
     this.stopLesson();
+  }
+
+  private tickTour(now: number): void {
+    const tour = this.tour;
+    if (!tour) return;
+    tour.update(this.s.player, now);
+    if (tour.isDone) this.ui.tourBar.show(true);
+  }
+
+  /** After the tour: straight into the first course lesson. */
+  finishTour(): void {
+    this.endTour();
+    const first = SONGS.find((song) => song.course === 1);
+    if (first) this.openIntro(first);
   }
 
   private hint(now: number): string | null {

@@ -32,6 +32,28 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | B6 | Settings → Strum direction → Down only; strum up and down | Only downstrokes sound | |
 | B7 | Settings → Left-handed | Instrument mirrors; hands swap roles | |
 
+## B2. Touch and tone
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| T1 | Push one string slowly with the right fingertip | String bends under the finger, then snaps and sounds | |
+| T2 | Pluck near the bridge, then over the soundhole, then near the neck | Bright/thin → warm → soft/dark | |
+| T3 | Strum with the nail leading, then the pad | Nail brighter with a tick; label shows *tırnak* / *parmak ucu* | |
+| T4 | Point the strumming finger up, or curl it, and sweep the strings | No sound; label shows *parmak ters* | |
+| T5 | Rest the right palm edge on the strings by the bridge and strum | Short, dark palm-muted chug | |
+| T6 | Touch a ringing string | It stops | |
+
+## B3. Free (pro) mode
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| F1 | Fret a real G shape, strum | Plays G; "G" appears above the neck | |
+| F2 | Lay the index finger flat across fret 5 (barre) | All strings fretted at 5 | |
+| F3 | Pluck a string, then land another finger higher on it | Hammer-on: pitch changes without a new pluck | |
+| F4 | Pluck, then slide the same finger 2 frets | Pitch glides | |
+| F5 | Fret, pluck, push the string sideways | Pitch bends up, ~2 semitones at most | |
+| F6 | Settings → Capo 2, Tuning Drop D | Capo bar drawn; open G shape sounds A; low string down a tone | |
+
 ## C. Instruments and notes
 
 | # | Step | Expected | Result |
@@ -50,6 +72,8 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | D3 | Play along mode, 100 %, drums on | Groove in time; on-time strums grade Perfect/Good | |
 | D4 | Finish a lesson | Result card with accuracy; best score shows in the list | |
 | D5 | Melody lesson (Twinkle) | Next note's string and fret highlighted on the neck | |
+| D6 | Shadow mode lesson | Guide plays on the beat; ghost pick sweeps; *Rehber* / *Ben* sliders change each voice | |
+| D7 | Lessons → Guided tour | Each step advances only after doing it; last step opens lesson 1 | |
 
 ## Report
 

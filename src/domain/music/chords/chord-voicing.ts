@@ -1,4 +1,4 @@
-import { CHORD_SHAPES } from '@domain/music/chord-shapes';
+import { CHORD_SHAPES } from '@domain/music/chords/chord-shapes';
 import { LETTER_SEMITONES, SEMITONES_PER_OCTAVE } from '@domain/music/note-names';
 import { GUITAR_STRING_COUNT } from '@domain/music/tunings';
 

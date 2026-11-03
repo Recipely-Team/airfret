@@ -4,7 +4,7 @@ import type { StrumOptions } from '@domain/gesture/strum-options';
 import type { Point } from '@domain/fretboard/point';
 import { clamp } from '@core/math/clamp';
 
-const DEFAULTS: StrumOptions = { hysteresis: 0.012, minSpeed: 0.12, cooldown: 0.06, dropout: 0.18 };
+const DEFAULTS: StrumOptions = { hysteresis: 0.016, minSpeed: 0.12, cooldown: 0.06, dropout: 0.18 };
 const MIN_DT = 1e-3;
 const ABOVE = -1;
 const BELOW = 1;
@@ -44,16 +44,34 @@ export class StrumDetector {
     if (this.side.length !== ys.length) return this.arm(p, t, ys, band);
 
     const prev = this.prev ?? p;
-    const dy = p.y - prev.y;
-    const speed = Math.abs(dy) / Math.max(MIN_DT, t - this.prevT) / h;
+    const speed = Math.abs(p.y - prev.y) / Math.max(MIN_DT, t - this.prevT) / h;
     const out: Crossing[] = [];
     ys.forEach((y, i) => {
-      const crossing = this.cross(i, y, p.y, prev.y, dy, speed, t, band);
+      const crossing = this.cross(i, y, p, prev, speed, t, band);
       if (crossing) out.push(crossing);
     });
     this.prev = p;
     this.prevT = t;
     return out.sort((a, b) => a.frac - b.frac);
+  }
+
+  /**
+   * Strings the fingertip is pressing right now: it has crossed the string's line but not yet
+   * pushed past the release band, so the string is bent under the finger and about to snap.
+   */
+  touching(p: Point | null, ys: readonly number[], h: number): number[] {
+    if (!p || this.side.length !== ys.length) return [];
+    const band = this.opts.hysteresis * h;
+    return ys.flatMap((line, i) => {
+      const d = p.y - line;
+      const armed = this.side[i] ?? UNKNOWN;
+      return armed !== UNKNOWN && Math.sign(d) === -armed && Math.abs(d) <= band ? [i] : [];
+    });
+  }
+
+  /** Release distance in px: how far a string bends before it snaps off the finger. */
+  releaseBand(h: number): number {
+    return this.opts.hysteresis * h;
   }
 
   private arm(p: Point, t: number, ys: readonly number[], band: number): Crossing[] {
@@ -64,8 +82,8 @@ export class StrumDetector {
     return [];
   }
 
-  private cross(i: number, line: number, y: number, prevY: number, dy: number, speed: number, t: number, band: number): Crossing | null {
-    const now = sideOf(y, line, band);
+  private cross(i: number, line: number, p: Point, prev: Point, speed: number, t: number, band: number): Crossing | null {
+    const now = sideOf(p.y, line, band);
     const was = this.side[i] ?? UNKNOWN;
     if (now === UNKNOWN || now === was) return null;
     this.side[i] = now;
@@ -73,8 +91,10 @@ export class StrumDetector {
     const isCoolingDown = t - (this.lastFire[i] ?? -Infinity) < this.opts.cooldown;
     if (was === UNKNOWN || isTooSlow || isCoolingDown) return null;
     this.lastFire[i] = t;
-    const frac = dy === 0 ? 1 : clamp((line - prevY) / dy, 0, 1);
-    return { string: i, frac, speed, dir: now === BELOW ? StrumDirection.down : StrumDirection.up };
+    const dy = p.y - prev.y;
+    const frac = dy === 0 ? 1 : clamp((line - prev.y) / dy, 0, 1);
+    const x = prev.x + (p.x - prev.x) * frac;
+    return { string: i, x, frac, speed, dir: now === BELOW ? StrumDirection.down : StrumDirection.up };
   }
 }
 

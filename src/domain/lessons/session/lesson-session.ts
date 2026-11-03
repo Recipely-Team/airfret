@@ -1,4 +1,5 @@
 import type { Song } from '@domain/lessons/catalog/song';
+import { parseChordSymbol } from '@domain/music/chords/chord-symbol';
 import type { SongChart } from '@domain/lessons/chart/song-chart';
 import type { Target } from '@domain/lessons/chart/target';
 import { Grade } from '@domain/lessons/session/grade';
@@ -161,5 +162,8 @@ export class LessonSession {
 }
 
 function matches(target: Target, played: PlayedInput): boolean {
-  return target.chord !== undefined ? target.chord === played.chord : target.midi === played.midi;
+  if (target.chord === undefined) return target.midi === played.midi;
+  if (!played.recognized) return target.chord === played.chord;
+  const want = parseChordSymbol(target.chord);
+  return want.root === played.recognized.root && want.quality === played.recognized.quality;
 }

@@ -1,0 +1,40 @@
+/**
+ * Recommended fretting finger per string, low E → high e, matching `CHORD_SHAPES`:
+ * 1 index, 2 middle, 3 ring, 4 pinky; 0 = open; null = not played.
+ * Where finger 1 holds several strings on one fret, it's a barre.
+ */
+export const CHORD_FINGERS: Readonly<Record<string, readonly (number | null)[]>> = {
+  C: [null, 3, 2, 0, 1, 0],
+  Cmaj7: [null, 3, 2, 0, 0, 0],
+  C7: [null, 3, 2, 4, 1, 0],
+  Cadd9: [null, 2, 1, 0, 3, 0],
+  D: [null, null, 0, 1, 3, 2],
+  Dm: [null, null, 0, 2, 3, 1],
+  D7: [null, null, 0, 2, 1, 3],
+  Dsus4: [null, null, 0, 1, 3, 4],
+  E: [0, 2, 3, 1, 0, 0],
+  Em: [0, 2, 3, 0, 0, 0],
+  E7: [0, 2, 0, 1, 0, 0],
+  Em7: [0, 1, 0, 0, 0, 0],
+  F: [1, 3, 4, 2, 1, 1],
+  Fmaj7: [null, null, 3, 2, 1, 0],
+  G: [2, 1, 0, 0, 0, 3],
+  G7: [3, 2, 0, 0, 0, 1],
+  A: [null, 0, 1, 2, 3, 0],
+  Am: [null, 0, 2, 3, 1, 0],
+  A7: [null, 0, 2, 0, 3, 0],
+  Am7: [null, 0, 2, 0, 1, 0],
+  Asus2: [null, 0, 1, 2, 0, 0],
+  B7: [null, 2, 1, 3, 0, 4],
+  Bm: [null, 1, 3, 4, 2, 1],
+  'F#m': [1, 3, 4, 1, 1, 1],
+  'C#m': [null, 1, 3, 4, 2, 1],
+  Bb: [null, 1, 2, 3, 4, 1],
+  E5: [0, 1, 2, null, null, null],
+  A5: [null, 0, 1, 2, null, null],
+  D5: [null, null, 0, 1, 3, null],
+  G5: [1, 3, 4, null, null, null],
+  C5: [null, 1, 3, 4, null, null],
+  F5: [1, 3, 4, null, null, null],
+  B5: [null, 1, 3, 4, null, null],
+};

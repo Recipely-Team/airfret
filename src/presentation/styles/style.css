@@ -37,7 +37,7 @@ button, select, input { font: inherit; color: inherit; }
   height: 100%;
   object-fit: cover;
   transform: scaleX(-1);
-  filter: brightness(var(--cam, 0.55)) saturate(0.75);
+  filter: brightness(calc(var(--cam, 0.55) * 0.7)) saturate(0.6) blur(1px);
 }
 
 #stage { position: absolute; inset: 0; }
@@ -169,12 +169,31 @@ input[type='checkbox'] { accent-color: var(--accent); width: 16px; height: 16px;
 .dots .off { color: rgba(236, 232, 225, 0.2); }
 .group-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; padding: 14px 10px 4px; }
 .lesson-opts { border-top: 1px solid var(--line); padding: 14px 20px 20px; display: grid; gap: 10px; }
-.opt { display: flex; justify-content: space-between; align-items: center; }
+.opt { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.song .step { color: var(--accent); font-weight: 600; margin-right: 8px; }
+.song .done { color: var(--accent); }
+
+/* Lesson intro */
+.card.intro { width: min(640px, 100%); text-align: left; max-height: calc(100vh - 32px); overflow-y: auto; }
+.intro-chords { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 6px; }
+.intro-chords figure { margin: 0; background: rgba(236, 232, 225, 0.04); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px 6px; text-align: center; }
+.intro-chords figcaption { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+.intro-tips { margin: 10px 0 14px; padding-left: 18px; color: var(--muted); display: grid; gap: 5px; }
+.mode-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0 14px; }
+.mode-card { text-align: left; border: 1px solid var(--line-strong); border-radius: 10px; background: transparent; padding: 10px 12px; cursor: pointer; }
+.mode-card strong { display: block; font-weight: 600; margin-bottom: 3px; }
+.mode-card span { color: var(--muted); font-size: 12.5px; }
+.mode-card[aria-checked='true'] { border-color: var(--accent); background: rgba(224, 164, 88, 0.08); }
+.intro-row { display: flex; gap: 22px; flex-wrap: wrap; }
+.mix { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
+.mix input { width: 72px; }
+.tour-bar { position: absolute; top: 188px; left: 50%; transform: translateX(-50%); z-index: 4; display: flex; gap: 6px; }
+@media (max-width: 700px) { .mode-cards { grid-template-columns: 1fr; } }
 
 /* Lesson HUD */
 .lesson-bar {
   position: absolute;
-  top: 160px; left: 50%;
+  top: 190px; left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;

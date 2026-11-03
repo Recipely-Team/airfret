@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PlayMode } from '@domain/instruments/play-mode';
 import { SONGS } from '@domain/lessons/catalog/song-catalog';
 import { parseSong } from '@domain/lessons/chart/parse-song';
-import { knownChord } from '@domain/music/chord-voicing';
+import { knownChord } from '@domain/music/chords/chord-voicing';
 import { findPosition } from '@domain/music/find-position';
 import { BASS_TUNING, GUITAR_TUNING } from '@domain/music/tunings';
 
