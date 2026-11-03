@@ -5,6 +5,8 @@ export interface LessonOptions {
   /** Stop at each target until it is played correctly. */
   readonly shouldWait: boolean;
   readonly isEasy: boolean;
+  /** A guide guitarist plays every target (shadow mode). */
+  readonly hasGuide: boolean;
   readonly hasDrums: boolean;
   /** Seconds subtracted from input times (camera + processing delay). */
   readonly latency: number;

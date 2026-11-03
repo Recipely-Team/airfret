@@ -4,13 +4,14 @@ import { SEMITONES_PER_OCTAVE } from '@domain/music/note-names';
 /** Proportions of the screen the instrument occupies. */
 const Proportion = {
   centerY: 0.6,
-  spreadOfHeight: 0.17,
-  spreadOfWidth: 0.12,
-  nutTaper: 0.82,
-  nutX: 0.05,
-  neckEndX: 0.57,
-  strumX0: 0.62,
-  strumX1: 0.95,
+  spreadOfHeight: 0.12,
+  spreadOfWidth: 0.09,
+  nutTaper: 0.8,
+  nutX: 0.1,
+  neckEndX: 0.55,
+  strumX0: 0.58,
+  /** The bridge: strings end here. */
+  strumX1: 0.86,
   /** Share of real (12-TET) fret spacing; the rest is even spacing so high frets stay hittable. */
   realSpacing: 0.55,
 } as const;

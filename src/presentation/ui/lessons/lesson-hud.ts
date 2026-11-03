@@ -1,16 +1,24 @@
+import type { SettingsStore } from '@application/settings/settings-store';
 import type { LessonSession } from '@domain/lessons/session/lesson-session';
 import { byId } from '@presentation/ui/dom';
 
 const PERCENT = 100;
 
-/** The pill under the timeline: title, progress, accuracy, streak and a stop button. */
+/** The pill under the coach: title, progress, accuracy, streak, guide/me volume, stop. */
 export class LessonHud {
-  constructor(onStop: () => void) {
+  constructor(store: SettingsStore, onStop: () => void) {
     byId('lessonStop').onclick = onStop;
+    const guide = byId<HTMLInputElement>('guideVolume');
+    const me = byId<HTMLInputElement>('playerVolume');
+    guide.value = String(store.value.guideVolume);
+    me.value = String(store.value.playerVolume);
+    guide.oninput = () => store.update({ guideVolume: Number(guide.value) });
+    me.oninput = () => store.update({ playerVolume: Number(me.value) });
   }
 
-  show(title: string): void {
+  show(title: string, hasGuide: boolean): void {
     byId('lessonTitle').textContent = title;
+    byId('mixGuide').hidden = !hasGuide;
     byId('lessonBar').hidden = false;
   }
 

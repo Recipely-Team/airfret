@@ -13,6 +13,16 @@ ready, open a GitHub issue and link it here.
 Wrap the web build with Tauri for a dock icon, offline use and no browser chrome. The camera
 permission prompt moves to macOS; the WASM model and worklet already load from local files.
 
+## Solid-body shapes — `idea`
+Electric and bass bodies reuse the acoustic profile; give them double cutaways (horns) so they read as electrics at a glance.
+
+## Pressing vs hovering — `idea`
+In free mode a fingertip over the neck counts as pressing. Use landmark depth (tip z relative to the knuckle)
+to tell a lifted finger from a pressing one; needs per-camera calibration.
+
+## Drum lessons — `idea`
+Groove charts (rock, shuffle, half-time) with the same coach, wait mode and shadow guide as the guitar lessons.
+
 ## Calibration — `idea`
 Measure camera + audio latency with a tap-along test instead of a slider, and let the player drag
 the instrument's position and size to fit how they sit.

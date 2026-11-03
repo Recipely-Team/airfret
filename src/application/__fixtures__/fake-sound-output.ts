@@ -1,13 +1,19 @@
 import type { Result } from '@core/result/result';
 import { ok } from '@core/result/result-factories';
+import type { DrumHitRequest } from '@domain/audio/drum-hit-request';
 import type { DrumKind } from '@domain/audio/drum-kind';
+import type { PluckRequest } from '@domain/audio/pluck-request';
+import type { RetuneRequest } from '@domain/audio/retune-request';
+import type { Voice } from '@domain/audio/voice';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
 import type { Instrument } from '@domain/instruments/instrument';
 
 /** Records every sound request instead of making noise. */
 export class FakeSoundOutput implements SoundOutputInterface {
   now = 0;
-  readonly plucks: { string: number; midi: number; amp: number; when: number; isMuted: boolean }[] = [];
+  readonly plucks: PluckRequest[] = [];
+  readonly retunes: RetuneRequest[] = [];
+  readonly volumes: Partial<Record<Voice, number>> = {};
   readonly damps: number[] = [];
   readonly chucks: number[] = [];
   readonly clicks: { when: number; isAccent: boolean }[] = [];
@@ -20,8 +26,16 @@ export class FakeSoundOutput implements SoundOutputInterface {
   setInstrument(_instrument: Instrument): void {}
   setVolume(_volume: number): void {}
 
-  pluck(string: number, midi: number, amp: number, when: number, isMuted: boolean): void {
-    this.plucks.push({ string, midi, amp, when, isMuted });
+  pluck(request: PluckRequest): void {
+    this.plucks.push(request);
+  }
+
+  retune(request: RetuneRequest): void {
+    this.retunes.push(request);
+  }
+
+  setVoiceVolume(voice: Voice, volume: number): void {
+    this.volumes[voice] = volume;
   }
 
   damp(string: number): void {
@@ -30,6 +44,28 @@ export class FakeSoundOutput implements SoundOutputInterface {
 
   chuck(amp: number): void {
     this.chucks.push(amp);
+  }
+
+  readonly touches: number[] = [];
+  fretNoises = 0;
+
+  touch(string: number): void {
+    this.touches.push(string);
+  }
+
+  fretNoise(): void {
+    this.fretNoises++;
+  }
+
+  readonly drumHits: DrumHitRequest[] = [];
+  chokes = 0;
+
+  hitDrum(request: DrumHitRequest): void {
+    this.drumHits.push(request);
+  }
+
+  chokeHiHat(): void {
+    this.chokes++;
   }
 
   click(when: number, isAccent: boolean): void {

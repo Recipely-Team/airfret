@@ -1,9 +1,18 @@
 import { assignHands } from '@application/play/assign-hands';
-import type { PlayEvent } from '@application/play/play-event';
-import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
+import { GestureCollector } from '@application/play/gesture-collector';
+import { LegatoTracker } from '@application/play/legato-tracker';
 import { chordSlotSelection } from '@application/play/chord-slot-selection';
-import { inStrumArea, onNeck, strumStringYs, fretAt } from '@domain/fretboard/neck-geometry';
+import type { PlayEvent } from '@application/play/play-event';
+import { Voice } from '@domain/audio/voice';
+import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
 import type { FretboardLayout } from '@domain/fretboard/fretboard-layout';
+import type { Fretting } from '@domain/fretboard/fretting';
+import { mapFretting } from '@domain/fretboard/map-fretting';
+import { fingerStrike } from '@domain/gesture/finger-strike';
+import { isPalmMuting } from '@domain/gesture/palm-mute';
+import { StrikeSurface } from '@domain/gesture/strike-surface';
+import { fretAt, inStrumArea, onNeck, strumStringYs } from '@domain/fretboard/neck-geometry';
+import { pluckPosition } from '@domain/fretboard/pluck-position';
 import type { Point } from '@domain/fretboard/point';
 import type { Crossing } from '@domain/gesture/crossing';
 import { OneEuroFilter } from '@domain/gesture/one-euro-filter';
@@ -12,7 +21,8 @@ import { StrumDirection } from '@domain/gesture/strum-direction';
 import { speedToAmp } from '@domain/gesture/strum-velocity';
 import type { Instrument } from '@domain/instruments/instrument';
 import { PlayMode } from '@domain/instruments/play-mode';
-import { chordNotes } from '@domain/music/chord-voicing';
+import { CHORD_SHAPES } from '@domain/music/chords/chord-shapes';
+import { chordNotes } from '@domain/music/chords/chord-voicing';
 import { StrumFilter } from '@domain/settings/strum-filter';
 import { HandLandmark } from '@domain/tracking/hand-landmark';
 import { extendedFingers } from '@domain/tracking/hand-pose';
@@ -39,15 +49,18 @@ interface PlayerSetup {
   readonly mode: PlayMode;
   readonly chords: readonly string[];
   readonly strumFilter: StrumFilter;
+  /** Capo fret; the tuning passed in already includes it. */
+  readonly capo: number;
 }
 
 /**
  * **Player** — turns tracked hands into sound.
  *
  * @remarks
- * - The fretting hand selects a chord box (chord mode) or a fret (note mode); a fist mutes.
- * - The strumming index fingertip plays every string it crosses, louder the faster it moves.
- * - Exposes its state read-only for the renderer: points, hands, per-string energy.
+ * - The fretting hand selects a chord (chord mode) or a fret (note mode); a fist mutes; changing chord squeaks the wound strings.
+ * - The strumming fingertip bends each string it presses and plucks it when it slips off; where along the string it plucks sets the tone.
+ * - A fingertip landing on a ringing string stops it, like a real pick does.
+ * - Exposes its state read-only for the renderer: points, hands, touched strings, per-string energy.
  */
 export class Player {
   layout!: FretboardLayout;
@@ -61,9 +74,26 @@ export class Player {
   strumPoint: Point | null = null;
   fretHand: readonly Point[] | null = null;
   strumHand: readonly Point[] | null = null;
+  /** Strings currently bent under the strumming fingertip. */
+  touching: readonly number[] = [];
+  /** Release distance in px — how far a string bends before it snaps. */
+  releaseBand = 0;
+  /** Free mode: what the fretting hand holds. */
+  fretting: Fretting | null = null;
+  /** Free mode: name of the last chord strummed. */
+  lastChordName = '';
+  /** Part of the finger striking the strings right now. */
+  strike: StrikeSurface = StrikeSurface.nail;
+  isPalmMuted = false;
+  capo = 0;
   readonly energy: number[] = [];
   readonly trail: { p: Point; t: number }[] = [];
   onEvent: (e: PlayEvent) => void = () => {};
+  private readonly gestures = new GestureCollector((e) => {
+    if (e.chord) this.lastChordName = e.chord;
+    this.onEvent(e);
+  });
+  private readonly legato: LegatoTracker;
 
   private strumFilter: StrumFilter = StrumFilter.both;
   private manualFret: number | null = null;
@@ -75,19 +105,35 @@ export class Player {
   private lastCross = { when: -1, dir: 0 };
   private lastFrame = 0;
 
-  constructor(private readonly sound: SoundOutputInterface) {}
+  constructor(private readonly sound: SoundOutputInterface) {
+    this.legato = new LegatoTracker(sound);
+  }
 
   get chord(): string | undefined {
     return this.chords[this.slot];
   }
 
+  /** Fret (counted from the nut) each string is stopped at right now, 0 = open; for tone and drawing. */
+  stringFret(string: number): number {
+    if (this.mode === PlayMode.free) return this.fretting?.frets[string] ?? 0;
+    if (this.mode === PlayMode.note) return this.fret;
+    const shapeFret = (this.chord ? CHORD_SHAPES[this.chord]?.[string] : 0) ?? 0;
+    return shapeFret > 0 ? shapeFret + this.capo : this.capo;
+  }
+
+  /** Free mode works in absolute frets; the tuning already includes the capo. */
+  private soundingFret = (fret: number): number => (fret > this.capo ? fret - this.capo : 0);
+
   configure(setup: PlayerSetup): void {
     if (this.stringCount !== setup.layout.strings) this.strum.reset();
     this.stringCount = setup.layout.strings;
-    ({ layout: this.layout, instrument: this.instrument, mode: this.mode, chords: this.chords, strumFilter: this.strumFilter } = setup);
+    ({ layout: this.layout, instrument: this.instrument, mode: this.mode, chords: this.chords, strumFilter: this.strumFilter, capo: this.capo } = setup);
+    this.legato.reset(setup.layout.strings);
+    this.fretting = null;
     if (this.slot >= this.chords.length) this.slot = 0;
     this.energy.length = setup.layout.strings;
     this.energy.fill(0);
+    this.releaseBand = this.strum.releaseBand(setup.layout.h);
   }
 
   /** One camera frame of hands in screen px. `canStrum` is false while the mouse strums instead. */
@@ -95,7 +141,7 @@ export class Player {
     const { fret, strum } = assignHands(hands, this.layout);
     this.fretHand = fret;
     this.strumHand = strum;
-    this.updateFretHand(fret, t);
+    this.updateFretHand(fret, t, audioNow);
     if (canStrum) this.feedStrum(this.strumTip(strum, t), t, audioNow);
   }
 
@@ -105,7 +151,7 @@ export class Player {
     this.feedStrum(p, t, audioNow);
   }
 
-  /** Keyboard selection: chord box in chord mode, fret in note mode. */
+  /** Keyboard selection: chord in chord mode, fret in note mode. */
   select(index: number): void {
     if (this.mode === PlayMode.chord) {
       if (index < this.chords.length) this.slot = index;
@@ -115,12 +161,13 @@ export class Player {
     }
   }
 
-  private updateFretHand(hand: readonly Point[] | null, t: number): void {
+  private updateFretHand(hand: readonly Point[] | null, t: number, audioNow: number): void {
     const tip = hand?.[HandLandmark.indexTip];
     const palm = hand?.[HandLandmark.middleMcp];
     if (!hand || !tip || !palm) {
       this.fretSmooth.forEach((f) => f.reset());
       this.fretPoint = null;
+      this.fretting = null;
       this.fistFrames = 0;
       this.isMuted = false;
       if (this.mode === PlayMode.note) this.fret = this.manualFret ?? 0;
@@ -133,8 +180,15 @@ export class Player {
     this.isMuted = this.fistFrames >= FIST_FRAMES;
     if (this.isMuted && !wasMuted) this.sound.damp(-1, 0);
     if (this.isMuted) return;
+    if (this.mode === PlayMode.free) {
+      this.fretting = mapFretting(this.layout, hand, this.fretting);
+      this.legato.update(this.fretting, this.instrument.tuning, this.soundingFret, this.energy, audioNow);
+      return;
+    }
+    const before = this.mode === PlayMode.chord ? this.slot : this.fret;
     if (this.mode === PlayMode.chord) this.slot = chordSlotSelection(this.layout, this.chords.length, p, this.slot);
     else this.fret = fretAt(this.layout, p);
+    if ((this.mode === PlayMode.chord ? this.slot : this.fret) !== before) this.sound.fretNoise(audioNow);
   }
 
   private strumTip(hand: readonly Point[] | null, t: number): Point | null {
@@ -154,31 +208,59 @@ export class Player {
     this.lastFrame = t;
     if (p) this.trail.push({ p, t });
     while (this.trail.length && t - (this.trail[0]?.t ?? t) > Timing.trail) this.trail.shift();
-    const crossings = this.strum.update(p, t, strumStringYs(this.layout), this.layout.h);
+    const ys = strumStringYs(this.layout);
+    this.isPalmMuted = isPalmMuting(this.layout, this.strumHand);
+    const crossings = this.strum.update(p, t, ys, this.layout.h);
     for (const c of crossings) this.play(c, audioNow + Timing.scheduleLead + c.frac * Math.min(dt, Timing.maxSpread));
+    const touching = this.strum.touching(p, ys, this.layout.h);
+    for (const s of touching) if (!this.touching.includes(s)) this.sound.touch(s, audioNow);
+    this.touching = touching;
+    this.gestures.tick(t);
   }
 
   private play(c: Crossing, when: number): void {
     if (this.strumFilter === StrumFilter.down && c.dir === StrumDirection.up) return;
-    const tuning = this.instrument.tuning;
-    const open = tuning[c.string] ?? 0;
-    const midi = this.mode === PlayMode.chord
-      ? (this.chord ? chordNotes(this.chord, tuning)[c.string] ?? null : open)
-      : open + this.fret;
+    // A tracked hand must strike with nail or pad; the mouse always plays.
+    this.strike = this.strumHand ? fingerStrike(this.strumHand, c.dir, !this.layout.isLefty) : StrikeSurface.nail;
+    if (this.strike === StrikeSurface.none) return;
+    const midi = this.noteOf(c.string);
     const isNewGesture = when - this.lastCross.when > Timing.gestureGap || c.dir !== this.lastCross.dir;
     this.lastCross = { when, dir: c.dir };
+    const amp = speedToAmp(c.speed);
     if (midi !== null) {
-      const amp = speedToAmp(c.speed);
-      this.sound.pluck(c.string, midi, amp, when, this.isMuted);
+      const position = pluckPosition(this.layout, c.x, this.stringFret(c.string));
+      this.sound.pluck({
+        string: c.string, midi, amp, when, isMuted: this.isMuted, position, voice: Voice.player,
+        attack: this.strike, isPalmMuted: this.isPalmMuted,
+      });
       if (this.isMuted && isNewGesture) this.sound.chuck(amp, when);
-      this.energy[c.string] = Math.max(this.energy[c.string] ?? 0, this.isMuted ? amp * MUTED_ENERGY : amp);
+      const isDamped = this.isMuted || this.isPalmMuted;
+      this.energy[c.string] = Math.max(this.energy[c.string] ?? 0, isDamped ? amp * MUTED_ENERGY : amp);
     }
-    if (this.mode === PlayMode.note && midi !== null) this.onEvent({ when, midi, isMuted: this.isMuted });
-    else if (this.mode === PlayMode.chord && isNewGesture) this.emitChord(when);
+    this.report(c, when, amp, midi, isNewGesture);
   }
 
-  private emitChord(when: number): void {
-    const chord = this.isMuted ? undefined : this.chord;
-    this.onEvent(chord === undefined ? { when, isMuted: this.isMuted } : { when, chord, isMuted: this.isMuted });
+  /** Pitch the string sounds when plucked now, or null if the chord shape leaves it out. */
+  private noteOf(string: number): number | null {
+    const tuning = this.instrument.tuning;
+    const open = tuning[string] ?? 0;
+    if (this.mode === PlayMode.free) {
+      const fret = this.fretting?.frets[string] ?? 0;
+      return open + this.soundingFret(fret) + (this.fretting?.bends[string] ?? 0);
+    }
+    if (this.mode === PlayMode.note) return open + this.fret;
+    return this.chord ? chordNotes(this.chord, tuning)[string] ?? null : open;
+  }
+
+  private report(c: Crossing, when: number, amp: number, midi: number | null, isNewGesture: boolean): void {
+    const base = { when, isMuted: this.isMuted, dir: c.dir, amp };
+    if (this.mode === PlayMode.free) {
+      this.gestures.add(this.lastFrame, when, c.dir, amp, this.isMuted, midi === null ? null : Math.round(midi), isNewGesture);
+    } else if (this.mode === PlayMode.note && midi !== null) {
+      this.onEvent({ ...base, midi });
+    } else if (this.mode === PlayMode.chord && isNewGesture) {
+      const chord = this.isMuted ? undefined : this.chord;
+      this.onEvent(chord === undefined ? base : { ...base, chord });
+    }
   }
 }

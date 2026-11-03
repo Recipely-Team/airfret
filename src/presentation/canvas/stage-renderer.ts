@@ -1,34 +1,49 @@
+import type { DrumPlayer } from '@application/drums/drum-player';
 import type { Player } from '@application/play/player';
+import type { PedalBindings } from '@domain/input/pedal-bindings';
+import { paintKit } from '@presentation/canvas/drums/paint-kit';
+import { paintPedals } from '@presentation/canvas/drums/paint-pedals';
+import { paintSticks } from '@presentation/canvas/drums/paint-sticks';
+import type { TourSession } from '@application/tour/tour-session';
 import type { LessonSession } from '@domain/lessons/session/lesson-session';
+import { GuitarArt } from '@presentation/canvas/guitar/guitar-art';
+import { lookFor } from '@presentation/canvas/guitar/guitar-looks';
 import { FONT, rgba, Palette } from '@presentation/canvas/palette';
 import type { PaintContext } from '@presentation/canvas/paint-context';
-import { paintBody } from '@presentation/canvas/painters/paint-body';
-import { paintChordDiagram } from '@presentation/canvas/painters/paint-chord-diagram';
-import { paintHands } from '@presentation/canvas/painters/paint-hands';
-import { paintHighway } from '@presentation/canvas/painters/paint-highway';
-import { paintNeck } from '@presentation/canvas/painters/paint-neck';
-import { paintStrings } from '@presentation/canvas/painters/paint-strings';
+import { HandCutout } from '@presentation/canvas/painters/instrument/hand-cutout';
+import { paintChordCard } from '@presentation/canvas/painters/instrument/paint-chord-card';
+import { paintChordChips } from '@presentation/canvas/painters/instrument/paint-chord-chips';
+import { paintFingering } from '@presentation/canvas/painters/instrument/paint-fingering';
+import { paintPick } from '@presentation/canvas/painters/instrument/paint-pick';
+import { paintStrings } from '@presentation/canvas/painters/instrument/paint-strings';
+import { paintCoach } from '@presentation/canvas/painters/lesson/paint-coach';
+import { paintStrumCue } from '@presentation/canvas/painters/lesson/paint-strum-cue';
+import { paintTour } from '@presentation/canvas/painters/tour/paint-tour';
 
 const MAX_DPR = 2;
 const MAX_FRAME = 0.05;
 const STRING_DECAY_PER_SECOND = 3.2;
 /** A target this many beats away is too far ahead to highlight a note. */
 const TARGET_LOOKAHEAD_BEATS = 2.5;
-const HINT_GAP_OF_HEIGHT = 0.17;
+const HINT_GAP_OF_HEIGHT = 0.2;
 
 /**
- * **StageRenderer** — draws one frame of the instrument overlay on the canvas.
+ * **StageRenderer** — draws one frame.
  *
  * @remarks
- * - Each layer is a painter in `painters/`; this class owns sizing, timing and order.
+ * Order matters: guitar art → finger placement → strings → the player's real hands (cut from the
+ * camera, so fingers sit on the strings) → labels, pick, chord chart → lesson coach and cues.
  */
 export class StageRenderer {
   private phase = 0;
   private lastT = 0;
+  private readonly art = new GuitarArt();
+  private readonly hands = new HandCutout();
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
     private readonly ctx: CanvasRenderingContext2D,
+    private readonly video: HTMLVideoElement,
   ) {}
 
   resize(w: number, h: number): void {
@@ -40,33 +55,44 @@ export class StageRenderer {
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  draw(player: Player, lesson: LessonSession | null, audioNow: number, now: number, hint: string | null): void {
+  /** Drum mode frame: kit, sticks, the real hands holding them, and the pedals. */
+  drums(drums: DrumPlayer, bindings: PedalBindings, now: number, hint: string | null, brightness: number): void {
+    const w = this.canvas.clientWidth || window.innerWidth;
+    const h = this.canvas.clientHeight || window.innerHeight;
+    this.ctx.clearRect(0, 0, w, h);
+    paintKit(this.ctx, drums, now, h);
+    paintSticks(this.ctx, drums.sticks);
+    this.hands.draw(this.ctx, this.video, drums.hands, w, h, brightness);
+    paintPedals(this.ctx, drums, bindings, w, h);
+    if (hint) {
+      this.ctx.font = `400 15px ${FONT}`;
+      this.ctx.textAlign = 'center';
+      this.ctx.fillStyle = rgba(Palette.ink, 0.7);
+      this.ctx.fillText(hint, w / 2, h * 0.16);
+    }
+  }
+
+  draw(player: Player, lesson: LessonSession | null, tour: TourSession | null, audioNow: number, now: number, hint: string | null, brightness: number): void {
     const dt = this.lastT ? Math.min(MAX_FRAME, now - this.lastT) : 0;
     this.lastT = now;
     this.phase += dt;
     player.energy.forEach((e, i) => (player.energy[i] = e * Math.exp(-dt * STRING_DECAY_PER_SECOND)));
-    const pc: PaintContext = { ctx: this.ctx, player, lesson, audioNow, now, phase: this.phase, target: targetOf(lesson, audioNow) };
     const l = player.layout;
+    const pc: PaintContext = { ctx: this.ctx, player, look: lookFor(player.instrument.chain), lesson, audioNow, now, phase: this.phase, target: targetOf(lesson, audioNow) };
     this.ctx.clearRect(0, 0, l.w, l.h);
-    this.shade(pc);
-    [paintBody, paintNeck, paintStrings, paintHands, paintHighway, paintChordDiagram].forEach((paint) => paint(pc));
+    this.art.draw(this.ctx, l, player.instrument.chain);
+    paintFingering(pc);
+    paintStrings(pc);
+    const hands = [player.fretHand, player.strumHand].filter((h): h is NonNullable<typeof h> => h !== null);
+    this.hands.draw(this.ctx, this.video, hands, l.w, l.h, brightness);
+    [paintChordChips, paintPick, paintChordCard, paintCoach, paintStrumCue].forEach((paint) => paint(pc));
+    if (tour) paintTour(pc, tour);
     if (hint) {
       this.ctx.font = `400 15px ${FONT}`;
       this.ctx.textAlign = 'center';
-      this.ctx.fillStyle = rgba(Palette.ink, 0.6);
+      this.ctx.fillStyle = rgba(Palette.ink, 0.7);
       this.ctx.fillText(hint, l.w / 2, l.centerY + l.spreadBody + l.h * HINT_GAP_OF_HEIGHT);
     }
-  }
-
-  /** Calms the camera image behind the instrument so the strings read. */
-  private shade({ ctx, player }: PaintContext): void {
-    const l = player.layout;
-    const g = ctx.createLinearGradient(0, l.centerY - l.h * 0.35, 0, l.centerY + l.h * 0.4);
-    g.addColorStop(0, rgba(Palette.shade, 0));
-    g.addColorStop(0.5, rgba(Palette.shade, 0.35));
-    g.addColorStop(1, rgba(Palette.shade, 0));
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, l.w, l.h);
   }
 }
 

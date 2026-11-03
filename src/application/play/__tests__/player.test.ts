@@ -16,7 +16,7 @@ function setup(mode: PlayMode, strumFilter: StrumFilter = StrumFilter.both, inst
   const player = new Player(sound);
   const inst = instrumentById(instrument);
   const layout = computeLayout(W, H, inst.tuning.length, false, inst.maxFret);
-  player.configure({ layout, instrument: inst, mode, chords: ['G', 'C', 'D', 'Em'], strumFilter });
+  player.configure({ layout, instrument: inst, mode, chords: ['G', 'C', 'D', 'Em'], strumFilter, capo: 0 });
   const events: PlayEvent[] = [];
   player.onEvent = (e) => events.push(e);
   const ys = strumStringYs(layout);

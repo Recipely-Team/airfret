@@ -5,37 +5,33 @@ import type { Song } from '@domain/lessons/catalog/song';
 import { SONGS } from '@domain/lessons/catalog/song-catalog';
 import { t } from '@presentation/i18n/translator';
 import { byId } from '@presentation/ui/dom';
-import { renderSegmented } from '@presentation/ui/controls/segmented-control';
 
 const MAX_LEVEL = 3;
-const TEMPOS = [0.6, 0.8, 1];
 const PERCENT = 100;
+/** A course lesson counts as passed at this accuracy. */
+const PASSED = 0.7;
 
 /**
- * **LessonsDrawer** — song list grouped by chords / melody, plus tempo, mode, strumming and drum options.
+ * **LessonsDrawer** — the beginner course first (numbered, ticked when passed), then songs,
+ * melodies and bass lines. Picking one opens its intro card.
  */
 export class LessonsDrawer {
-  private selected: Song = SONGS[0] as Song;
   private readonly el = byId('lessons');
 
   constructor(
     private readonly store: SettingsStore,
-    private readonly onStart: (song: Song) => void,
+    private readonly onPick: (song: Song) => void,
+    onTour: () => void,
+    onClose: () => void,
   ) {
-    byId('lessonsBtn').onclick = () => this.open();
-    byId('lessonsClose').onclick = () => this.close();
-    byId('lessonStart').onclick = () => onStart(this.selected);
-    const drums = byId<HTMLInputElement>('optDrums');
-    drums.checked = store.value.hasLessonDrums;
-    drums.onchange = () => store.update({ hasLessonDrums: drums.checked });
-  }
-
-  get song(): Song {
-    return this.selected;
-  }
-
-  select(song: Song): void {
-    this.selected = song;
+    byId('lessonsClose').onclick = () => {
+      this.close();
+      onClose();
+    };
+    byId('tourBtn').onclick = () => {
+      this.close();
+      onTour();
+    };
   }
 
   open(): void {
@@ -50,45 +46,39 @@ export class LessonsDrawer {
   render(): void {
     const list = byId('songList');
     list.replaceChildren();
-    for (const mode of Object.values(PlayMode)) {
+    const groups: [string, readonly Song[]][] = [
+      ['lesson.course', SONGS.filter((s) => s.course !== undefined)],
+      ['lesson.songs', SONGS.filter((s) => s.course === undefined && s.mode === PlayMode.chord)],
+      ['lesson.noteMode', SONGS.filter((s) => s.mode === PlayMode.note && s.instrument !== 'bass')],
+      ['lesson.bass', SONGS.filter((s) => s.instrument === 'bass')],
+    ];
+    for (const [key, songs] of groups) {
       const label = document.createElement('div');
       label.className = 'group-label';
-      label.textContent = t(mode === PlayMode.chord ? 'lesson.chordMode' : 'lesson.noteMode');
-      list.append(label, ...SONGS.filter((s) => s.mode === mode).map((s) => this.row(s)));
+      label.textContent = t(key);
+      list.append(label, ...songs.map((s) => this.row(s)));
     }
-    byId('optEasyRow').hidden = this.selected.mode !== PlayMode.chord;
-    this.renderOptions();
-  }
-
-  private renderOptions(): void {
-    const s = this.store.value;
-    renderSegmented(byId('optTempo'), TEMPOS.map((v) => ({ value: v, label: `${Math.round(v * PERCENT)}%` })), s.lessonTempo, (lessonTempo) => this.store.update({ lessonTempo }));
-    renderSegmented(byId('optWait'), [{ value: true, label: t('lesson.wait') }, { value: false, label: t('lesson.play') }], s.shouldLessonWait, (shouldLessonWait) => this.store.update({ shouldLessonWait }));
-    renderSegmented(byId('optEasy'), [{ value: true, label: t('lesson.easy') }, { value: false, label: t('lesson.full') }], s.isLessonEasy, (isLessonEasy) => this.store.update({ isLessonEasy }));
   }
 
   private row(song: Song): HTMLElement {
     const el = document.createElement('div');
     el.className = 'song';
     el.tabIndex = 0;
-    el.setAttribute('role', 'option');
-    el.setAttribute('aria-selected', String(song === this.selected));
-    const name = cell('name', song.title);
+    el.setAttribute('role', 'button');
+    const best = this.store.value.best[song.id];
+    const name = cell('name', '');
+    if (song.course !== undefined) name.append(cell(best !== undefined && best >= PASSED ? 'step done' : 'step', best !== undefined && best >= PASSED ? '✓' : String(song.course)));
+    name.append(document.createTextNode(song.title));
     const level = cell('meta', '');
     const dots = cell('dots', '●'.repeat(song.level));
     dots.append(cell('off', '●'.repeat(MAX_LEVEL - song.level)));
     level.append(dots);
     const meta = cell('meta wide', `${t(song.credit)} · ${song.bpm} BPM · ${t(instrumentById(song.instrument).name)}`);
-    const best = this.store.value.best[song.id];
     if (best !== undefined) meta.append(cell('best', ` · ${t('lesson.best')} ${Math.round(best * PERCENT)}%`));
     el.append(name, level, cell('about', t(song.about)), meta);
-    el.onclick = () => {
-      this.selected = song;
-      this.render();
-    };
-    el.ondblclick = () => this.onStart(song);
+    el.onclick = () => this.onPick(song);
     el.onkeydown = (e) => {
-      if (e.key === 'Enter') this.onStart(song);
+      if (e.key === 'Enter') this.onPick(song);
     };
     return el;
   }
