@@ -1,5 +1,6 @@
 import type { Failure } from '@core/failure/failure';
 import type { Result } from '@core/result/result';
+import type { DrumHitRequest } from '@domain/audio/drum-hit-request';
 import type { DrumKind } from '@domain/audio/drum-kind';
 import type { PluckRequest } from '@domain/audio/pluck-request';
 import type { RetuneRequest } from '@domain/audio/retune-request';
@@ -29,6 +30,10 @@ export interface SoundOutputInterface {
   touch(string: number, when: number): void;
   /** Fingers sliding over wound strings during a chord change. */
   fretNoise(when: number): void;
+  /** A drum-kit stroke or pedal. */
+  hitDrum(request: DrumHitRequest): void;
+  /** Stops a ringing open hi-hat (the cymbals close). */
+  chokeHiHat(when: number): void;
   click(when: number, isAccent: boolean): void;
   drum(kind: DrumKind, when: number, amp: number): void;
 }

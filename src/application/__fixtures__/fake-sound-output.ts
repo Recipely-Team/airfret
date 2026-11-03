@@ -1,5 +1,6 @@
 import type { Result } from '@core/result/result';
 import { ok } from '@core/result/result-factories';
+import type { DrumHitRequest } from '@domain/audio/drum-hit-request';
 import type { DrumKind } from '@domain/audio/drum-kind';
 import type { PluckRequest } from '@domain/audio/pluck-request';
 import type { RetuneRequest } from '@domain/audio/retune-request';
@@ -54,6 +55,17 @@ export class FakeSoundOutput implements SoundOutputInterface {
 
   fretNoise(): void {
     this.fretNoises++;
+  }
+
+  readonly drumHits: DrumHitRequest[] = [];
+  chokes = 0;
+
+  hitDrum(request: DrumHitRequest): void {
+    this.drumHits.push(request);
+  }
+
+  chokeHiHat(): void {
+    this.chokes++;
   }
 
   click(when: number, isAccent: boolean): void {

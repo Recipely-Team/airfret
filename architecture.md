@@ -78,6 +78,21 @@ Domain is grouped by what the code is *for*:
   tip passes the release band. Touching a ringing string stops it.
 - **Palm mute**: the strumming palm edge resting on the strings by the bridge shortens and darkens notes.
 
+## Drums
+
+- **Sticks** (`domain/drums/stick-from-hand.ts`): direction d = normalize(knuckles − wrist), grip between
+  the thumb IP joint and the index knuckle, tip = grip + d · 2.3 · |knuckles − wrist| (a 16" stick).
+- **Hits** (`domain/drums/hit-detector.ts`): each pad has a head line through its centre; a hit fires when
+  the tip crosses it downward inside the pad, with sub-frame timing and velocity 1 − e^(−v / v_full). A pad
+  re-arms only after the tip rebounds above it, so a resting stick doesn't retrigger.
+- **Articulation**: snare edge → rimshot, ride centre → bell, hi-hat open/closed from the pedal; closing a
+  ringing open hat chokes it.
+- **Sound** (`infrastructure/audio/drums/`): swept-sine kick + beater click; snare shell modes + wires;
+  pitch-dropping toms; cymbals from six inharmonic square oscillators through band filters.
+- **Pedals**: `PedalInputInterface` merges keyboard, mouse buttons, gamepads and Web MIDI. Bindings live in
+  settings (several per action, one action per input); `PedalRouter` maps inputs to kick / kick 2 /
+  hi-hat pedal. Defaults: Space, B, MIDI 36 kick; N, MIDI 35 second kick; left Shift, MIDI 44 hi-hat.
+
 ## Shadow mode
 
 `GuidePlayer` plays every lesson target on a separate **guide voice** (its own string bank and gain),

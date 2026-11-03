@@ -21,7 +21,8 @@
         <div class="seg" id="modes" role="radiogroup"></div>
         <select id="chordSet" class="select" aria-label="Chord set"></select>
         <div class="spacer"></div>
-        <button class="btn ghost" id="helpBtn" data-i18n="ui.help"></button>
+        <button class="btn ghost" id="pedalsBtn" data-i18n="pedals.title" hidden></button>
+        <button class="btn ghost" id="exploreBtn" data-i18n="explore.title"></button>
         <button class="btn" id="lessonsBtn" data-i18n="ui.lessons"></button>
         <button class="btn icon" id="settingsBtn" aria-label="Settings">
           <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="10" cy="10" r="2.6"/><path d="M10 1.8v2.4M10 15.8v2.4M1.8 10h2.4M15.8 10h2.4M4.2 4.2l1.7 1.7M14.1 14.1l1.7 1.7M4.2 15.8l1.7-1.7M14.1 5.9l1.7-1.7"/></svg>
@@ -47,6 +48,26 @@
         <label class="row col"><span data-i18n="ui.camera"></span><input type="range" id="brightness" min="0.15" max="1" step="0.01" /></label>
         <label class="row col"><span><span data-i18n="ui.latency"></span> <em id="latencyVal"></em></span><input type="range" id="latency" min="0" max="200" step="5" /></label>
         <div class="row"><span data-i18n="ui.language"></span><div class="seg small" id="langs"></div></div>
+      </div>
+
+      <div class="popover pedals" id="pedals" hidden>
+        <div class="drawer-head flat"><h3 data-i18n="pedals.title"></h3><button class="btn ghost" id="pedalsClose" data-i18n="ui.close"></button></div>
+        <p class="muted small" data-i18n="pedals.about"></p>
+        <div id="pedalsList"></div>
+        <div class="row"><span data-i18n="pedals.hihatMode"></span><div class="seg small" id="pedalsHat"></div></div>
+        <p class="status small" id="pedalsStatus"></p>
+        <div class="actions left">
+          <button class="btn small" id="pedalsMidi" data-i18n="pedals.midi"></button>
+          <button class="btn small ghost" id="pedalsReset" data-i18n="pedals.reset"></button>
+        </div>
+      </div>
+
+      <div class="overlay" id="explore" hidden>
+        <div class="card explore">
+          <div class="drawer-head flat"><h2 data-i18n="explore.title"></h2><button class="btn ghost" id="exploreClose" data-i18n="ui.close"></button></div>
+          <p class="muted" data-i18n="explore.intro"></p>
+          <div class="explore-grid" id="exploreGrid"></div>
+        </div>
       </div>
 
       <div class="popover help" id="help" hidden>

@@ -1,4 +1,6 @@
 import { PlayMode } from '@domain/instruments/play-mode';
+import { DEFAULT_PEDAL_BINDINGS } from '@domain/input/default-pedal-bindings';
+import { HiHatPedalMode } from '@domain/input/hihat-pedal-mode';
 import { LessonMode } from '@domain/lessons/session/lesson-mode';
 import type { Settings } from '@domain/settings/settings';
 import { StrumFilter } from '@domain/settings/strum-filter';
@@ -22,5 +24,8 @@ export const DEFAULT_SETTINGS: Settings = {
   guideVolume: 0.6,
   isLessonEasy: true,
   hasLessonDrums: false,
+  pedalBindings: DEFAULT_PEDAL_BINDINGS,
+  hihatMode: HiHatPedalMode.holdToOpen,
+  hasSeenExplore: false,
   best: {},
 };

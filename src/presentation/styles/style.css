@@ -259,3 +259,25 @@ input[type='checkbox'] { accent-color: var(--accent); width: 16px; height: 16px;
   .progress { width: 80px; }
   .popover.help { right: 16px; width: calc(100vw - 32px); }
 }
+
+/* Pedals */
+.popover.pedals { width: 420px; }
+.drawer-head.flat { padding: 0 0 6px; }
+.drawer-head.flat h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.pedal-row { display: grid; grid-template-columns: 110px 1fr auto; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.pedal-row strong { font-weight: 500; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { border: 1px solid var(--line-strong); background: rgba(236, 232, 225, 0.05); border-radius: 999px; padding: 2px 9px; font-size: 12px; cursor: pointer; }
+.chip:hover { border-color: var(--miss); }
+.btn.small { padding: 4px 10px; font-size: 12.5px; }
+.actions.left { justify-content: flex-start; margin-top: 8px; }
+
+/* Explore */
+.card.explore { width: min(960px, 100%); text-align: left; max-height: calc(100vh - 32px); overflow-y: auto; }
+.explore-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 14px; }
+.feature { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px 12px; display: flex; flex-direction: column; gap: 6px; background: rgba(236, 232, 225, 0.025); }
+.feature h4 { margin: 0; font-size: 15px; font-weight: 600; }
+.feature p { margin: 0; color: var(--muted); font-size: 13px; }
+.feature ol { margin: 2px 0 6px; padding-left: 18px; font-size: 13px; display: grid; gap: 3px; }
+.feature .tag { align-self: flex-start; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.feature .btn { align-self: flex-start; margin-top: auto; }

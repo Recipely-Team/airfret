@@ -1,4 +1,6 @@
 import type { PlayMode } from '@domain/instruments/play-mode';
+import type { HiHatPedalMode } from '@domain/input/hihat-pedal-mode';
+import type { PedalBindings } from '@domain/input/pedal-bindings';
 import type { LessonMode } from '@domain/lessons/session/lesson-mode';
 import type { StrumFilter } from '@domain/settings/strum-filter';
 
@@ -25,6 +27,10 @@ export interface Settings {
   readonly guideVolume: number;
   readonly isLessonEasy: boolean;
   readonly hasLessonDrums: boolean;
+  readonly pedalBindings: PedalBindings;
+  readonly hihatMode: HiHatPedalMode;
+  /** The Explore guide has been shown once. */
+  readonly hasSeenExplore: boolean;
   /** Best accuracy (0–1) per song id. */
   readonly best: Readonly<Record<string, number>>;
 }

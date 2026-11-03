@@ -1,4 +1,9 @@
+import type { DrumPlayer } from '@application/drums/drum-player';
 import type { Player } from '@application/play/player';
+import type { PedalBindings } from '@domain/input/pedal-bindings';
+import { paintKit } from '@presentation/canvas/drums/paint-kit';
+import { paintPedals } from '@presentation/canvas/drums/paint-pedals';
+import { paintSticks } from '@presentation/canvas/drums/paint-sticks';
 import type { TourSession } from '@application/tour/tour-session';
 import type { LessonSession } from '@domain/lessons/session/lesson-session';
 import { GuitarArt } from '@presentation/canvas/guitar/guitar-art';
@@ -48,6 +53,23 @@ export class StageRenderer {
     this.canvas.style.width = `${w}px`;
     this.canvas.style.height = `${h}px`;
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  /** Drum mode frame: kit, sticks, the real hands holding them, and the pedals. */
+  drums(drums: DrumPlayer, bindings: PedalBindings, now: number, hint: string | null, brightness: number): void {
+    const w = this.canvas.clientWidth || window.innerWidth;
+    const h = this.canvas.clientHeight || window.innerHeight;
+    this.ctx.clearRect(0, 0, w, h);
+    paintKit(this.ctx, drums, now, h);
+    paintSticks(this.ctx, drums.sticks);
+    this.hands.draw(this.ctx, this.video, drums.hands, w, h, brightness);
+    paintPedals(this.ctx, drums, bindings, w, h);
+    if (hint) {
+      this.ctx.font = `400 15px ${FONT}`;
+      this.ctx.textAlign = 'center';
+      this.ctx.fillStyle = rgba(Palette.ink, 0.7);
+      this.ctx.fillText(hint, w / 2, h * 0.16);
+    }
   }
 
   draw(player: Player, lesson: LessonSession | null, tour: TourSession | null, audioNow: number, now: number, hint: string | null, brightness: number): void {

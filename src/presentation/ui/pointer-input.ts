@@ -1,3 +1,4 @@
+import type { DrumPlayer } from '@application/drums/drum-player';
 import type { Player } from '@application/play/player';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
 import { PlayMode } from '@domain/instruments/play-mode';
@@ -15,15 +16,21 @@ const ZERO_SLOT = 9;
 export class PointerInput {
   private down = false;
 
-  constructor(canvas: HTMLCanvasElement, player: Player, sound: SoundOutputInterface) {
+  constructor(canvas: HTMLCanvasElement, player: Player, sound: SoundOutputInterface, drums: DrumPlayer, isDrums: () => boolean) {
     const now = () => performance.now() / 1000;
     const at = (e: PointerEvent) => ({ x: e.clientX, y: e.clientY });
     canvas.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      if (isDrums()) {
+        drums.click(at(e), sound.now, now());
+        return;
+      }
       this.down = true;
       canvas.setPointerCapture(e.pointerId);
       player.pointer(at(e), now(), sound.now);
     });
     canvas.addEventListener('pointermove', (e) => {
+      if (isDrums()) return;
       if (this.down) player.pointer(at(e), now(), sound.now);
     });
     const up = () => {

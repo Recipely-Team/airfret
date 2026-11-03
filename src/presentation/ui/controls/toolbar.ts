@@ -1,6 +1,7 @@
 import type { SettingsStore } from '@application/settings/settings-store';
 import { INSTRUMENTS } from '@domain/instruments/instrument-catalog';
 import { PlayMode } from '@domain/instruments/play-mode';
+import { DRUMS_ID } from '@domain/drums/drums-id';
 import { CHORD_SETS } from '@domain/lessons/catalog/chord-set-catalog';
 import { t } from '@presentation/i18n/translator';
 import { byId } from '@presentation/ui/dom';
@@ -24,7 +25,11 @@ export class Toolbar {
   render(): void {
     const s = this.store.value;
     const isLocked = this.isLessonActive();
-    renderSegmented(byId('instruments'), INSTRUMENTS.map((i) => ({ value: i.id, label: t(i.name) })), s.instrument, this.onInstrument);
+    const isDrums = s.instrument === DRUMS_ID;
+    const items = [...INSTRUMENTS.map((i) => ({ value: i.id, label: t(i.name) })), { value: DRUMS_ID, label: t('inst.drums') }];
+    renderSegmented(byId('instruments'), items, s.instrument, this.onInstrument);
+    byId('modes').hidden = isDrums;
+    byId('pedalsBtn').hidden = !isDrums;
     renderSegmented(
       byId('modes'),
       Object.values(PlayMode).map((m) => ({ value: m, label: t(`mode.${m}`) })),
@@ -43,6 +48,6 @@ export class Toolbar {
       }),
     );
     select.disabled = isLocked;
-    select.hidden = s.mode !== PlayMode.chord;
+    select.hidden = s.mode !== PlayMode.chord || isDrums;
   }
 }
