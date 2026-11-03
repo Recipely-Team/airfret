@@ -8,7 +8,8 @@ import type { TrackedHand } from '@domain/tracking/tracked-hand';
 import { AssetPath } from '@infrastructure/constants/assets';
 
 const CAMERA = { width: 1280, height: 720, frameRate: 60 } as const;
-const MODEL = { numHands: 2, detection: 0.5, presence: 0.4, tracking: 0.4 } as const;
+/** Lower presence/tracking thresholds keep hands through motion blur in fast strokes. */
+const MODEL = { numHands: 2, detection: 0.5, presence: 0.3, tracking: 0.3 } as const;
 const HAVE_CURRENT_DATA = 2;
 
 /**

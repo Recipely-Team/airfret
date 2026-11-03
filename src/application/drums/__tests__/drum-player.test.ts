@@ -28,7 +28,7 @@ function fist(tip: Point): Point[] {
 function setup(mode: HiHatPedalMode = HiHatPedalMode.holdToOpen) {
   const sound = new FakeSoundOutput();
   const drums = new DrumPlayer(sound);
-  drums.configure(pads, H, mode);
+  drums.configure(pads, 1440, H, mode);
   return { sound, drums };
 }
 

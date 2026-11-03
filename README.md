@@ -47,6 +47,8 @@ Vite + strict TypeScript, no UI framework, Clean Architecture / DDD layers
 
 ## Shipping
 
+> **TODO:** automatic deploys are not connected yet — see [`docs/deploy.md`](docs/deploy.md).
+
 `dev` is the working branch (Vercel preview); `main` is production. Feature branches → PR to
 `dev` → release PR `dev → main`. See [`.claude/skills/`](.claude/skills).
 
