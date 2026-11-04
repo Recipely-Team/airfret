@@ -34,6 +34,11 @@ about 60 % (a 13 c error read as 21 c). Nobody had checked the meter itself. *Gu
 manifest; the instruments-vs-real test first proves the meter reads known shifts exactly, then requires
 every played note within 3 c.
 
+**Moving any setting — even the volume slider — cut off ringing recorded notes.**
+The app re-applies the instrument on every settings change, and the engine answered each one by dropping
+its sample set and loading it again, which stops every note the set is playing. *Guard:* `useSamples`
+returns early unless the set actually changes (comment there); manual QA row V4.
+
 ## Drums
 
 **Drumsticks vanished and reappeared, or jumped to the other hand.**

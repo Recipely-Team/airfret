@@ -66,6 +66,8 @@ export class WebAudioEngine implements SoundOutputInterface {
   private readonly sampleBus: GainNode;
   private readonly samples: SamplePlayer;
   private readonly sampleSets = new Map<string, Promise<SampleSet | null>>();
+  /** The sample set in use (or being loaded); null = synth only. */
+  private sampleSetId: string | null = null;
 
   constructor() {
     const ctx = this.ctx;
@@ -150,10 +152,16 @@ export class WebAudioEngine implements SoundOutputInterface {
     this.useSamples(instrument);
   }
 
-  /** Switches the sample player to the instrument's set, loading it once; the synth plays meanwhile. */
+  /**
+   * Switches the sample player to the voice's set, loading it once; the synth plays meanwhile. Settings
+   * changes re-apply the instrument constantly, so nothing happens unless the set itself changes —
+   * otherwise every volume nudge would cut the ringing notes.
+   */
   private useSamples(instrument: Instrument): void {
+    const setId = instrument.isRecorded ? (SAMPLE_SET_BY_INSTRUMENT[instrument.id] ?? null) : null;
+    if (setId === this.sampleSetId) return;
+    this.sampleSetId = setId;
     this.samples.use(null);
-    const setId = SAMPLE_SET_BY_INSTRUMENT[instrument.id];
     if (!setId) return;
     let pending = this.sampleSets.get(setId);
     if (!pending) {
@@ -161,7 +169,7 @@ export class WebAudioEngine implements SoundOutputInterface {
       this.sampleSets.set(setId, pending);
     }
     void pending.then((set) => {
-      if (this.instrument?.id === instrument.id) this.samples.use(set);
+      if (this.sampleSetId === setId) this.samples.use(set);
     });
   }
 

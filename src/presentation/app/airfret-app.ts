@@ -21,6 +21,7 @@ import { SONGS } from '@domain/lessons/catalog/song-catalog';
 import { LessonMode } from '@domain/lessons/session/lesson-mode';
 import type { LessonSession } from '@domain/lessons/session/lesson-session';
 import { knownChord } from '@domain/music/chords/chord-voicing';
+import { withVoice } from '@domain/instruments/voice-catalog';
 import { effectiveTuning } from '@domain/music/tuning-catalog';
 import type { HandTrackerInterface } from '@domain/tracking/hand-tracker-interface';
 import type { AppUi } from '@presentation/app/app-ui';
@@ -153,10 +154,10 @@ export class AirfretApp {
     }
   }
 
-  /** The selected instrument with the chosen tuning and capo applied to its open strings. */
+  /** The selected instrument in its chosen voice, with the tuning and capo applied to its open strings. */
   private instrument(): Instrument {
     const st = this.s.store.value;
-    const base = instrumentById(st.instrument);
+    const base = withVoice(instrumentById(st.instrument), st.voices[st.instrument]);
     return { ...base, tuning: effectiveTuning(base.tuning, st.tuning, st.capo) };
   }
 
@@ -295,5 +296,4 @@ export class AirfretApp {
       firstLesson: () => SONGS.find((song) => song.course === 1),
     });
   }
-
 }

@@ -10,6 +10,8 @@ export interface Settings {
   /** UI language code; empty = follow the browser. */
   readonly language: string;
   readonly instrument: string;
+  /** Chosen voice per instrument id; an instrument not listed plays its best-ranked voice. */
+  readonly voices: Readonly<Record<string, string>>;
   readonly mode: PlayMode;
   readonly chordSet: string;
   readonly isLefty: boolean;
