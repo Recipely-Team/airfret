@@ -82,6 +82,26 @@ song test before it ships. Grouped by how much of the existing code they reuse.
 **Air-only**
 - Theremin (pitch from one hand's height, volume from the other) — the most natural webcam instrument
 
+## Instrument voices — ranked versions of each instrument — `shaped`
+Keep several voices per instrument — e.g. recorded set A, recorded set B, the synth fitted to recordings, the
+original hand-tuned synth — and score all of them with the same real-instrument test
+(`instruments-vs-real.audio.test.ts`: pitch, decay, tone colour; plus the real-song tests). The best score is the
+default; the others stay selectable in settings as the second and third option, so a player can pick by ear and
+the ranking shows what to improve next.
+
+## Hands-only view — `idea`
+A button that hides the camera picture: the stage shows only the instrument and the tracked hands as their
+skeleton (the landmark points and the lines between them), with the existing strum and fret highlights. Cleaner
+to look at, nothing personal on screen (good for recording or streaming), and still shows exactly what the app
+sees. Tracking keeps running; only the video layer is hidden. Persisted like the other display settings.
+
+## Play-along — karaoke for instruments — `idea`
+Karaoke, but you play instead of sing: pick a song, the band (backing track or recording) plays every other
+part, and your instrument's part scrolls by in time — chords, notes or drum hits — scored as you go. Your part
+is muted in the mix so you fill the gap; a "guide" level brings it back while learning. Builds on the lesson
+timeline, the shadow guide and the real-song tests (tempo and alignment against a recording). Songs: public
+domain or the player's own files; backing tracks for copyrighted songs need licensing.
+
 ## Mac app — `idea`
 Wrap the web build with Tauri for a dock icon, offline use and no browser chrome. The camera
 permission prompt moves to macOS; the WASM model and worklet already load from local files.
