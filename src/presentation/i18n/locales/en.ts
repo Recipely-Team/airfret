@@ -69,6 +69,8 @@ export const EN: Readonly<Record<string, string>> = {
   'credit.exercise': 'Exercise',
   'credit.traditional': 'Traditional',
   'credit.beethoven': 'L. v. Beethoven',
+  'credit.bach': 'J. S. Bach',
+  'credit.tarrega': 'F. Tárrega (after Beethoven)',
 
   'about.firstStrums': 'Your first two chords. Steady downstrokes on every beat.',
   'about.fourChords': 'The four chords behind countless pop songs.',
@@ -81,6 +83,9 @@ export const EN: Readonly<Record<string, string>> = {
   'about.ode': 'Beethoven’s theme, mostly on the two highest strings.',
   'about.bassRoots': 'Lock in with the root of each chord.',
   'about.boogie': 'Walking boogie line through a 12-bar blues.',
+  'about.bachPrelude': 'The whole Prélude at Casals’ tempo — the guide plays every note; you follow the line.',
+  'about.claroDeLuna': 'Tárrega’s Moonlight Sonata, complete: bass, triplets and melody, sixth string in D.',
+  'about.bachPreludeBass': 'The Prélude at the cello’s pitch — the full 24-fret neck, at Casals’ tempo.',
   'ui.strumFilter': 'Strum direction',
   'strum.both': 'Both ways',
   'strum.down': 'Down only',

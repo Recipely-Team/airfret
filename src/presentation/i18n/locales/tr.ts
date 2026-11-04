@@ -69,6 +69,8 @@ export const TR: Readonly<Record<string, string>> = {
   'credit.exercise': 'Alıştırma',
   'credit.traditional': 'Geleneksel',
   'credit.beethoven': 'L. v. Beethoven',
+  'credit.bach': 'J. S. Bach',
+  'credit.tarrega': 'F. Tárrega (Beethoven’dan)',
 
   'about.firstStrums': 'İlk iki akorun. Her vuruşta düzenli aşağı tarama.',
   'about.fourChords': 'Sayısız pop şarkısının arkasındaki dört akor.',
@@ -81,6 +83,9 @@ export const TR: Readonly<Record<string, string>> = {
   'about.ode': 'Beethoven’ın teması, çoğu en ince iki telde.',
   'about.bassRoots': 'Her akorun kök notasına otur.',
   'about.boogie': '12 ölçülük blues üzerinde yürüyen boogie hattı.',
+  'about.bachPrelude': 'Prélude’ün tamamı, Casals’ın temposunda — rehber her notayı çalar, sen melodiyi izlersin.',
+  'about.claroDeLuna': 'Tárrega’nın Ay Işığı Sonatı, eksiksiz: bas, üçlemeler ve melodi; altıncı tel Re’de.',
+  'about.bachPreludeBass': 'Prélude çellonun kendi perdesinde — 24 perdelik sapın tamamı, Casals’ın temposunda.',
   'ui.strumFilter': 'Tarama yönü',
   'strum.both': 'İki yön',
   'strum.down': 'Sadece aşağı',

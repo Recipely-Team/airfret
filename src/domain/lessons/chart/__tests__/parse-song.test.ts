@@ -3,8 +3,9 @@ import { PlayMode } from '@domain/instruments/play-mode';
 import { SONGS } from '@domain/lessons/catalog/song-catalog';
 import { parseSong } from '@domain/lessons/chart/parse-song';
 import { knownChord } from '@domain/music/chords/chord-voicing';
-import { findPosition } from '@domain/music/find-position';
-import { BASS_TUNING, GUITAR_TUNING } from '@domain/music/tunings';
+import { instrumentById } from '@domain/instruments/instrument-catalog';
+import { planFingering } from '@domain/music/fingering/plan-fingering';
+import { effectiveTuning } from '@domain/music/tuning-catalog';
 
 describe('parseSong', () => {
   it('parses every song in the catalogue', () => {
@@ -19,13 +20,26 @@ describe('parseSong', () => {
     }
   });
 
-  it('only asks for notes the suggested instrument can reach', () => {
+  it('only asks for notes the suggested instrument can reach — every voice, on its real neck and tuning', () => {
     for (const song of SONGS.filter((s) => s.mode === PlayMode.note)) {
-      const tuning = song.instrument === 'bass' ? BASS_TUNING : GUITAR_TUNING;
+      const inst = instrumentById(song.instrument);
       const chart = parseSong(song, false);
       if (!chart.isOk) throw new Error(song.id);
-      for (const tg of chart.value.targets) expect(findPosition(tg.midi ?? -1, tuning, 12), `${song.id}: ${tg.midi}`).not.toBeNull();
+      const onsets = chart.value.targets.map((t) => [t.midi ?? -1, ...(t.harmony ?? [])]);
+      const plan = planFingering(onsets, effectiveTuning(inst.tuning, song.tuning ?? 'standard', 0), inst.frets);
+      plan.forEach((shape, i) => expect(shape.length, `${song.id} onset ${i}: ${onsets[i]?.join('+')}`).toBe(onsets[i]?.length));
     }
+  });
+
+  it('reads chords of notes, melody first, and exact triplet lengths', () => {
+    const r = parseSong({ ...SONGS.find((s) => s.id === 'twinkle')!, notes: 'A3+D3:1/3 D4:1/3 F4:1/3 r:0.5 E4:2' }, false);
+    if (!r.isOk) throw new Error('chart');
+    expect(r.value.targets.map((t) => [t.beat, t.midi, t.harmony])).toEqual([[0, 57, [50]], [1 / 3, 62, undefined], [2 / 3, 65, undefined], [1.5, 64, undefined]]);
+    expect(r.value.length).toBeCloseTo(3.5, 9);
+  });
+
+  it('fails on a malformed fraction instead of guessing', () => {
+    for (const len of ['1/0', '1/', 'x/3']) expect(parseSong({ ...SONGS.find((s) => s.id === 'twinkle')!, notes: `C4:${len}` }, false).isOk, len).toBe(false);
   });
 
   it('has one pattern slot per subdivision of the bar', () => {

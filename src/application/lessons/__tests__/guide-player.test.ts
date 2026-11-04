@@ -45,4 +45,28 @@ describe('GuidePlayer — plays like a guitarist, not a sequencer', () => {
     const lows = sound.plucks.filter((p) => p.string === 0).map((p) => p.position);
     expect(new Set(lows.map((v) => v.toFixed(4))).size).toBeGreaterThan(1);
   });
+
+  it('plays every voice of a fingerstyle chart at once, each on its own string, melody loudest', () => {
+    const sound = new FakeSoundOutput();
+    const guide = new GuidePlayer(sound);
+    const song = { ...SONGS.find((s) => s.id === 'twinkle')!, notes: 'E4+B3+E2:1 G4:1' };
+    const r = new StartLessonUseCase().execute(song, { tempo: 1, shouldWait: false, isEasy: false, hasDrums: false, hasGuide: true, latency: 0 }, 0);
+    if (!r.isOk) throw new Error('lesson');
+    for (let t = 0; t < r.value.timeOfBeat(1.5); t += 0.02) guide.update(r.value, instrumentById('nylon'), t);
+    const first = sound.plucks.slice(0, 3);
+    expect(first.map((p) => p.midi)).toEqual([64, 59, 40]);
+    expect(new Set(first.map((p) => p.string)).size).toBe(3);
+    expect(first[0]!.amp).toBeGreaterThan(first[1]!.amp);
+    expect(sound.plucks).toHaveLength(4);
+  });
+
+  it('reaches high notes on the real neck instead of skipping them', () => {
+    const sound = new FakeSoundOutput();
+    const guide = new GuidePlayer(sound);
+    const song = { ...SONGS.find((s) => s.id === 'twinkle')!, notes: 'B5:1' };
+    const r = new StartLessonUseCase().execute(song, { tempo: 1, shouldWait: false, isEasy: false, hasDrums: false, hasGuide: true, latency: 0 }, 0);
+    if (!r.isOk) throw new Error('lesson');
+    for (let t = 0; t < r.value.timeOfBeat(0.5); t += 0.02) guide.update(r.value, instrumentById('nylon'), t);
+    expect(sound.plucks.map((p) => [p.midi, p.string])).toEqual([[83, 5]]);
+  });
 });
