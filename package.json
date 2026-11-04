@@ -16,7 +16,9 @@
     "map": "node scripts/project-map.mjs",
     "check:structure": "node scripts/check-structure.mjs",
     "check": "npm run lint && npm run typecheck && npm run test:coverage && npm run check:structure",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:songs": "vitest run --config vitest.songs.config.ts",
+    "songs:pieces": "sh tools/songs/pieces.sh"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^1.2.0"

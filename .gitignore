@@ -4,3 +4,4 @@ public/mediapipe
 .vercel
 .DS_Store
 coverage
+tools/songs/.cache
