@@ -82,12 +82,14 @@ song test before it ships. Grouped by how much of the existing code they reuse.
 **Air-only**
 - Theremin (pitch from one hand's height, volume from the other) — the most natural webcam instrument
 
-## Instrument voices — ranked versions of each instrument — `shaped`
+## Instrument voices — ranked versions of each instrument — `shipped`
 Keep several voices per instrument — e.g. recorded set A, recorded set B, the synth fitted to recordings, the
 original hand-tuned synth — and score all of them with the same real-instrument test
 (`instruments-vs-real.audio.test.ts`: pitch, decay, tone colour; plus the real-song tests). The best score is the
 default; the others stay selectable in settings as the second and third option, so a player can pick by ear and
-the ranking shows what to improve next.
+the ranking shows what to improve next. Shipped: Settings → Sound (`voice-catalog.ts`); the ranking test is in
+`instruments-vs-real.audio.test.ts`. Open: a second recorded set per instrument, and more than one take per note
+for electric and bass so their recorded voice is scored fairly.
 
 ## Hands-only view — `shipped`
 A button that hides the camera picture: the stage shows only the instrument and the tracked hands as their
