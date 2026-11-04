@@ -89,11 +89,12 @@ original hand-tuned synth — and score all of them with the same real-instrumen
 default; the others stay selectable in settings as the second and third option, so a player can pick by ear and
 the ranking shows what to improve next.
 
-## Hands-only view — `idea`
+## Hands-only view — `shipped`
 A button that hides the camera picture: the stage shows only the instrument and the tracked hands as their
 skeleton (the landmark points and the lines between them), with the existing strum and fret highlights. Cleaner
 to look at, nothing personal on screen (good for recording or streaming), and still shows exactly what the app
 sees. Tracking keeps running; only the video layer is hidden. Persisted like the other display settings.
+Shipped as the camera button in the top bar (`isCameraHidden`, `paintHandSkeleton`); QA rows H1–H6.
 
 ## Play-along — karaoke for instruments — `idea`
 Karaoke, but you play instead of sing: pick a song, the band (backing track or recording) plays every other
