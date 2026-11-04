@@ -11,6 +11,7 @@ and every note comes from recordings of real instruments, in real time, in the b
 &nbsp;
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-2b2a28?style=for-the-badge&logo=typescript&logoColor=e0a458)
 ![No upload](https://img.shields.io/badge/video-never%20leaves%20your%20device-2b2a28?style=for-the-badge)
+[![License AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-2b2a28?style=for-the-badge)](#license)
 
 </div>
 
@@ -124,6 +125,15 @@ The pre-commit hook runs the gates and a secret scan. Camera, drawing and sound 
 Feature branch → PR to `dev` (preview) → release PR `dev → main` (production). Skills in [`.claude/skills/`](.claude/skills).
 
 > Vercel isn't connected to GitHub yet, so production is deployed by hand — see [`docs/deploy.md`](docs/deploy.md).
+
+## License
+
+The code is released under the **[GNU AGPL-3.0](LICENSE)**: you may read, run, change and redistribute it,
+as long as your version is released under the same licence with its source available to its users,
+including over a network.
+
+The name **Airfret** and its icons are reserved separately in [`TRADEMARKS.md`](TRADEMARKS.md). The instrument
+samples and the scores keep their own licences — see [`public/samples/CREDITS.md`](public/samples/CREDITS.md).
 
 <br/>
 
