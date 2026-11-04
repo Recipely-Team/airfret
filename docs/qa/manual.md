@@ -131,3 +131,12 @@ F/B rows (id — note):
 | H4 | Reload the page | The choice is remembered; the button shows pressed (accent) with a slash | |
 | H5 | Screen reader / hover on the button | Says "Hide camera — show only the hands", then "Show camera" once pressed (Turkish when the UI is Turkish) | |
 | H6 | Explore → *Hands only* → Try it | Camera hides and a toast explains how to bring it back | |
+## V. Instrument voices
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| V1 | Settings → Sound on the acoustic | Three options, numbered by rank: 1 · Recorded instrument, 2 · Synth, fitted to recordings, 3 · Synth, classic | |
+| V2 | Pick each one and strum | Recorded sounds like the samples; both synths sound synthesised, *classic* dies away faster | |
+| V3 | Pick a synth voice, switch to nylon and back | Each instrument remembers its own choice | |
+| V4 | Move the volume slider while a recorded chord rings | The chord keeps ringing (it used to be cut off) | |
+| V5 | Drums page → Settings | No Sound row | |

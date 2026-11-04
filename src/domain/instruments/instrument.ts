@@ -22,5 +22,9 @@ export interface Instrument {
   /** Output trim per pluck. */
   readonly level: number;
   readonly chain: ChainKind;
+  /** Which of its voices it plays with (`voice-catalog`). */
+  readonly voice: string;
+  /** Plays from recordings when they cover the note; false = the string synth only. */
+  readonly isRecorded: boolean;
   readonly defaultMode: PlayMode;
 }

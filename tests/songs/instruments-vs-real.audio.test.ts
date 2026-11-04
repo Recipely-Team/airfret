@@ -5,6 +5,7 @@ import { Voice } from '@domain/audio/voice';
 import { StrikeSurface } from '@domain/gesture/strike-surface';
 import type { Instrument } from '@domain/instruments/instrument';
 import { INSTRUMENTS } from '@domain/instruments/instrument-catalog';
+import { voicesFor, withVoice } from '@domain/instruments/voice-catalog';
 import type { SampleManifest } from '@infrastructure/audio/samples/sample-manifest';
 import type { SampleRef } from '@infrastructure/audio/samples/sample-ref';
 import { SAMPLE_SET_BY_INSTRUMENT } from '@infrastructure/audio/samples/sample-sets';
@@ -48,6 +49,20 @@ function recordings(setId: string): SampleRef[] {
   const m = JSON.parse(readFileSync(`public/samples/${setId}/manifest.json`, 'utf8')) as SampleManifest;
   const layer = m.samples.some((s) => s.layer === PREFERRED_LAYER) ? PREFERRED_LAYER : 0;
   return m.samples.filter((s) => s.layer === layer);
+}
+
+/**
+ * The real recording a voice is judged against: another take of the same note (a different dynamic layer)
+ * when the set has one, so the recorded voice isn't scored against the very file it plays.
+ */
+function otherTake(setId: string, ref: SampleRef): SampleRef {
+  const m = JSON.parse(readFileSync(`public/samples/${setId}/manifest.json`, 'utf8')) as SampleManifest;
+  return m.samples.find((s) => s.midi === ref.midi && s.string === ref.string && s.layer !== ref.layer) ?? ref;
+}
+
+/** One number per voice, lower is closer to the real instrument: decay (ln ratio) + tone colour (per 10 dB) + pitch (per 3 c). */
+function voiceScore(rows: readonly { decayLog: number; profileDb: number; cents: number }[]): number {
+  return median(rows.map((r) => r.decayLog)) + median(rows.map((r) => r.profileDb)) / 10 + median(rows.map((r) => Math.abs(r.cents))) / IN_TUNE_CENTS;
 }
 
 /** The open string a note is played on: the recording's own, or the highest string that reaches it. */
@@ -108,6 +123,28 @@ describe('Every instrument against recordings of the real instrument', () => {
       const limit = SYNTH_LIMITS[inst.id];
       expect(decayLog).toBeLessThanOrEqual(limit?.decayLog ?? 0);
       expect(profileDb).toBeLessThanOrEqual(limit?.profileDb ?? 0);
+    });
+  }
+
+  for (const base of INSTRUMENTS) {
+    const setId = SAMPLE_SET_BY_INSTRUMENT[base.id];
+    const voices = voicesFor(base.id);
+    if (!setId || voices.length < 2) continue;
+    it(`${base.id}: its voices are ranked best first, as measured against the real instrument`, () => {
+      const refs = recordings(setId).filter((_, i) => i % (EVERY * 2) === 0);
+      const scores = voices.map((v) => {
+        const inst = withVoice(base, v.id);
+        const rows = refs.map((r) => {
+          const take = otherTake(setId, r);
+          const real = analyze(decode(`public/samples/${setId}/${take.file}`) as Float32Array, nominal(r.midi));
+          const audio = play(inst, stringFor(inst, r), r.midi, true);
+          return { cents: cents(fundamental(audio, nominal(r.midi)), r.midi), ...distance(analyze(audio, nominal(r.midi)), real) };
+        });
+        return { voice: v.id, score: voiceScore(rows) };
+      });
+      console.info(`${base.id} voices: ${scores.map((x, i) => `${i + 1}. ${x.voice} ${x.score.toFixed(2)}`).join(' · ')}`);
+      const measured = [...scores].sort((a, b) => a.score - b.score).map((x) => x.voice);
+      expect(voices.map((v) => v.id), 'reorder VOICES in voice-catalog.ts to the measured ranking').toEqual(measured);
     });
   }
 });
