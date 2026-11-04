@@ -120,3 +120,14 @@ F/B rows (id — note):
 | R3 | Lessons → *Claro de Luna*, shadow mode | Tuning switches to drop D; guide plays bass, triplets and melody together at 60 bpm | |
 | R4 | Lessons → *Cello Suite No. 1 — Prélude* (guitar and bass) | Full piece at 70 bpm (≈ 2 min 22 s from first note to last), as Casals plays it | |
 | R5 | Bend a ringing note in free mode on a sampled instrument | The recording bends; it doesn't restart | |
+
+## H. Hands-only view
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| H1 | Press the camera button (top right, next to Settings) | Camera picture disappears; instrument on near-black; hands show as points and lines, fingertips in the accent colour | |
+| H2 | Strum, fret and pluck with the camera hidden | Tracking and sound work exactly as before; strum trail and fret highlights still show | |
+| H3 | Drums page with the camera hidden | Skeleton hands hold the sticks; hits work | |
+| H4 | Reload the page | The choice is remembered; the button shows pressed (accent) with a slash | |
+| H5 | Screen reader / hover on the button | Says "Hide camera — show only the hands", then "Show camera" once pressed (Turkish when the UI is Turkish) | |
+| H6 | Explore → *Hands only* → Try it | Camera hides and a toast explains how to bring it back | |

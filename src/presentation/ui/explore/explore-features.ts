@@ -18,5 +18,6 @@ export const EXPLORE_FEATURES: readonly { readonly id: string; readonly tag: str
   { id: 'course', tag: 'learn', steps: 3 },
   { id: 'shadow', tag: 'learn', steps: 3 },
   { id: 'nocamera', tag: 'tips', steps: 2 },
+  { id: 'handsonly', tag: 'tips', steps: 2 },
   { id: 'settings', tag: 'tips', steps: 3 },
 ];

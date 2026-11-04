@@ -18,6 +18,7 @@ export const DEFAULT_SETTINGS: Settings = {
   volume: 0.8,
   playerVolume: 1,
   brightness: 0.55,
+  isCameraHidden: false,
   latencyMs: 70,
   lessonTempo: 0.8,
   lessonMode: LessonMode.shadow,

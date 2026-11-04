@@ -44,6 +44,10 @@ export function launchFeature(id: string, d: LaunchDeps): void {
       if (first) d.ui.navigate({ kind: 'lesson', songId: first.id });
       return;
     }
+    case 'handsonly':
+      page(current, current === DRUMS_ID ? undefined : PlayMode.chord);
+      d.store.update({ isCameraHidden: true });
+      return say();
     case 'capo':
     case 'settings': d.ui.openSettings(); return say();
     default: page('acoustic', PlayMode.chord); return say();

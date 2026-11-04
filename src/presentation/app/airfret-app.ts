@@ -255,8 +255,8 @@ export class AirfretApp {
       requestAnimationFrame(this.frame);
       return;
     }
-    if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, stageHint({ isStarted: this.isStarted, hasCamera: this.hasCamera, isDrums: this.isDrums, secondsWithoutHands: now - this.lastHandsAt }), st.brightness);
-    else this.s.renderer.draw(this.s.player, this.lesson, this.tours.session, audioNow, now, stageHint({ isStarted: this.isStarted, hasCamera: this.hasCamera, isDrums: this.isDrums, secondsWithoutHands: now - this.lastHandsAt }), st.brightness);
+    if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, stageHint({ isStarted: this.isStarted, hasCamera: this.hasCamera, isDrums: this.isDrums, secondsWithoutHands: now - this.lastHandsAt }), { brightness: st.brightness, isHidden: st.isCameraHidden });
+    else this.s.renderer.draw(this.s.player, this.lesson, this.tours.session, audioNow, now, stageHint({ isStarted: this.isStarted, hasCamera: this.hasCamera, isDrums: this.isDrums, secondsWithoutHands: now - this.lastHandsAt }), { brightness: st.brightness, isHidden: st.isCameraHidden });
     requestAnimationFrame(this.frame);
   };
 
