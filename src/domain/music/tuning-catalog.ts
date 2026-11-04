@@ -1,5 +1,4 @@
 import type { Tuning } from '@domain/music/tuning';
-import { GUITAR_STRING_COUNT } from '@domain/music/tunings';
 
 export const GUITAR_TUNINGS: readonly Tuning[] = [
   { id: 'standard', name: 'tuning.standard', offsets: [0, 0, 0, 0, 0, 0] },
@@ -15,9 +14,18 @@ export const BASS_TUNINGS: readonly Tuning[] = [
   { id: 'halfDown', name: 'tuning.halfDown', offsets: [-1, -1, -1, -1] },
 ];
 
-/** Tunings available for an instrument with this many strings. */
+/** Offsets line up with the 5-string's strings, low B first: drop D would retune the wrong string. */
+export const BASS5_TUNINGS: readonly Tuning[] = [
+  { id: 'standard', name: 'tuning.standard', offsets: [0, 0, 0, 0, 0] },
+  { id: 'dropA', name: 'tuning.dropA', offsets: [-2, 0, 0, 0, 0] },
+  { id: 'halfDown', name: 'tuning.halfDown', offsets: [-1, -1, -1, -1, -1] },
+];
+
+const BY_STRING_COUNT: Readonly<Record<number, readonly Tuning[]>> = { 4: BASS_TUNINGS, 5: BASS5_TUNINGS, 6: GUITAR_TUNINGS };
+
+/** Tunings available for an instrument with this many strings (every tuning's offsets match its strings). */
 export function tuningsFor(strings: number): readonly Tuning[] {
-  return strings === GUITAR_STRING_COUNT ? GUITAR_TUNINGS : BASS_TUNINGS;
+  return BY_STRING_COUNT[strings] ?? [GUITAR_TUNINGS[0] as Tuning];
 }
 
 /** Open-string pitches after the tuning and a capo: a capo raises every string by its fret. */

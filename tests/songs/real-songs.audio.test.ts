@@ -19,9 +19,9 @@ const CASALS = {
   path: 'tools/songs/.cache/casals-bwv1007-prelude.ogg',
 } as const;
 const CASES = [
-  { song: 'bach-prelude', score: 'bach-prelude', instruments: ['acoustic', 'nylon', 'clean', 'drive'] },
-  { song: 'bach-prelude-bass', score: 'bach-prelude-bass', instruments: ['bass'] },
-  { song: 'claro-de-luna', score: 'claro-de-luna', instruments: ['nylon', 'acoustic', 'clean'] },
+  { song: 'bach-prelude', score: 'bach-prelude', instruments: ['acoustic', 'nylon', 'clean', 'drive', 'banjo'] },
+  { song: 'bach-prelude-bass', score: 'bach-prelude-bass', instruments: ['bass', 'bass5'] },
+  { song: 'claro-de-luna', score: 'claro-de-luna', instruments: ['nylon', 'acoustic', 'clean', 'banjo'] },
 ] as const;
 /**
  * What the rendered audio must show, measured against the written score. Pitch recall can't reach 1:

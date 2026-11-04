@@ -7,17 +7,24 @@ import { decode } from './decode.mjs';
 const [sfzPath, outPath] = process.argv.slice(2);
 const text = readFileSync(sfzPath, 'utf8');
 const regions = [];
-let current = {};
+// A region's opcodes may come in any order (the sample before its key); it is complete at the next
+// <region> or the end. SFZ's pitch_keycenter defaults to 60 when a region doesn't give one.
+let current = null;
+const flush = () => {
+  if (current?.sample) regions.push({ key: 60, ...current });
+};
 for (const line of text.split(/\r?\n/)) {
   const sample = /sample=([^\r\n]+?\.(flac|wav))/i.exec(line)?.[1];
   const key = /(?:pitch_keycenter|\bkey)=(\d+)/.exec(line)?.[1];
-  if (/<region>/.test(line)) current = {};
-  if (key) current.key = Number(key);
-  if (sample) {
-    current.sample = sample.trim();
-    if (current.key !== undefined) regions.push({ ...current });
+  if (/<region>/.test(line)) {
+    flush();
+    current = {};
   }
+  if (!current) continue;
+  if (key) current.key = Number(key);
+  if (sample) current.sample = sample.trim().replaceAll('\\', '/');
 }
+flush();
 const seen = new Set();
 const results = [];
 for (const r of regions) {

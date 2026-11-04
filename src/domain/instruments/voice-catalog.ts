@@ -20,6 +20,8 @@ export const VOICES: Readonly<Record<string, readonly InstrumentVoice[]>> = {
   clean: [RECORDED, FITTED],
   drive: [RECORDED, FITTED],
   bass: [RECORDED, FITTED],
+  bass5: [RECORDED, FITTED],
+  banjo: [RECORDED, FITTED],
 };
 
 /** The instrument's voices, best first; empty for instruments without a choice (the drum kit). */

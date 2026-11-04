@@ -79,3 +79,12 @@ be flat — all three joints on the strings, nearly straight, along the fret wir
 return path crosses the strings the same way a strum does. (Also reported by other air-guitar
 projects.) *Guard:* the *Down only* strum filter, covered by `player.test.ts`
 ("ignores upstrokes when the strum filter is down-only").
+
+## Tools
+
+**The sample tools silently dropped SFZ regions they didn't expect.** SFZ lets a region leave out
+`pitch_keycenter` (it defaults to 60), put `sample=` before its key, and use `\` in paths. `prepare.mjs`
+skipped the keyless region (a banjo lost its C4) and `measure-refs.mjs` skipped every region written
+sample-first (all 58 of the banjo's) — no error either time. *Guard:* both read a region when it ends, with
+the spec's default key and `/` paths; `instruments-vs-real.audio.test.ts` plays every recorded note in tune,
+and `public/samples/CREDITS.md` records how many regions each set kept.
