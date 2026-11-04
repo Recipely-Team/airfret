@@ -20,6 +20,12 @@ milliseconds summed above full scale, which the master compressor let through as
 *Guard:* `string-worklet.test.ts` counts allocations during `process()` while strumming fast (must be 0)
 and checks the bank's peak; the master output now ends in a hard-knee limiter plus a `0.97·tanh` soft clip.
 
+**Changing note or chord squeaked, and resting a finger on a string scraped.**
+The player fired a synthetic "fingers on wound strings" squeak on every fret or chord-box change, and
+`touch()` added a noise burst; at playing speed that is a hiss between every pair of notes.
+*Guard:* `player-hands.test.ts` ("moving the fretting hand to another chord makes no sound of its own");
+the `fretNoise` method is gone from `SoundOutputInterface`, so nothing can schedule it again.
+
 ## Drums
 
 **Drumsticks vanished and reappeared, or jumped to the other hand.**

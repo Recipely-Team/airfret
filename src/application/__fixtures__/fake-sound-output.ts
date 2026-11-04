@@ -47,14 +47,9 @@ export class FakeSoundOutput implements SoundOutputInterface {
   }
 
   readonly touches: number[] = [];
-  fretNoises = 0;
 
   touch(string: number): void {
     this.touches.push(string);
-  }
-
-  fretNoise(): void {
-    this.fretNoises++;
   }
 
   readonly drumHits: DrumHitRequest[] = [];

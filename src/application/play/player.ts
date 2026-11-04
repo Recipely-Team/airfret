@@ -189,10 +189,8 @@ export class Player {
       this.legato.update(this.fretting, this.instrument.tuning, this.soundingFret, this.energy, audioNow);
       return;
     }
-    const before = this.mode === PlayMode.chord ? this.slot : this.fret;
     if (this.mode === PlayMode.chord) this.slot = chordSlotSelection(this.layout, this.chords.length, p, this.slot);
     else this.fret = fretAt(this.layout, p);
-    if ((this.mode === PlayMode.chord ? this.slot : this.fret) !== before) this.sound.fretNoise(audioNow);
   }
 
   private strumTip(hand: readonly Point[] | null, t: number): Point | null {
