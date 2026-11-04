@@ -38,7 +38,7 @@ An instrument ships only when it can do what the real one does, proven by a real
 
 | Instrument | Range | Real song (tests) | Open gaps |
 |---|---|---|---|
-| Acoustic (steel) | 20 frets ✓ | Bach Prélude, Claro de Luna ✓ | Licence of the samples unverified; one dynamic layer |
+| Acoustic (steel) | 20 frets ✓ | Bach Prélude, Claro de Luna ✓ | One dynamic layer |
 | Classical (nylon) | 19 frets ✓ | Claro de Luna (drop D), Bach Prélude ✓ | Same |
 | Clean electric | 22 frets ✓ | Both ✓ | Only 13 samples, re-pitched ±2 semitones: needs per-string/per-fret recordings |
 | Drive electric | 22 frets ✓ | Bach Prélude ✓ | Same as clean |
