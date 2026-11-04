@@ -110,3 +110,13 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 Machine/browser:
 F/B rows (id — note):
 ```
+
+## R. Real samples and real songs
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| R1 | Open acoustic, nylon, electric, bass in turn; strum within the first second | Synth at first, then recorded strings once the set has loaded; no gap or click at the switch | |
+| R2 | Network tab while switching instruments | Each set's files load once; switching back doesn't reload them | |
+| R3 | Lessons → *Claro de Luna*, shadow mode | Tuning switches to drop D; guide plays bass, triplets and melody together at 60 bpm | |
+| R4 | Lessons → *Cello Suite No. 1 — Prélude* (guitar and bass) | Full piece at 70 bpm (≈ 2 min 22 s from first note to last), as Casals plays it | |
+| R5 | Bend a ringing note in free mode on a sampled instrument | The recording bends; it doesn't restart | |

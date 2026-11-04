@@ -20,6 +20,9 @@ scrolling timeline and scoring. Vite + TypeScript, no UI framework. Deployed on 
 - `npm run build` — typecheck + static build to `dist/`
 - `npm run check` — **all gates**: lint, typecheck, tests with coverage minimums, structure
 - `npm run lint` · `npm run typecheck` · `npm test` · `npm run test:coverage`
+- `npm run test:songs` — real songs rendered with the real samples, checked against the score and (Prelude)
+  Pablo Casals' recording; needs ffmpeg, downloads the references once. Separate CI job.
+- `npm run songs:pieces` — regenerate `catalog/pieces/` and their score fixtures from the Mutopia MIDI
 - `npm run check:structure` · `npm run map`
 
 ## Architecture
