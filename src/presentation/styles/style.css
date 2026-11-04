@@ -340,7 +340,6 @@ a.btn, a.brand { text-decoration: none; color: inherit; display: inline-flex; al
 .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: -8px 0 12px; }
 .hero-cta { flex-direction: column; align-items: flex-start; gap: 1px; padding: 11px 20px; font-size: 15px; }
 .hero-cta small { font-size: 11.5px; font-weight: 500; opacity: 0.72; }
-}
 @media (max-width: 900px) { .page-title { display: none; } .bar-context { margin-left: 0; } }
 
 /* Header: what you play (left) · this page's controls · what you learn · settings (right) */
@@ -386,3 +385,4 @@ a.btn, a.brand { text-decoration: none; color: inherit; display: inline-flex; al
   .bar-divider { display: none; }
   .picker-icon { display: none; }
   .picker-name { max-width: 160px; }
+}

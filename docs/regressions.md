@@ -87,6 +87,10 @@ fifteen Explore cards.** Escape only knew the popovers and the lessons drawer; t
 every feature at once. *Guard:* Escape closes every overlay, then `closeOverlay()` puts the address back (it only rewrites the URL, never closes anything — the cause);
 the first run starts the guided tour instead (`tour-instrument.test.ts`); QA rows N6, N7.
 
+**A stray brace in `style.css` passed every local gate and broke the CI build.** Lint, types and tests
+never parse the stylesheet; only the production build's CSS minifier does. *Guard:* the pre-commit hook
+runs `vite build` too (well under a second).
+
 ## Tools
 
 **The sample tools silently dropped SFZ regions they didn't expect.** SFZ lets a region leave out
