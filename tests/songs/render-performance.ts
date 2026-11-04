@@ -57,7 +57,7 @@ export function render(plucks: readonly PluckRequest[], inst: Instrument, { useS
   const end = Math.max(...plucks.map((p) => p.when)) + TAIL_SECONDS;
   const out = new Float32Array(Math.ceil(end * SR));
   const setId = SAMPLE_SET_BY_INSTRUMENT[inst.id];
-  const set = setId && useSamples ? loadSet(setId) : null;
+  const set = setId && useSamples && inst.isRecorded ? loadSet(setId) : null;
   const synth = new WorkletSandbox();
   const active = new Map<string, { start: number; buffer: Float32Array; rate: number; gain: number; stopAt: number }>();
   let recorded = 0;

@@ -9,6 +9,7 @@ import { StrumFilter } from '@domain/settings/strum-filter';
 export const DEFAULT_SETTINGS: Settings = {
   language: '',
   instrument: 'acoustic',
+  voices: {},
   mode: PlayMode.chord,
   chordSet: 'pop',
   isLefty: false,
