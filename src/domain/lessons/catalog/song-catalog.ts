@@ -1,5 +1,8 @@
 import { PlayMode } from '@domain/instruments/play-mode';
 import type { Song } from '@domain/lessons/catalog/song';
+import { BACH_PRELUDE } from '@domain/lessons/catalog/pieces/bach-prelude';
+import { BACH_PRELUDE_BASS } from '@domain/lessons/catalog/pieces/bach-prelude-bass';
+import { CLARO_DE_LUNA } from '@domain/lessons/catalog/pieces/claro-de-luna';
 import { midiToName } from '@domain/music/pitch';
 
 /** Classic walking boogie: up the arpeggio plus the sixth, down from the flat seventh. */
@@ -10,11 +13,20 @@ const D2 = 38;
 const E2 = 40;
 const STEADY = 'D.D.D.D.';
 const WALTZ = 'D.D.D.';
+/**
+ * Tempo of the real pieces. The Prelude follows Pablo Casals' 1938 recording (public domain; 164 beats
+ * from first note to last in 141.5 s ≈ 70 bpm), which `tests/songs` aligns the app's performance with.
+ * Claro de Luna keeps its score's marking.
+ */
+const PRELUDE_BPM = 70;
+const CLARO_BPM = 60;
 
 /**
  * The lesson library — traditional / public-domain tunes and original exercises only.
  *
  * @remarks
+ * - Real pieces (`pieces/`) are complete public-domain scores at their real tempo, every voice included:
+ *   the player is graded on the melody, the guide plays the full arrangement.
  * - Course lessons (`course`) follow the order guitar teachers use: one chord with steady
  *   downstrokes, two easy chords and the change between them, more chords, then rhythm, then a song.
  */
@@ -72,6 +84,14 @@ export const SONGS: readonly Song[] = [
     notes: 'E4:1 E4:1 F4:1 G4:1 G4:1 F4:1 E4:1 D4:1 C4:1 C4:1 D4:1 E4:1 E4:1.5 D4:0.5 D4:2 ' +
       'E4:1 E4:1 F4:1 G4:1 G4:1 F4:1 E4:1 D4:1 C4:1 C4:1 D4:1 E4:1 D4:1.5 C4:0.5 C4:2',
     about: 'about.ode' },
+
+  // Real pieces — complete, at full tempo
+  { id: 'bach-prelude', title: 'Cello Suite No. 1 — Prélude', credit: 'credit.bach', level: 3, bpm: PRELUDE_BPM, beatsPerBar: 4, mode: PlayMode.note, instrument: 'acoustic',
+    notes: BACH_PRELUDE, about: 'about.bachPrelude' },
+  { id: 'claro-de-luna', title: 'Claro de Luna', credit: 'credit.tarrega', level: 3, bpm: CLARO_BPM, beatsPerBar: 4, mode: PlayMode.note, instrument: 'nylon', tuning: 'dropD',
+    notes: CLARO_DE_LUNA, about: 'about.claroDeLuna' },
+  { id: 'bach-prelude-bass', title: 'Cello Suite No. 1 — Prélude (bass)', credit: 'credit.bach', level: 3, bpm: PRELUDE_BPM, beatsPerBar: 4, mode: PlayMode.note, instrument: 'bass',
+    notes: BACH_PRELUDE_BASS, about: 'about.bachPreludeBass' },
 
   // Bass
   { id: 'bass-roots', title: 'Root Notes: G – D – Em – C', credit: 'credit.exercise', level: 1, bpm: 82, beatsPerBar: 4, mode: PlayMode.note, instrument: 'bass',

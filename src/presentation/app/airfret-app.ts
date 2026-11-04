@@ -212,7 +212,7 @@ export class AirfretApp {
     this.lesson = session.value;
     this.s.guide.reset();
     const mode = song.mode === PlayMode.chord && st.mode === PlayMode.free ? PlayMode.free : song.mode;
-    this.s.store.update({ instrument: song.instrument, mode });
+    this.s.store.update({ instrument: song.instrument, mode, tuning: song.tuning ?? 'standard' }); // charted for one tuning
     this.ui.hud.show(song.title, opts.hasGuide);
   }
 

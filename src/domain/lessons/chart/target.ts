@@ -7,5 +7,7 @@ export interface Target {
   readonly dur: number;
   readonly chord?: string;
   readonly midi?: number;
+  /** Other notes sounded with `midi` (bass line, inner voices), highest first; the guide plays them, grading uses `midi`. */
+  readonly harmony?: readonly number[];
   readonly strum?: StrumMark;
 }

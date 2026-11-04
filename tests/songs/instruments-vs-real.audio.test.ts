@@ -1,0 +1,113 @@
+import { readFileSync } from 'node:fs';
+import { describe, expect, it } from 'vitest';
+import type { PluckRequest } from '@domain/audio/pluck-request';
+import { Voice } from '@domain/audio/voice';
+import { StrikeSurface } from '@domain/gesture/strike-surface';
+import type { Instrument } from '@domain/instruments/instrument';
+import { INSTRUMENTS } from '@domain/instruments/instrument-catalog';
+import type { SampleManifest } from '@infrastructure/audio/samples/sample-manifest';
+import type { SampleRef } from '@infrastructure/audio/samples/sample-ref';
+import { SAMPLE_SET_BY_INSTRUMENT } from '@infrastructure/audio/samples/sample-sets';
+import { analyze, distance } from '../../tools/calibrate/analyze.mjs';
+import { decode } from '../../tools/calibrate/decode.mjs';
+import { fundamental } from '../../tools/calibrate/pitch.mjs';
+import { render, SR } from './render-performance';
+
+/**
+ * Every instrument against recordings of the real thing, note by note.
+ *
+ * - **What the app plays** (the recorded voice, re-pitched and tuning-corrected by SampleSet) must be in
+ *   tune — including notes re-pitched past the recorded range (drop D, the top of the bass).
+ * - **The synth fallback** (heard before a set loads, for muted strokes and outside the recordings) must be
+ *   in tune and, for decay and tone colour, no further from the recording than it is today. These are
+ *   ratchets like the coverage minimums: lower them as the string model improves, never raise them.
+ */
+/** What the app plays must be this close to true pitch (a trained ear notices about 5 c on a held note). */
+const IN_TUNE_CENTS = 3;
+/** The synth's own pitch error; its dispersion allpass flattens low notes slightly (issue #14). */
+const SYNTH_IN_TUNE_CENTS = 10;
+/** Median distance of the synth from the recordings: |ln(T60 synth / T60 real)| and early harmonic profile (dB). */
+const SYNTH_LIMITS: Record<string, { decayLog: number; profileDb: number }> = {
+  // Measured 2026-11-04: the synth decays 2–6× faster than the real strings across its partials.
+  acoustic: { decayLog: 1.35, profileDb: 15.5 },
+  nylon: { decayLog: 1.9, profileDb: 15 },
+  clean: { decayLog: 1.15, profileDb: 14.5 },
+  drive: { decayLog: 1.15, profileDb: 13 },
+  bass: { decayLog: 0.8, profileDb: 18.5 },
+};
+/** One recorded note in this many is compared (all strings and the whole range still come up). */
+const EVERY = 3;
+const START = 0.05;
+const PREFERRED_LAYER = 1;
+
+const median = (xs: readonly number[]) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)] ?? NaN;
+const nominal = (midi: number) => 440 * 2 ** ((midi - 69) / 12);
+const cents = (hz: number, midi: number) => 1200 * Math.log2(hz / nominal(midi));
+
+function recordings(setId: string): SampleRef[] {
+  const m = JSON.parse(readFileSync(`public/samples/${setId}/manifest.json`, 'utf8')) as SampleManifest;
+  const layer = m.samples.some((s) => s.layer === PREFERRED_LAYER) ? PREFERRED_LAYER : 0;
+  return m.samples.filter((s) => s.layer === layer);
+}
+
+/** The open string a note is played on: the recording's own, or the highest string that reaches it. */
+function stringFor(inst: Instrument, ref: SampleRef | { midi: number; string: number }): number {
+  return ref.string >= 0 ? ref.string : inst.tuning.reduce((best, open, i) => (ref.midi >= open ? i : best), 0);
+}
+
+function note(inst: Instrument, string: number, midi: number): PluckRequest {
+  return { string, midi, amp: 0.7, when: START, isMuted: false, position: inst.pick, voice: Voice.guide, attack: StrikeSurface.nail, isPalmMuted: false };
+}
+
+function play(inst: Instrument, string: number, midi: number, useSamples: boolean): Float32Array {
+  return render([note(inst, string, midi)], inst, { useSamples }).audio.subarray(Math.round(START * SR));
+}
+
+/** Resamples `x` so it sounds `shift` cents higher (what SampleSet's detune does). */
+function repitch(x: Float32Array, shift: number): Float32Array {
+  const rate = 2 ** (shift / 1200);
+  return Float32Array.from({ length: Math.floor(x.length / rate) }, (_, i) => {
+    const k = Math.floor(i * rate);
+    const f = i * rate - k;
+    return (x[k] ?? 0) * (1 - f) + (x[k + 1] ?? 0) * f;
+  });
+}
+
+describe('Every instrument against recordings of the real instrument', () => {
+  it('the pitch meter reads a known shift exactly (an over-reading meter once mis-tuned the sample sets)', () => {
+    const x = decode('public/samples/steel/s0-43-v1.m4a') as Float32Array;
+    const base = cents(fundamental(x, nominal(43)), 43);
+    for (const shift of [-40, -13, 13, 40]) expect(cents(fundamental(repitch(x, shift), nominal(43)), 43) - base).toBeCloseTo(shift, 0);
+  });
+
+  for (const inst of INSTRUMENTS) {
+    const setId = SAMPLE_SET_BY_INSTRUMENT[inst.id];
+    if (!setId) continue;
+    const refs = recordings(setId).filter((_, i) => i % EVERY === 0);
+
+    it(`${inst.id}: what the app plays is in tune on every string, across the whole range`, () => {
+      const lowest = Math.min(...refs.map((r) => r.lo));
+      const highest = Math.max(...refs.map((r) => r.hi));
+      const stretched = [{ midi: lowest - 2, string: 0 }, { midi: highest + 2, string: inst.tuning.length - 1 }];
+      const off = [...refs, ...stretched].map((r) => ({ midi: r.midi, c: cents(fundamental(play(inst, stringFor(inst, r), r.midi, true), nominal(r.midi)), r.midi) }));
+      const worst = off.reduce((a, b) => (Math.abs(b.c) > Math.abs(a.c) ? b : a));
+      console.info(`${inst.id}: ${off.length} notes, worst ${worst.c.toFixed(1)} c at MIDI ${worst.midi}`);
+      expect(Math.abs(worst.c)).toBeLessThan(IN_TUNE_CENTS);
+    });
+
+    it(`${inst.id}: the synth fallback is in tune and no further from the recordings than today`, () => {
+      const rows = refs.map((r) => {
+        const real = analyze(decode(`public/samples/${setId}/${r.file}`) as Float32Array, nominal(r.midi));
+        const audio = play(inst, stringFor(inst, r), r.midi, false);
+        return { c: cents(fundamental(audio, nominal(r.midi)), r.midi), ...distance(analyze(audio, nominal(r.midi)), real) };
+      });
+      const decayLog = median(rows.map((r) => r.decayLog));
+      const profileDb = median(rows.map((r) => r.profileDb));
+      console.info(`${inst.id} synth vs real: ${rows.length} notes · decay ×${Math.exp(decayLog).toFixed(2)} (ln ${decayLog.toFixed(2)}) · profile ${profileDb.toFixed(1)} dB`);
+      expect(Math.max(...rows.map((r) => Math.abs(r.c)))).toBeLessThan(SYNTH_IN_TUNE_CENTS);
+      const limit = SYNTH_LIMITS[inst.id];
+      expect(decayLog).toBeLessThanOrEqual(limit?.decayLog ?? 0);
+      expect(profileDb).toBeLessThanOrEqual(limit?.profileDb ?? 0);
+    });
+  }
+});
