@@ -120,6 +120,9 @@ F/B rows (id — note):
 | R3 | Lessons → *Claro de Luna*, shadow mode | Tuning switches to drop D; guide plays bass, triplets and melody together at 60 bpm | |
 | R4 | Lessons → *Cello Suite No. 1 — Prélude* (guitar and bass) | Full piece at 70 bpm (≈ 2 min 22 s from first note to last), as Casals plays it | |
 | R5 | Bend a ringing note in free mode on a sampled instrument | The recording bends; it doesn't restart | |
+| R6 | Open `/banjo`, strum G and C | A round banjo pot (nickel hoop, cream head, floating bridge) fits on screen; a short, bright, snappy recorded sound | |
+| R7 | Open `/bass-5`, Notes mode, pluck the top string open and at fret 5 | Five strings, 3+2 headstock; a deep low B, then E — in tune, recorded (not synth) | |
+| R8 | `/bass-5` → Settings → Tuning | Standard, Drop A, Half step down — no Drop D | |
 
 ## H. Hands-only view
 

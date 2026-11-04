@@ -35,6 +35,11 @@ const SYNTH_LIMITS: Record<string, { decayLog: number; profileDb: number }> = {
   clean: { decayLog: 1.15, profileDb: 14.5 },
   drive: { decayLog: 1.15, profileDb: 13 },
   bass: { decayLog: 0.8, profileDb: 18.5 },
+  // The 5-string shares the bass recordings; measured 2026-11-05.
+  bass5: { decayLog: 0.8, profileDb: 18.5 },
+  // Measured 2026-11-05: decay ×1.7, but the tone colour is the furthest of all — the banjo takes are
+  // short (0.6–2 s) and their early harmonics swing ±20 dB note to note, so the profile metric is noisy here.
+  banjo: { decayLog: 0.55, profileDb: 32 },
 };
 /** One recorded note in this many is compared (all strings and the whole range still come up). */
 const EVERY = 3;

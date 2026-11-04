@@ -11,7 +11,8 @@ const Muted = { t60: 0.09, brightness: 0.6 } as const;
 const PalmMuted = { t60: 0.25, brightness: 0.5 } as const;
 /** Nail vs fleshy pad: the nail adds brightness and a pick-like tick; the pad rounds the attack off. */
 const ATTACK_BRIGHTNESS = { nail: 0.12, pad: -0.18 } as const;
-const STIFFNESS = { acoustic: 0.12, nylon: 0.05, clean: 0.1, drive: 0.1, bass: 0.22 } as const;
+/** Banjo: fitted to its recordings (tools/calibrate/fit.mjs; at the top of the searched range). */
+const STIFFNESS = { acoustic: 0.12, nylon: 0.05, clean: 0.1, drive: 0.1, bass: 0.22, banjo: 0.35 } as const;
 /** Decay laws are stated at 110 Hz: T60(f) = t60 · (110 / f)^t60Exponent. */
 const DECAY_REFERENCE_HZ = 110;
 const STEREO_WIDTH = 0.5;

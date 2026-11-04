@@ -3,6 +3,10 @@
 //   node tools/samples/prepare.mjs sfz  <file.sfz>  <out-dir> [--seconds 4] [--codec flac]
 //   node tools/samples/prepare.mjs meta <ogg-dir>   <out-dir> [--seconds 4.5] [--codec aac]
 //
+// `--skip-untrusted` leaves out recordings whose tuning error is larger than MAX_CORRECTION: the engine
+// can't correct them, so a neighbouring recording re-pitched by a semitone voices the note instead
+// (the guitar banjo is tuned 30–70 c sharp).
+//
 // `sfz`  — FreePats-style maps: one layer, each sample covers a key range and is re-pitched.
 // `meta` — Meta Open Sound guitars: every string sampled at every fret in three dynamics, named
 //          INSGuitar<Kind>_String<Name>_Vel0<n>[Technique]_<Note>_01.ogg. Nothing is re-pitched.
@@ -28,6 +32,7 @@ const FADE = 0.3;
 const MAX_CORRECTION = 60;
 // Pitch is read from the long-FFT fundamental: analyze()'s inharmonicity fit over-reads offsets (~60 %).
 const AAC_BITRATE = '72k';
+const SFZ_DEFAULT_KEYCENTER = 60;
 const STRINGS = ['LowE', 'A', 'D', 'G', 'B', 'HighE'];
 const NOTE = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 
@@ -35,6 +40,7 @@ const [mode, source, outDir, ...rest] = process.argv.slice(2);
 const flag = (name, fallback) => (rest.includes(name) ? rest[rest.indexOf(name) + 1] : fallback);
 const seconds = Number(flag('--seconds', mode === 'meta' ? 4.5 : 4));
 const codec = flag('--codec', mode === 'meta' ? 'aac' : 'flac');
+const shouldSkipUntrusted = rest.includes('--skip-untrusted');
 if (!['sfz', 'meta'].includes(mode) || !source || !outDir) throw new Error('usage: prepare.mjs sfz|meta <source> <out-dir>');
 
 const entries = mode === 'sfz' ? parseSfz(source) : parseMeta(source);
@@ -46,6 +52,11 @@ const setPeak = cuts.reduce((m, c) => Math.max(m, peakOf(c.audio)), 0);
 const samples = [];
 for (const c of cuts) {
   const gain = 0.9 / Math.max(1e-6, setPeak);
+  const raw = rawCents(c.audio, c.midi);
+  if (shouldSkipUntrusted && !(Math.abs(raw) <= MAX_CORRECTION)) {
+    console.log(`skipped ${c.midi}: ${raw} c is past the trusted correction`);
+    continue;
+  }
   const file = `${c.string >= 0 ? `s${c.string}-` : ''}${c.midi}${c.layer > 0 ? `-v${c.layer}` : ''}.${codec === 'aac' ? 'm4a' : 'flac'}`;
   encode(c.audio.map((v) => v * gain), join(outDir, file));
   const cents = centsOff(c.audio, c.midi);
@@ -71,11 +82,15 @@ function peakOf(x) {
   return m;
 }
 
-function centsOff(audio, midi) {
+function rawCents(audio, midi) {
   const nominal = 440 * Math.pow(2, (midi - 69) / 12);
   const measured = fundamental(audio, nominal);
-  const cents = Number.isFinite(measured) ? Math.round(1200 * Math.log2(nominal / measured)) : 0;
-  return Math.abs(cents) > MAX_CORRECTION ? 0 : cents;
+  return Number.isFinite(measured) ? Math.round(1200 * Math.log2(nominal / measured)) : NaN;
+}
+
+function centsOff(audio, midi) {
+  const cents = rawCents(audio, midi);
+  return Number.isFinite(cents) && Math.abs(cents) <= MAX_CORRECTION ? cents : 0;
 }
 
 function encode(audio, out) {
@@ -107,8 +122,10 @@ function parseSfz(path) {
   const out = [];
   let cur = null;
   const flush = () => {
-    if (cur?.sample && cur.key !== undefined && !out.some((o) => o.midi === cur.key)) {
-      out.push({ path: join(dirname(path), cur.sample), midi: cur.key, lo: cur.lo ?? cur.key, hi: cur.hi ?? cur.key, string: -1, layer: 0 });
+    // SFZ: pitch_keycenter defaults to 60 (middle C) when a region doesn't give one.
+    const key = cur?.key ?? SFZ_DEFAULT_KEYCENTER;
+    if (cur?.sample && !out.some((o) => o.midi === key)) {
+      out.push({ path: join(dirname(path), cur.sample), midi: key, lo: cur.lo ?? key, hi: cur.hi ?? key, string: -1, layer: 0 });
     }
   };
   for (const token of text.replace(/\/\/[^\n]*/g, '').split(/\s+(?=<|\w+=)/)) {
@@ -118,7 +135,7 @@ function parseSfz(path) {
     }
     if (!cur) continue;
     for (const [, k, v] of token.matchAll(/(\w+)=([^\n<]+?)(?=\s+\w+=|\s*$|\s*<)/g)) {
-      if (k === 'sample') cur.sample = v.trim();
+      if (k === 'sample') cur.sample = v.trim().replaceAll('\\', '/');
       else if (k === 'key') cur.key = cur.lo = cur.hi = Number(v);
       else if (k === 'pitch_keycenter') cur.key = Number(v);
       else if (k === 'lokey') cur.lo = Number(v);

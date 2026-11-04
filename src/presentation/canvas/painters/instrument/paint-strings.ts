@@ -1,12 +1,14 @@
 import { stringY } from '@domain/fretboard/neck-geometry';
 import type { PaintContext } from '@presentation/canvas/paint-context';
 
-/** Gauges in inches, low → high: light acoustic set, nylon, electric 10s, bass 45s. */
+/** Gauges in inches, low → high: light acoustic set, nylon, electric 10s, bass 45s, light banjo set. */
 const GAUGES = {
   acoustic: [0.053, 0.042, 0.032, 0.024, 0.016, 0.012],
   classical: [0.044, 0.035, 0.03, 0.04, 0.032, 0.028],
   electric: [0.046, 0.036, 0.026, 0.017, 0.013, 0.01],
-  bass: [0.105, 0.085, 0.065, 0.045],
+  /** A 5-string set; a 4-string uses its top four. */
+  bass: [0.13, 0.105, 0.085, 0.065, 0.045],
+  banjo: [0.042, 0.032, 0.024, 0.018, 0.013, 0.01],
 } as const;
 /** px per inch of gauge at a 900 px tall screen. */
 const PX_PER_INCH = 62;
@@ -26,7 +28,7 @@ const SHADOW_OFFSET = 3;
  */
 export function paintStrings({ ctx, player, look, phase }: PaintContext): void {
   const l = player.layout;
-  const gauges = GAUGES[look.style];
+  const gauges = GAUGES[look.style].slice(-l.strings);
   const scale = (l.h / REFERENCE_HEIGHT) * PX_PER_INCH;
   const pick = player.strumPoint;
   for (let i = 0; i < l.strings; i++) {
