@@ -28,6 +28,12 @@ const LOOKS: Readonly<Record<ChainKind, GuitarLook>> = {
     headstock: '#1a1a1d', binding: '#d9d5cc', inlay: '#1c1c1c', hardware: '#c7c7c9', pickguard: '#232326',
     wound: '#bdbdc0', plain: '#bdbdc0', woundCount: 4,
   },
+  banjo: {
+    // Calfskin-toned head (top), mahogany resonator (burst), nickel rim and brackets (hardware).
+    style: 'banjo', top: '#e6dcc3', topGrain: '#d3c6a7', burst: '#3a1f12', board: '#2a1a12', boardGrain: '#180e09',
+    headstock: '#2a1a12', binding: '#efe4cc', inlay: '#e8e2d2', hardware: '#cfcfd1', pickguard: 'transparent',
+    wound: '#c9c9cb', plain: '#dcdcde', woundCount: 3,
+  },
 };
 
 export function lookFor(chain: ChainKind): GuitarLook {

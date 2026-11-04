@@ -79,11 +79,15 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| N1 | ☰ | Menu opens with Home, six instruments, Learn, Settings; current page highlighted | |
+| N1 | ☰ | Menu opens with Home, eight instruments, Learn, Settings; current page highlighted | |
 | N2 | Open `/bass`, `/drums`, `/electric` directly (reload) | That instrument's page, with the start card | |
 | N3 | Back / Forward | Moves between pages | |
 | N4 | Dersler → close | Back on the page you came from | |
 | N5 | Strum fast and repeatedly for 10 s | No crackle, no harsh distortion | |
+| N6 | Open Explore, then a lesson's intro, then Lessons; press Escape each time | Each closes back to the page under it | |
+| N7 | Private window → `/banjo` → Start | The guided tour starts on the banjo — no wall of Explore cards. On `/drums` nothing opens | |
+| N8 | Home on a phone (390 px wide) | "Start playing" first; instruments as compact rows under Guitars · Bass · Drums; no `/slug` labels; toolbar on one row, no camera button | |
+| N9 | `/acoustic` on a phone, chord mode | Chord names don't overlap; the chord card doesn't cover the "show your hands" hint | |
 
 ## E. Explore
 
@@ -120,6 +124,9 @@ F/B rows (id — note):
 | R3 | Lessons → *Claro de Luna*, shadow mode | Tuning switches to drop D; guide plays bass, triplets and melody together at 60 bpm | |
 | R4 | Lessons → *Cello Suite No. 1 — Prélude* (guitar and bass) | Full piece at 70 bpm (≈ 2 min 22 s from first note to last), as Casals plays it | |
 | R5 | Bend a ringing note in free mode on a sampled instrument | The recording bends; it doesn't restart | |
+| R6 | Open `/banjo`, strum G and C | A round banjo pot (nickel hoop, cream head, floating bridge) fits on screen; a short, bright, snappy recorded sound | |
+| R7 | Open `/bass-5`, Notes mode, pluck the top string open and at fret 5 | Five strings, 3+2 headstock; a deep low B, then E — in tune, recorded (not synth) | |
+| R8 | `/bass-5` → Settings → Tuning | Standard, Drop A, Half step down — no Drop D | |
 
 ## H. Hands-only view
 

@@ -71,16 +71,18 @@ Drag the mouse across the strings; number keys pick chords and frets.
 | ⚡ | **Clean electric** | 22 frets | Recorded |
 | 🔥 | **Overdrive** | 22 frets | Recorded, through an amp model |
 | 🎚️ | **Bass** — 4 strings | 24 frets | Recorded, synth above A2 |
+| 🎚️ | **5-string bass** — low B | 24 frets | The bass recordings, re-pitched down to B0 |
+| 🪕 | **Banjo** — 6 strings, tuned like a guitar | 22 frets | Recorded (CC0), synth above C5 |
 | 🥁 | **Drums** — kit, cymbals, pedals | — | Synthesised |
 
 Every instrument is checked against recordings of the real one: each note it plays is within **3 cents** of true pitch.
-What comes next — 12-string, ukulele, bağlama, oud, violin, piano, theremin and more — is in the [roadmap](docs/roadmap.md).
+What comes next — 12-string, ukulele (no free recordings yet), bağlama, oud, violin, piano, theremin and more — is in the [roadmap](docs/roadmap.md).
 
 ## Real songs, real tempo
 
 | Piece | On | Tempo | Proven by |
 |---|---|---|---|
-| **J. S. Bach** — Cello Suite No. 1, Prélude | guitars · bass (24 frets) | 70 bpm, as **Pablo Casals** plays it | aligned with his 1938 recording: same music, **0.999×** his time |
+| **J. S. Bach** — Cello Suite No. 1, Prélude | guitars · banjo · 4- and 5-string bass | 70 bpm, as **Pablo Casals** plays it | aligned with his 1938 recording: same music, **0.999×** his time |
 | **F. Tárrega** — *Claro de Luna* (Moonlight Sonata) | guitars, drop D | 60 bpm, as written | every note of the score, < 30 ms off |
 
 Complete public-domain scores — bass line, inner voices and melody — never a slowed-down practice version.

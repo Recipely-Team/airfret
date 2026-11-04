@@ -3,12 +3,17 @@ import { strumStringYs } from '@domain/fretboard/neck-geometry';
 import { ACOUSTIC_BOUTS, CLASSICAL_BOUTS, SOLID_BOUTS, traceBody } from '@presentation/canvas/guitar/body-shape';
 import type { BodyGeometry } from '@presentation/canvas/guitar/body-geometry';
 import type { GuitarLook } from '@presentation/canvas/guitar/guitar-look';
+import { paintBanjoPot } from '@presentation/canvas/guitar/paint-banjo-pot';
 import { paintWood } from '@presentation/canvas/guitar/wood';
 
 const SHADOW = { color: 'rgba(0,0,0,0.55)', blur: 50, offsetY: 22 } as const;
 
 /** Body: shadow, wood top with edge burst, binding, then hole/pickups, pickguard and bridge. */
 export function paintArtBody(ctx: CanvasRenderingContext2D, l: FretboardLayout, g: BodyGeometry, look: GuitarLook): void {
+  if (look.style === 'banjo') {
+    paintBanjoPot(ctx, l, g, look);
+    return;
+  }
   const bouts = look.style === 'acoustic' ? ACOUSTIC_BOUTS : look.style === 'classical' ? CLASSICAL_BOUTS : SOLID_BOUTS;
   const outline = () => traceBody(ctx, g.x0, g.cy, g.length, g.width, bouts.upper, bouts.lower);
   const box = { x: g.x0, y: g.cy - g.width / 2, w: g.length, h: g.width };

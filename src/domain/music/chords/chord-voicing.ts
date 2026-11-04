@@ -7,6 +7,8 @@ const MINOR_PATTERN = /^[A-G][#b]?m(?!aj)/;
 const FIFTH = 7;
 const MINOR_THIRD = 3;
 const MAJOR_THIRD = 4;
+/** Root, fifth, octave, tenth: one tone per string of a 4-string bass. */
+const BASS_OUTLINE_STRINGS = 4;
 
 /** True when the chord has a guitar shape. */
 export function knownChord(name: string): boolean {
@@ -27,7 +29,8 @@ export function chordRoot(name: string): number {
  *
  * @remarks
  * - Six strings use the shape table.
- * - A bass outlines the chord: root, fifth, octave, and the third above it.
+ * - A bass outlines the chord: root, fifth, octave, and the third above it, starting on its E string —
+ *   a 5-string's low B stays silent, as a player keeps it for the lowest notes.
  */
 export function chordNotes(name: string, tuning: readonly number[]): (number | null)[] {
   if (tuning.length === GUITAR_STRING_COUNT) {
@@ -39,9 +42,10 @@ export function chordNotes(name: string, tuning: readonly number[]): (number | n
     });
   }
   const pc = chordRoot(name);
-  let root = tuning[0] ?? 0;
+  const skipped = Math.max(0, tuning.length - BASS_OUTLINE_STRINGS);
+  let root = tuning[skipped] ?? 0;
   while (((root % SEMITONES_PER_OCTAVE) + SEMITONES_PER_OCTAVE) % SEMITONES_PER_OCTAVE !== pc) root++;
   const third = MINOR_PATTERN.test(name) ? MINOR_THIRD : MAJOR_THIRD;
   const tones = [root, root + FIFTH, root + SEMITONES_PER_OCTAVE, root + SEMITONES_PER_OCTAVE + third];
-  return tones.slice(0, tuning.length);
+  return [...tuning.slice(0, skipped).map(() => null), ...tones].slice(0, tuning.length);
 }

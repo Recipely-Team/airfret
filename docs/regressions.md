@@ -79,3 +79,23 @@ be flat — all three joints on the strings, nearly straight, along the fret wir
 return path crosses the strings the same way a strum does. (Also reported by other air-guitar
 projects.) *Guard:* the *Down only* strum filter, covered by `player.test.ts`
 ("ignores upstrokes when the strum filter is down-only").
+
+## Flow
+
+**Escape didn't close Explore or a lesson's intro, and the very first Start buried the stage under all
+fifteen Explore cards.** Escape only knew the popovers and the lessons drawer; the first-run guide showed
+every feature at once. *Guard:* Escape closes every overlay, then `closeOverlay()` puts the address back (it only rewrites the URL, never closes anything — the cause);
+the first run starts the guided tour instead (`tour-instrument.test.ts`); QA rows N6, N7.
+
+**A stray brace in `style.css` passed every local gate and broke the CI build.** Lint, types and tests
+never parse the stylesheet; only the production build's CSS minifier does. *Guard:* the pre-commit hook
+runs `vite build` too (well under a second).
+
+## Tools
+
+**The sample tools silently dropped SFZ regions they didn't expect.** SFZ lets a region leave out
+`pitch_keycenter` (it defaults to 60), put `sample=` before its key, and use `\` in paths. `prepare.mjs`
+skipped the keyless region (a banjo lost its C4) and `measure-refs.mjs` skipped every region written
+sample-first (all 58 of the banjo's) — no error either time. *Guard:* both read a region when it ends, with
+the spec's default key and `/` paths; `instruments-vs-real.audio.test.ts` plays every recorded note in tune,
+and `public/samples/CREDITS.md` records how many regions each set kept.

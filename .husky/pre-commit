@@ -3,3 +3,5 @@ npm run --silent lint
 npm run --silent typecheck
 npm run --silent check:structure
 npx vitest run --silent
+# The production build minifies the CSS: a stylesheet syntax error fails only here, not in lint or tests.
+npx vite build --logLevel error

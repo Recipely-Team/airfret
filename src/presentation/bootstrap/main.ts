@@ -86,7 +86,14 @@ function bootstrap(): void {
   const pedalRouter = new PedalRouter(store, drums, () => ({ audio: sound.now, wall: performance.now() / 1000 }));
   pedalInput.listen((e) => running.isDrums && pedalRouter.handle(e));
   byId('pedalsBtn').onclick = () => ui.pedals.open();
-  wirePopovers(canvas, () => drawer.close());
+  // Escape closes whatever overlay is open (lessons, Explore, a lesson's intro) and returns the address to the
+  // page under it — `closeOverlay` only rewrites the address, so the overlays are closed here first.
+  wirePopovers(canvas, () => {
+    drawer.close();
+    ui.explore.close();
+    ui.intro.hide();
+    running.closeOverlay();
+  });
 
   const render = () => {
     const s = store.value;

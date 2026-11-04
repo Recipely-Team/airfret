@@ -52,3 +52,25 @@ describe('tunings for bass', () => {
     expect(effectiveTuning(BASS_TUNING, 'nope', 0)).toEqual([...BASS_TUNING]);
   });
 });
+
+describe('5-string bass', () => {
+  it('offers tunings whose offsets fit five strings, so drop A lowers the low B and nothing else', async () => {
+    const { effectiveTuning, tuningsFor } = await import('@domain/music/tuning-catalog');
+    const { BASS5_TUNING } = await import('@domain/music/tunings');
+    for (const t of tuningsFor(5)) expect(t.offsets).toHaveLength(5);
+    expect(tuningsFor(5).map((t) => t.id)).not.toContain('dropD');
+    expect(effectiveTuning(BASS5_TUNING, 'dropA', 0)).toEqual([21, 28, 33, 38, 43]);
+  });
+
+  it('outlines a chord from its E string and leaves the low B silent', async () => {
+    const { BASS5_TUNING } = await import('@domain/music/tunings');
+    expect(chordNotes('Am', BASS5_TUNING)).toEqual([null, 33, 40, 45, 48]);
+  });
+});
+
+describe('tunings for any other string count', () => {
+  it('falls back to standard instead of handing out offsets for the wrong strings', async () => {
+    const { tuningsFor } = await import('@domain/music/tuning-catalog');
+    expect(tuningsFor(7).map((t) => t.id)).toEqual(['standard']);
+  });
+});

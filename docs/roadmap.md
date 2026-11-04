@@ -34,7 +34,7 @@ An instrument ships only when it can do what the real one does, proven by a real
    (`instruments-vs-real.audio.test.ts`): within 3 cents of true pitch, and the synth fallback no further from
    the recordings in decay and tone than the last measurement (ratchet; today 2–6× too short a decay).
 
-### Where the current instruments stand (2026-11-04)
+### Where the current instruments stand (2026-11-05)
 
 | Instrument | Range | Real song (tests) | Open gaps |
 |---|---|---|---|
@@ -42,7 +42,9 @@ An instrument ships only when it can do what the real one does, proven by a real
 | Classical (nylon) | 19 frets ✓ | Claro de Luna (drop D), Bach Prélude ✓ | Same |
 | Clean electric | 22 frets ✓ | Both ✓ | Only 13 samples, re-pitched ±2 semitones: needs per-string/per-fret recordings |
 | Drive electric | 22 frets ✓ | Bach Prélude ✓ | Same as clean |
-| Bass | 24 frets ✓ | Bach Prélude at cello pitch ✓, Casals ✓ | Samples cover only E1–A2: 550 of 656 notes are synthesised; needs a full-range set; 5-string option |
+| Bass | 24 frets ✓ | Bach Prélude at cello pitch ✓, Casals ✓ | Samples cover only E1–A2: 550 of 656 notes are synthesised; needs a full-range set |
+| 5-string bass | 24 frets ✓, low B | Bach Prélude ✓ | Shares the 4-string recordings: B0–D#1 re-pitched or synthesised |
+| Banjo (6-string, guitar tuning) | 22 frets ✓ | Bach Prélude, Claro de Luna ✓ | 25 recordings, D2–C5 (CC0), one take each; synth tone colour furthest from the real one (32 dB); no 5-string drone banjo yet |
 | Drums | — | — | Groove charts and a real-song test (see Drum lessons) |
 
 The on-screen neck still shows 12 frets: the guide plays the whole neck, but an air player can't reach fret 13+
@@ -58,10 +60,13 @@ song test before it ships. Grouped by how much of the existing code they reuse.
 
 **Fretted, same hand model (tuning + frets + samples)**
 - 12-string guitar (octave courses), 7- and 8-string guitar, baritone guitar
-- 5- and 6-string bass, fretless bass (continuous pitch), acoustic bass guitar
-- Ukulele (soprano, concert, tenor, baritone), guitalele
+- ~~5-string bass~~ (shipped), 6-string bass, fretless bass (continuous pitch), acoustic bass guitar
+- Ukulele (soprano, concert, tenor, baritone), guitalele — blocked on recordings: no CC0 / freely licensed
+  ukulele multisample found (2026-11-05); also needs its own chord shapes and tunings keyed by family, not
+  string count (a 4-string ukulele would otherwise get the bass's)
 - Mandolin and mandola (paired courses, tremolo picking), Irish bouzouki
-- Banjo (5-string with the short drone string; 4-string tenor), resonator guitar / dobro
+- Banjo: ~~6-string guitar banjo~~ (shipped); 5-string with the short drone string (needs re-entrant tuning and
+  its own chord shapes; the only free set found, FlameStudios Kay, is GPL-3.0), 4-string tenor; resonator guitar / dobro
 - Bağlama / saz (kısa and uzun sap, microtonal frets — 17+ per octave), cura, tanbur, cümbüş
 - Oud and fretless lutes (continuous pitch, maqam intonation), Renaissance lute, balalaika, sitar (sympathetic strings)
 - Lap steel and pedal steel (slide bar instead of frets)
@@ -104,6 +109,18 @@ part, and your instrument's part scrolls by in time — chords, notes or drum hi
 is muted in the mix so you fill the gap; a "guide" level brings it back while learning. Builds on the lesson
 timeline, the shadow guide and the real-song tests (tempo and alignment against a recording). Songs: public
 domain or the player's own files; backing tracks for copyrighted songs need licensing.
+
+## Practice loop — `idea`
+Pick a few bars of a lesson and loop them, slower at first and up to full tempo as the score improves —
+what Rocksmith's Riff Repeater does and players miss most elsewhere (seamless loops, short sections, pause).
+Builds on the lesson timeline and the tempo choice; the real-song tests keep 100 % honest.
+
+## Onboarding — what comparable apps do (2026-11-05) — partly `shipped`
+Simply Guitar and Fender Play move a new player one task at a time to a first sound; Handel (a webcam
+instrument) plays before camera access. Shipped: first Start runs the tour (not every feature at once), a
+"Start playing" path from home, the no-camera route on the start card. Open: a skill question before the
+first lesson (first-timer · knows chords · plays already) to pick where the course starts, and a daily
+practice goal.
 
 ## Mac app — `idea`
 Wrap the web build with Tauri for a dock icon, offline use and no browser chrome. The camera
