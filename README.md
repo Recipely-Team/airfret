@@ -1,57 +1,146 @@
+<div align="center">
+
 # Airfret
 
-**Play guitar and bass in the air.** Your webcam sees both hands; a virtual instrument sits over
-the mirrored image; every note is synthesised in real time. Lessons teach songs with a scrolling
-timeline, a wait-for-me mode and timing scores.
+### Play guitar, bass and drums in the air.
 
-- **Five instruments** — acoustic, nylon, clean electric, overdrive, 4-string bass.
-- **Chord mode** — point the left index finger at a chord box, strum with the right. Faster = louder.
-  A fist on the neck mutes for a percussive chuck.
-- **Note mode** — the left hand holds a fret (1–12), the right hand plucks single strings.
-- **Lessons** — 11 traditional / public-domain tunes and exercises; count-in, metronome or drums,
-  60–100 % tempo, *wait for me* or *play along*; best scores saved; a real-guitar chord diagram for
-  every chord, so practice carries over to a real instrument.
-- **Private by design** — hand tracking runs in the browser; video never leaves the device.
-- **No camera?** Drag the mouse across the strings; number keys pick chords or frets.
+Your webcam watches both hands. A real-looking instrument sits over the mirrored image,<br/>
+and every note comes from recordings of real instruments, in real time, in the browser.
 
-## Getting started
+[![Play now](https://img.shields.io/badge/play-airfret.vercel.app-e0a458?style=for-the-badge&labelColor=161514)](https://airfret.vercel.app)
+&nbsp;
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-2b2a28?style=for-the-badge&logo=typescript&logoColor=e0a458)
+![No upload](https://img.shields.io/badge/video-never%20leaves%20your%20device-2b2a28?style=for-the-badge)
+[![License AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-2b2a28?style=for-the-badge)](#license)
+
+</div>
+
+<br/>
+
+## What you can do
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**🎸 Strum chords**<br/>
+Point at a chord with one hand, strum with the other. Faster is louder; a fist on the neck gives a muted *chuck*.
+
+</td>
+<td width="33%" valign="top">
+
+**🎼 Play anything, fret by fret**<br/>
+Free mode is a real fretboard: every fingertip frets its own string — barres, bends, slides, hammer-ons.
+
+</td>
+<td width="33%" valign="top">
+
+**🥁 Air drums**<br/>
+Sticks in your hands, a full kit on screen, and pedals on any key, mouse button, gamepad or MIDI pedal.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+**📚 Learn real songs**<br/>
+26 lessons: a beginner course, traditional songs, and complete classical pieces at full tempo.
+
+</td>
+<td valign="top">
+
+**👤 Shadow a guitarist**<br/>
+A guide plays every note with you, like a teacher beside you — then step in and play along, or let it wait for you.
+
+</td>
+<td valign="top">
+
+**🖱️ No camera? Still works**<br/>
+Drag the mouse across the strings; number keys pick chords and frets.
+
+</td>
+</tr>
+</table>
+
+## Instruments
+
+| | Instrument | Neck | Voice |
+|---|---|---|---|
+| 🪵 | **Acoustic** — steel string | 20 frets | Recorded, every string and fret |
+| 🎻 | **Classical** — nylon | 19 frets | Recorded, every string and fret |
+| ⚡ | **Clean electric** | 22 frets | Recorded |
+| 🔥 | **Overdrive** | 22 frets | Recorded, through an amp model |
+| 🎚️ | **Bass** — 4 strings | 24 frets | Recorded, synth above A2 |
+| 🥁 | **Drums** — kit, cymbals, pedals | — | Synthesised |
+
+Every instrument is checked against recordings of the real one: each note it plays is within **3 cents** of true pitch.
+What comes next — 12-string, ukulele, bağlama, oud, violin, piano, theremin and more — is in the [roadmap](docs/roadmap.md).
+
+## Real songs, real tempo
+
+| Piece | On | Tempo | Proven by |
+|---|---|---|---|
+| **J. S. Bach** — Cello Suite No. 1, Prélude | guitars · bass (24 frets) | 70 bpm, as **Pablo Casals** plays it | aligned with his 1938 recording: same music, **0.999×** his time |
+| **F. Tárrega** — *Claro de Luna* (Moonlight Sonata) | guitars, drop D | 60 bpm, as written | every note of the score, < 30 ms off |
+
+Complete public-domain scores — bass line, inner voices and melody — never a slowed-down practice version.
+
+## Quick start
 
 ```bash
 npm install
-npm run dev       # http://localhost:5180 — use Chrome or Safari, allow the camera
+npm run dev        # → http://localhost:5180  (Chrome or Safari, allow the camera)
 ```
 
-Sit about an arm's length from the camera with even light on your hands.
+> Sit about an arm's length from the camera, with even light on your hands.
 
-## Checking your work
+## How it works
 
-```bash
-npm run check     # lint · typecheck · tests with per-layer coverage minimums · structure gate
-npm run build     # static site in dist/
+```
+ webcam ──► MediaPipe hand landmarks ──► gestures (strum · fret · strike) ──► notes
+                                                                              │
+          recorded samples (one per string & fret) ◄──────────────────────────┤
+          Karplus–Strong string worklet (fallback)  ◄──────────────────────────┘
+                              │
+                 body · amp · cabinet ──► reverb ──► limiter ──► 🔊
 ```
 
-The pre-commit hook runs the same gates plus a secret scan. Camera, rendering and sound are
-covered by the manual pass in [`docs/qa/manual.md`](docs/qa/manual.md).
+- **Hand tracking** — MediaPipe Hand Landmarker (WASM + WebGL) with One-Euro smoothing, all on-device.
+- **Playing** — per-string crossing detection with sub-frame timing; strike position and finger surface shape the tone.
+- **Sound** — real multisampled instruments, tuning-corrected per note; a physical string model fills the gaps.
+- **Code** — Vite and strict TypeScript, no UI framework, Clean Architecture / DDD. Rules in [`CLAUDE.md`](CLAUDE.md), reasons in [`architecture.md`](architecture.md), every file in [`PROJECT-MAP.md`](PROJECT-MAP.md).
 
-## How it is built
+## Quality gates
 
-Vite + strict TypeScript, no UI framework, Clean Architecture / DDD layers
-(`core → domain → application / infrastructure → presentation`). Start with
-[`CLAUDE.md`](CLAUDE.md) for the rules and [`architecture.md`](architecture.md) for the why;
-[`PROJECT-MAP.md`](PROJECT-MAP.md) indexes every file.
+| Command | Checks |
+|---|---|
+| `npm run check` | lint · types · tests with per-layer coverage minimums · structure rules |
+| `npm run test:songs` | real songs rendered with the real samples, against the score and a real recording; every instrument against its recordings *(needs ffmpeg)* |
+| `npm run build` | the static site in `dist/` |
 
-- **Hand tracking:** MediaPipe Hand Landmarker (WASM + WebGL), One-Euro smoothing.
-- **Strumming:** per-string crossing detection with hysteresis and sub-frame timing.
-- **Sound:** an extended Karplus–Strong string bank in an AudioWorklet, tuned to within 2 cents,
-  through per-instrument body / amp / cabinet chains.
+The pre-commit hook runs the gates and a secret scan. Camera, drawing and sound feel are covered by the [manual QA pass](docs/qa/manual.md).
 
 ## Shipping
 
-> **TODO:** automatic deploys are not connected yet — see [`docs/deploy.md`](docs/deploy.md).
+Feature branch → PR to `dev` (preview) → release PR `dev → main` (production). Skills in [`.claude/skills/`](.claude/skills).
 
-`dev` is the working branch (Vercel preview); `main` is production. Feature branches → PR to
-`dev` → release PR `dev → main`. See [`.claude/skills/`](.claude/skills).
+> Vercel isn't connected to GitHub yet, so production is deployed by hand — see [`docs/deploy.md`](docs/deploy.md).
 
-## Docs
+## License
 
-[Roadmap](docs/roadmap.md) · [Regressions](docs/regressions.md) · [Privacy & security](docs/privacy.md) · [Manual QA](docs/qa/manual.md)
+The code is released under the **[GNU AGPL-3.0](LICENSE)**: you may read, run, change and redistribute it,
+as long as your version is released under the same licence with its source available to its users,
+including over a network.
+
+The name **Airfret** and its icons are reserved separately in [`TRADEMARKS.md`](TRADEMARKS.md). The instrument
+samples and the scores keep their own licences — see [`public/samples/CREDITS.md`](public/samples/CREDITS.md).
+
+<br/>
+
+<div align="center">
+
+[Roadmap](docs/roadmap.md) · [Regressions](docs/regressions.md) · [Privacy & security](docs/privacy.md) · [Manual QA](docs/qa/manual.md) · [Sample credits](public/samples/CREDITS.md)
+
+<sub>Part of <a href="https://github.com/Recipely-Team">Recipely Team</a>.</sub>
+
+</div>
