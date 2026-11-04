@@ -10,6 +10,8 @@ export interface Settings {
   /** UI language code; empty = follow the browser. */
   readonly language: string;
   readonly instrument: string;
+  /** Chosen voice per instrument id; an instrument not listed plays its best-ranked voice. */
+  readonly voices: Readonly<Record<string, string>>;
   readonly mode: PlayMode;
   readonly chordSet: string;
   readonly isLefty: boolean;
@@ -21,6 +23,8 @@ export interface Settings {
   /** Lesson mix: your own playing, 0–1. Used only while a lesson runs. */
   readonly playerVolume: number;
   readonly brightness: number;
+  /** Hands-only view: the camera picture is hidden and the hands are drawn as a skeleton. Tracking still runs. */
+  readonly isCameraHidden: boolean;
   readonly latencyMs: number;
   readonly lessonTempo: number;
   readonly lessonMode: LessonMode;

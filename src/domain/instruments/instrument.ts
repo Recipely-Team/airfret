@@ -7,7 +7,10 @@ export interface Instrument {
   /** i18n key for the display name. */
   readonly name: string;
   readonly tuning: readonly number[];
+  /** Frets drawn on the on-screen neck (what an air player can reach). */
   readonly maxFret: number;
+  /** Frets on the real instrument (classical 19, steel-string 20, electric 22, bass 24): the guide and lessons use the full range. */
+  readonly frets: number;
   /** Seconds for the fundamental to decay to −60 dB at 110 Hz. */
   readonly t60: number;
   /** Higher notes ring shorter: T60(f) = t60 · (110 / f)^t60Exponent. */
@@ -19,5 +22,9 @@ export interface Instrument {
   /** Output trim per pluck. */
   readonly level: number;
   readonly chain: ChainKind;
+  /** Which of its voices it plays with (`voice-catalog`). */
+  readonly voice: string;
+  /** Plays from recordings when they cover the note; false = the string synth only. */
+  readonly isRecorded: boolean;
   readonly defaultMode: PlayMode;
 }

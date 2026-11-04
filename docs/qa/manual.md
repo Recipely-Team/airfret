@@ -110,3 +110,33 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 Machine/browser:
 F/B rows (id — note):
 ```
+
+## R. Real samples and real songs
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| R1 | Open acoustic, nylon, electric, bass in turn; strum within the first second | Synth at first, then recorded strings once the set has loaded; no gap or click at the switch | |
+| R2 | Network tab while switching instruments | Each set's files load once; switching back doesn't reload them | |
+| R3 | Lessons → *Claro de Luna*, shadow mode | Tuning switches to drop D; guide plays bass, triplets and melody together at 60 bpm | |
+| R4 | Lessons → *Cello Suite No. 1 — Prélude* (guitar and bass) | Full piece at 70 bpm (≈ 2 min 22 s from first note to last), as Casals plays it | |
+| R5 | Bend a ringing note in free mode on a sampled instrument | The recording bends; it doesn't restart | |
+
+## H. Hands-only view
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| H1 | Press the camera button (top right, next to Settings) | Camera picture disappears; instrument on near-black; hands show as points and lines, fingertips in the accent colour | |
+| H2 | Strum, fret and pluck with the camera hidden | Tracking and sound work exactly as before; strum trail and fret highlights still show | |
+| H3 | Drums page with the camera hidden | Skeleton hands hold the sticks; hits work | |
+| H4 | Reload the page | The choice is remembered; the button shows pressed (accent) with a slash | |
+| H5 | Screen reader / hover on the button | Says "Hide camera — show only the hands", then "Show camera" once pressed (Turkish when the UI is Turkish) | |
+| H6 | Explore → *Hands only* → Try it | Camera hides and a toast explains how to bring it back | |
+## V. Instrument voices
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| V1 | Settings → Sound on the acoustic | Three options, numbered by rank: 1 · Recorded instrument, 2 · Synth, fitted to recordings, 3 · Synth, classic | |
+| V2 | Pick each one and strum | Recorded sounds like the samples; both synths sound synthesised, *classic* dies away faster | |
+| V3 | Pick a synth voice, switch to nylon and back | Each instrument remembers its own choice | |
+| V4 | Move the volume slider while a recorded chord rings | The chord keeps ringing (it used to be cut off) | |
+| V5 | Drums page → Settings | No Sound row | |

@@ -93,6 +93,7 @@ function bootstrap(): void {
     setLanguage(resolveLanguage(s.language));
     applyStaticCopy();
     document.documentElement.style.setProperty('--cam', String(s.brightness));
+    document.documentElement.classList.toggle('cam-hidden', s.isCameraHidden);
     toolbar.render();
     settingsPanel.render();
     drawer.render();

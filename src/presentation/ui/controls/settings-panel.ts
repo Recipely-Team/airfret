@@ -1,5 +1,6 @@
 import type { SettingsStore } from '@application/settings/settings-store';
 import { instrumentById } from '@domain/instruments/instrument-catalog';
+import { voicesFor, withVoice } from '@domain/instruments/voice-catalog';
 import { tuningsFor } from '@domain/music/tuning-catalog';
 import { StrumFilter } from '@domain/settings/strum-filter';
 import { Language } from '@presentation/i18n/language';
@@ -8,7 +9,11 @@ import { byId } from '@presentation/ui/dom';
 import { renderSegmented } from '@presentation/ui/controls/segmented-control';
 
 /**
- * **SettingsPanel** — handedness, strum direction, tuning, capo, volume, camera brightness, latency, language.
+ * **SettingsPanel** — handedness, strum direction, sound (voice), tuning, capo, volume, camera brightness,
+ * latency, language.
+ *
+ * @remarks
+ * - Voices are listed best first with their rank, so the measured ranking is visible where the choice is made.
  */
 export class SettingsPanel {
   constructor(private readonly store: SettingsStore) {
@@ -21,12 +26,26 @@ export class SettingsPanel {
     this.slider('latency', s.latencyMs, (v) => store.update({ latencyMs: v }));
     this.slider('capo', s.capo, (v) => store.update({ capo: v }));
     byId<HTMLSelectElement>('tuning').onchange = (e) => store.update({ tuning: (e.target as HTMLSelectElement).value });
+    byId<HTMLSelectElement>('voice').onchange = (e) => {
+      const v = store.value;
+      store.update({ voices: { ...v.voices, [v.instrument]: (e.target as HTMLSelectElement).value } });
+    };
   }
 
   render(): void {
     const s = this.store.value;
     byId('latencyVal').textContent = `${s.latencyMs} ms`;
     byId('capoVal').textContent = s.capo === 0 ? t('ui.noCapo') : t('ui.capoAt', { n: s.capo });
+    const voices = voicesFor(s.instrument);
+    const chosen = withVoice(instrumentById(s.instrument), s.voices[s.instrument]).voice;
+    byId('voiceRow').hidden = voices.length < 2;
+    byId<HTMLSelectElement>('voice').replaceChildren(...voices.map((v, rank) => {
+      const o = document.createElement('option');
+      o.value = v.id;
+      o.textContent = t('voice.ranked', { n: rank + 1, name: t(v.name) });
+      o.selected = v.id === chosen;
+      return o;
+    }));
     const tuning = byId<HTMLSelectElement>('tuning');
     tuning.replaceChildren(...tuningsFor(instrumentById(s.instrument).tuning.length).map((tu) => {
       const o = document.createElement('option');

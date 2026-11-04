@@ -40,6 +40,12 @@ button, select, input { font: inherit; color: inherit; }
   filter: brightness(calc(var(--cam, 0.55) * 0.7)) saturate(0.6) blur(1px);
 }
 
+/* Hands-only view: the video stays live for tracking, it just isn't shown. */
+:root.cam-hidden #cam { opacity: 0; }
+#camBtn .cam-slash { display: none; }
+#camBtn[aria-pressed="true"] { color: var(--accent, #e0a458); }
+#camBtn[aria-pressed="true"] .cam-slash { display: inline; }
+
 #stage { position: absolute; inset: 0; }
 
 /* Top bar */

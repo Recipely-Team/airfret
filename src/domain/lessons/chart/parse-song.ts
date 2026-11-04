@@ -11,6 +11,9 @@ import type { Target } from '@domain/lessons/chart/target';
 import { noteToMidi } from '@domain/music/pitch';
 
 const REST = 'r';
+/** Joins the notes of one onset: "E4+B3". */
+const CHORD_JOIN = '+';
+const FRACTION = '/';
 const DEFAULT_SUBDIV = 2;
 const EPSILON = 1e-6;
 
@@ -22,7 +25,7 @@ const EPSILON = 1e-6;
  */
 export function parseSong(song: Song, isEasy: boolean): Result<SongChart, Failure> {
   const tokens = (song.mode === PlayMode.chord ? song.chords : song.notes)?.trim().split(/\s+/) ?? [];
-  const parsed = tokens.map((tok) => tok.split(':')).map(([name, len]) => ({ name: name ?? '', dur: Number(len) }));
+  const parsed = tokens.map((tok) => tok.split(':')).map(([name, len]) => ({ name: name ?? '', dur: parseLength(len ?? '') }));
   if (!parsed.length || parsed.some((p) => !p.name || !(p.dur > 0))) {
     return fail(new Failure(FailureCode.invalidChart, `${song.id}: bad token`));
   }
@@ -57,11 +60,20 @@ function noteChart(song: Song, parsed: { name: string; dur: number }[]): Result<
   let beat = 0;
   for (const { name, dur } of parsed) {
     if (name !== REST) {
-      const midi = noteToMidi(name);
-      if (midi === null) return fail(new Failure(FailureCode.invalidChart, `${song.id}: bad note ${name}`));
-      targets.push({ index: targets.length, beat, midi, dur });
+      const pitches = name.split(CHORD_JOIN).map(noteToMidi);
+      const [midi, ...harmony] = pitches;
+      if (midi === undefined || pitches.some((p) => p === null)) return fail(new Failure(FailureCode.invalidChart, `${song.id}: bad note ${name}`));
+      const rest = harmony as number[];
+      targets.push(rest.length ? { index: targets.length, beat, midi: midi as number, dur, harmony: rest } : { index: targets.length, beat, midi: midi as number, dur });
     }
     beat += dur;
   }
   return ok({ segments: [], targets, length: beat });
+}
+
+/** "2", "0.5" or a fraction such as "1/3" (triplets stay exact); NaN when malformed. */
+function parseLength(text: string): number {
+  if (!text.includes(FRACTION)) return Number(text);
+  const [num, den] = text.split(FRACTION).map(Number);
+  return num !== undefined && den !== undefined && den > 0 ? num / den : NaN;
 }

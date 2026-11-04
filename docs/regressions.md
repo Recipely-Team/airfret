@@ -20,6 +20,25 @@ milliseconds summed above full scale, which the master compressor let through as
 *Guard:* `string-worklet.test.ts` counts allocations during `process()` while strumming fast (must be 0)
 and checks the bank's peak; the master output now ends in a hard-knee limiter plus a `0.97·tanh` soft clip.
 
+**The top frets of the nylon guitar played up to 20 cents flat.**
+Its recordings there are 20–40 cents flat, and `SampleSet` capped the tuning correction at 20 cents
+"because large re-pitching sounds unnatural", though notes are routinely re-pitched by whole semitones.
+*Guard:* the correction cap matches the sample tool's own analysis limit (60 c); `sample-set.test.ts`
+"plays the top frets in tune…", and `tests/songs/instruments-vs-real.audio.test.ts` measures every
+instrument's notes against true pitch.
+
+**Tuning corrections made many sampled notes more out of tune, not less (up to 18 c).**
+The corrections were measured with `analyze()`'s inharmonicity fit, which over-reads a pitch offset by
+about 60 % (a 13 c error read as 21 c). Nobody had checked the meter itself. *Guard:* pitch is now read by
+`tools/calibrate/pitch.mjs` (long-FFT fundamental); `tools/samples/retune-manifest.mjs` re-measured every
+manifest; the instruments-vs-real test first proves the meter reads known shifts exactly, then requires
+every played note within 3 c.
+
+**Moving any setting — even the volume slider — cut off ringing recorded notes.**
+The app re-applies the instrument on every settings change, and the engine answered each one by dropping
+its sample set and loading it again, which stops every note the set is playing. *Guard:* `useSamples`
+returns early unless the set actually changes (comment there); manual QA row V4.
+
 ## Drums
 
 **Drumsticks vanished and reappeared, or jumped to the other hand.**

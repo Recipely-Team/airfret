@@ -12,25 +12,21 @@ import type { SoundOutputInterface } from '@domain/audio/sound-output-interface'
 import { ChainKind } from '@domain/instruments/chain-kind';
 import type { Instrument } from '@domain/instruments/instrument';
 import { midiToFreq } from '@domain/music/pitch';
-import { clamp } from '@core/math/clamp';
 import type { AudioChain } from '@infrastructure/audio/chains/audio-chain';
 import { buildChain } from '@infrastructure/audio/chains/build-chain';
 import { impulseResponse } from '@infrastructure/audio/chains/impulse-response';
+import { outputStage } from '@infrastructure/audio/chains/output-stage';
 import { DrumKit } from '@infrastructure/audio/drum-kit';
 import { AcousticKit } from '@infrastructure/audio/drums/acoustic-kit';
+import { loadSampleSet } from '@infrastructure/audio/samples/load-sample-set';
+import { SamplePlayer } from '@infrastructure/audio/samples/sample-player';
+import type { SampleSet } from '@infrastructure/audio/samples/sample-set';
+import { SAMPLE_SET_BY_INSTRUMENT } from '@infrastructure/audio/samples/sample-sets';
+import { ringSeconds, stringPan, stringPluck } from '@infrastructure/audio/strings/string-pluck';
 import { AssetPath } from '@infrastructure/constants/assets';
 
-const Level = { master: 0.8, click: 0.5, chuck: 0.35, mutedPluck: 0.8, minAmp: 0.05 } as const;
+const Level = { master: 0.8, click: 0.5, chuck: 0.35, samples: 0.9 } as const;
 const Reverb = { seconds: 2.2, decay: 3.2 } as const;
-const Muted = { t60: 0.09, brightness: 0.6 } as const;
-/** Palm resting by the bridge: notes still pitch, but die in a quarter second and lose their top. */
-const PalmMuted = { t60: 0.25, brightness: 0.5 } as const;
-/** Nail vs fleshy pad: the nail adds brightness and a pick-like tick; the pad rounds the attack off. */
-const ATTACK_BRIGHTNESS = { nail: 0.12, pad: -0.18 } as const;
-const STIFFNESS = { acoustic: 0.12, nylon: 0.05, clean: 0.1, drive: 0.1, bass: 0.22 } as const;
-/** Decay laws are stated at 110 Hz: T60(f) = t60 · (110 / f)^t60Exponent. */
-const DECAY_REFERENCE_HZ = 110;
-const STEREO_WIDTH = 0.5;
 const KIT_LEVEL = 0.9;
 /** Drums sit in a small room: a little of the shared reverb. */
 const KIT_ROOM = 0.6;
@@ -42,16 +38,17 @@ const PICK = { highpassHz: 3000, level: 0.09, length: 0.004 } as const;
 const TOUCH = { bandHz: 3200, level: 0.025, length: 0.03 } as const;
 /** Fingers sliding over wound strings: a short rising squeak. */
 const SQUEAK = { fromHz: 1400, toHz: 3200, q: 6, level: 0.05, length: 0.12 } as const;
-/** Plucking nearer the bridge than this is brighter, farther is darker. */
-const NEUTRAL_POSITION = 0.2;
-const POSITION_BRIGHTNESS = 1.1;
 
 /**
  * **WebAudioEngine** — the `SoundOutputInterface` on Web Audio.
  *
  * @remarks
- * - Strings come from a Karplus–Strong AudioWorklet (`public/worklets/strings.js`), sample-accurate.
- * - Graph: string bank → instrument chain → dry bus + shared reverb → master → limiter.
+ * - Notes come from real recordings (`public/samples/`, see `SAMPLE_SET_BY_INSTRUMENT`) when the
+ *   instrument has a set and it covers the note; otherwise, and for muted strokes, from a Karplus–Strong
+ *   AudioWorklet (`public/worklets/strings.js`). Both are sample-accurate. Sets load in the background:
+ *   until one is ready the synth plays.
+ * - Graph: string bank → instrument chain → dry bus + shared reverb → master → limiter. Recordings
+ *   already carry body and room, so they skip the chain — except the drive guitar, which needs its amp.
  */
 export class WebAudioEngine implements SoundOutputInterface {
   private readonly ctx = new AudioContext({ latencyHint: 'interactive' });
@@ -66,6 +63,11 @@ export class WebAudioEngine implements SoundOutputInterface {
   private readonly voiceGains = new Map<Voice, GainNode>();
   private current: AudioChain | null = null;
   private instrument: Instrument | null = null;
+  private readonly sampleBus: GainNode;
+  private readonly samples: SamplePlayer;
+  private readonly sampleSets = new Map<string, Promise<SampleSet | null>>();
+  /** The sample set in use (or being loaded); null = synth only. */
+  private sampleSetId: string | null = null;
 
   constructor() {
     const ctx = this.ctx;
@@ -92,6 +94,10 @@ export class WebAudioEngine implements SoundOutputInterface {
     kitRoom.gain.value = KIT_ROOM;
     kitBus.connect(kitRoom).connect(this.reverbIn);
     this.kit = new AcousticKit(ctx, kitBus, this.noise);
+    this.sampleBus = ctx.createGain();
+    this.sampleBus.gain.value = Level.samples;
+    this.sampleBus.connect(this.chainOut);
+    this.samples = new SamplePlayer(ctx, this.sampleBus);
   }
 
   get now(): number {
@@ -122,6 +128,7 @@ export class WebAudioEngine implements SoundOutputInterface {
 
   setVoiceVolume(voice: Voice, volume: number): void {
     this.voiceGains.get(voice)?.gain.setTargetAtTime(volume, this.ctx.currentTime, SMOOTHING);
+    this.samples.setVoiceVolume(voice, volume);
   }
 
   setInstrument(instrument: Instrument): void {
@@ -140,43 +147,62 @@ export class WebAudioEngine implements SoundOutputInterface {
     }
     this.current = chain;
     this.reverbIn.gain.setTargetAtTime(chain.reverbSend, this.ctx.currentTime, SMOOTHING);
+    this.sampleBus.disconnect();
+    this.sampleBus.connect(instrument.chain === ChainKind.drive ? chain.input : this.chainOut);
+    this.useSamples(instrument);
+  }
+
+  /**
+   * Switches the sample player to the voice's set, loading it once; the synth plays meanwhile. Settings
+   * changes re-apply the instrument constantly, so nothing happens unless the set itself changes —
+   * otherwise every volume nudge would cut the ringing notes.
+   */
+  private useSamples(instrument: Instrument): void {
+    const setId = instrument.isRecorded ? (SAMPLE_SET_BY_INSTRUMENT[instrument.id] ?? null) : null;
+    if (setId === this.sampleSetId) return;
+    this.sampleSetId = setId;
+    this.samples.use(null);
+    if (!setId) return;
+    let pending = this.sampleSets.get(setId);
+    if (!pending) {
+      pending = loadSampleSet(this.ctx, import.meta.env.BASE_URL, setId).catch(() => null);
+      this.sampleSets.set(setId, pending);
+    }
+    void pending.then((set) => {
+      if (this.sampleSetId === setId) this.samples.use(set);
+    });
   }
 
   pluck(r: PluckRequest): void {
     const inst = this.instrument;
     const bank = this.banks.get(r.voice);
     if (!bank || !inst) return;
-    const freq = midiToFreq(r.midi);
-    const level = Math.min(1, Math.max(Level.minAmp, r.amp));
-    const attack = r.attack === StrikeSurface.pad ? ATTACK_BRIGHTNESS.pad : ATTACK_BRIGHTNESS.nail;
-    const tone = inst.bright * (0.75 + 0.25 * level) + (NEUTRAL_POSITION - r.position) * POSITION_BRIGHTNESS + attack;
-    const ring = inst.t60 * Math.pow(DECAY_REFERENCE_HZ / freq, inst.t60Exponent);
-    bank.port.postMessage({
-      type: 'pluck',
-      when: r.when,
-      string: r.string,
-      freq,
-      amp: inst.level * level * (r.isMuted ? Level.mutedPluck : 1),
-      t60: r.isMuted ? Muted.t60 : r.isPalmMuted ? PalmMuted.t60 : ring,
-      bright: r.isMuted ? inst.bright * Muted.brightness : clamp(r.isPalmMuted ? tone * PalmMuted.brightness : tone, 0.05, 1),
-      stiffness: STIFFNESS[inst.chain],
-      pick: r.position,
-      pan: (r.string / Math.max(1, inst.tuning.length - 1) - 0.5) * STEREO_WIDTH,
-    });
-    if (inst.chain !== ChainKind.nylon && r.attack === StrikeSurface.nail) this.noiseBurst('highpass', PICK.highpassHz, 0.7, r.when, PICK.level * level, PICK.length);
+    const isRecorded = !r.isMuted && !r.isPalmMuted && this.samples.pluck(r, stringPan(inst, r.string));
+    if (isRecorded) {
+      // The recording has replaced whatever this string's synth voice was doing.
+      bank.port.postMessage({ type: 'damp', when: r.when, string: r.string });
+      return;
+    }
+    this.samples.damp(r.voice, r.string, r.when);
+    bank.port.postMessage(stringPluck(inst, r));
+    if (inst.chain !== ChainKind.nylon && r.attack === StrikeSurface.nail) this.noiseBurst('highpass', PICK.highpassHz, 0.7, r.when, PICK.level * Math.min(1, r.amp), PICK.length);
   }
 
   retune(r: RetuneRequest): void {
     const inst = this.instrument;
+    if (this.samples.isSounding(r.voice, r.string)) {
+      this.samples.retune(r);
+      return;
+    }
     const freq = midiToFreq(r.midi);
     this.banks.get(r.voice)?.port.postMessage({
       type: 'retune', when: r.when, string: r.string, freq, glide: r.glide, excite: r.excite,
-      t60: inst ? inst.t60 * Math.pow(DECAY_REFERENCE_HZ / freq, inst.t60Exponent) : 0,
+      t60: inst ? ringSeconds(inst, freq) : 0,
     });
   }
 
   touch(string: number, when: number): void {
-    this.banks.get(Voice.player)?.port.postMessage({ type: 'damp', when, string });
+    this.damp(string, when);
     this.noiseBurst('bandpass', TOUCH.bandHz, 1, when, TOUCH.level, TOUCH.length);
   }
 
@@ -201,6 +227,7 @@ export class WebAudioEngine implements SoundOutputInterface {
 
   damp(string: number, when: number): void {
     this.banks.get(Voice.player)?.port.postMessage({ type: 'damp', when, string });
+    this.samples.damp(Voice.player, string, when);
   }
 
   private noiseBurst(type: BiquadFilterType, freq: number, q: number, when: number, level: number, length: number): void {
@@ -253,32 +280,4 @@ export class WebAudioEngine implements SoundOutputInterface {
   drum(kind: DrumKind, when: number, amp: number): void {
     this.drums.play(kind, when, amp);
   }
-}
-
-/**
- * Master safety stage: a fast hard-knee limiter, then a tanh soft-clipper.
- *
- * @remarks
- * - Six strings struck within milliseconds sum far above full scale; a compressor alone lets the first
- *   transient through and the output clips square. The shaper rounds whatever is left: y = 0.97·tanh(u),
- *   so the output can never pass ±0.97 and stays clean instead of crackling.
- * - The shaper's input domain [−1, 1] stands for signals of ±2 (half-gain in front, tanh(2x) curve).
- */
-function outputStage(ctx: AudioContext, input: AudioNode): AudioNode {
-  const limiter = ctx.createDynamicsCompressor();
-  limiter.threshold.value = -9;
-  limiter.knee.value = 0;
-  limiter.ratio.value = 20;
-  limiter.attack.value = 0.001;
-  limiter.release.value = 0.12;
-  const half = ctx.createGain();
-  half.gain.value = 0.5;
-  const clip = ctx.createWaveShaper();
-  const n = 2048;
-  const curve = new Float32Array(n);
-  for (let i = 0; i < n; i++) curve[i] = 0.97 * Math.tanh(2 * ((i / (n - 1)) * 2 - 1));
-  clip.curve = curve;
-  clip.oversample = '2x';
-  input.connect(limiter).connect(half).connect(clip);
-  return clip;
 }
