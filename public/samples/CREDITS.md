@@ -6,8 +6,8 @@ Prepared with `tools/samples/prepare.mjs`. Only freely redistributable sources m
 |---|---|---|---|
 | `bass/` | FreePats — *Finger Bass YR* (Yamaha RBX, recorded by Andrea Biasior), 2019-09-30 | CC0 1.0 | Verified (LICENSE.txt in the release) |
 | `electric/` | FreePats — *Clean Electric Guitar* | CC0 1.0 | Per FreePats; re-check the release's LICENSE.txt |
-| `steel/` | Meta Open Sound guitars (`INSGuitar…` files) | **Unverified** | Owner to confirm the licence before release |
-| `nylon/` | Meta Open Sound guitars (`INSGuitar…` files) | **Unverified** | Owner to confirm the licence before release |
+| `steel/` | Meta Open Sound guitars (`INSGuitar…` files) | Freely redistributable | Confirmed by the owner, 2026-11-04; record the licence name and link here |
+| `nylon/` | Meta Open Sound guitars (`INSGuitar…` files) | Freely redistributable | Confirmed by the owner, 2026-11-04; record the licence name and link here |
 
 ## Real-song references (not shipped in the build)
 
