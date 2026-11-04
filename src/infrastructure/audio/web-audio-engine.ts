@@ -38,10 +38,6 @@ const SMOOTHING = 0.02;
 const CHUCK = { guitarHz: 2200, bassHz: 700, q: 1.2, attack: 0.003, length: 0.06 } as const;
 /** Pick hitting the string: a 3 ms bright tick, louder for harder strokes. */
 const PICK = { highpassHz: 3000, level: 0.09, length: 0.004 } as const;
-/** Fingertip landing on a string. */
-const TOUCH = { bandHz: 3200, level: 0.025, length: 0.03 } as const;
-/** Fingers sliding over wound strings: a short rising squeak. */
-const SQUEAK = { fromHz: 1400, toHz: 3200, q: 6, level: 0.05, length: 0.12 } as const;
 /** Plucking nearer the bridge than this is brighter, farther is darker. */
 const NEUTRAL_POSITION = 0.2;
 const POSITION_BRIGHTNESS = 1.1;
@@ -177,26 +173,6 @@ export class WebAudioEngine implements SoundOutputInterface {
 
   touch(string: number, when: number): void {
     this.banks.get(Voice.player)?.port.postMessage({ type: 'damp', when, string });
-    this.noiseBurst('bandpass', TOUCH.bandHz, 1, when, TOUCH.level, TOUCH.length);
-  }
-
-  fretNoise(when: number): void {
-    if (!this.current || this.instrument?.chain === ChainKind.nylon) return;
-    const t = Math.max(when, this.ctx.currentTime);
-    const src = this.ctx.createBufferSource();
-    src.buffer = this.noise;
-    const bp = this.ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.Q.value = SQUEAK.q;
-    bp.frequency.setValueAtTime(SQUEAK.fromHz, t);
-    bp.frequency.exponentialRampToValueAtTime(SQUEAK.toHz, t + SQUEAK.length);
-    const g = this.ctx.createGain();
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(SQUEAK.level, t + SQUEAK.length * 0.3);
-    g.gain.linearRampToValueAtTime(0, t + SQUEAK.length);
-    src.connect(bp).connect(g).connect(this.current.input);
-    src.start(t, Math.random() * 0.5);
-    src.stop(t + SQUEAK.length + 0.02);
   }
 
   damp(string: number, when: number): void {
