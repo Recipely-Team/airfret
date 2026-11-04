@@ -36,7 +36,7 @@ export interface Settings {
   /** Songs the player typed in themselves. */
   readonly customSongs: readonly Song[];
   readonly hihatMode: HiHatPedalMode;
-  /** The Explore guide has been shown once. */
+  /** The first-run introduction has been offered (once: the guided tour on a six-string chord instrument; the name is historical). */
   readonly hasSeenExplore: boolean;
   /** Best accuracy (0–1) per song id. */
   readonly best: Readonly<Record<string, number>>;

@@ -31,6 +31,7 @@ import { TourController } from '@presentation/app/tour-controller';
 import type { Route } from '@presentation/routing/route';
 import { videoToScreen } from '@presentation/canvas/screen-mapping';
 import type { StageRenderer } from '@presentation/canvas/stage-renderer';
+import { tourInstrument } from '@presentation/app/tour-instrument';
 import { t } from '@presentation/i18n/translator';
 
 const MS_PER_SECOND = 1000;
@@ -148,10 +149,9 @@ export class AirfretApp {
     if (!camera.isOk) this.ui.toast.show(t('app.cameraError'), ERROR_TOAST_MS);
     this.lastHandsAt = performance.now() / MS_PER_SECOND;
     this.ui.start.hide();
-    if (!this.s.store.value.hasSeenExplore) {
-      this.s.store.update({ hasSeenExplore: true });
-      this.ui.explore.open();
-    }
+    const isFirstRun = !this.s.store.value.hasSeenExplore;
+    this.s.store.update({ hasSeenExplore: true });
+    if (isFirstRun && tourInstrument(this.s.store.value.instrument) === this.s.store.value.instrument) this.startTour();
   }
 
   /** The selected instrument in its chosen voice, with the tuning and capo applied to its open strings. */
@@ -226,7 +226,7 @@ export class AirfretApp {
   startTour(): void {
     this.stopLesson();
     this.tours.start(this.hasCamera);
-    this.s.store.update({ mode: PlayMode.chord, instrument: 'acoustic' });
+    this.s.store.update({ mode: PlayMode.chord, instrument: tourInstrument(this.s.store.value.instrument) });
   }
 
   skipTourStep(): void {
@@ -237,9 +237,9 @@ export class AirfretApp {
     this.tours.end();
   }
 
-  /** From the home page or the menu: open the acoustic page and run the tour. */
+  /** From the home page or the menu: open the tour's instrument (`tourInstrument`) and run the tour. */
   tourFromAnywhere(): void {
-    this.ui.navigate({ kind: 'instrument', instrument: 'acoustic' });
+    this.ui.navigate({ kind: 'instrument', instrument: tourInstrument(this.s.store.value.instrument) });
     this.startTour();
   }
 
