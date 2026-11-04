@@ -31,6 +31,8 @@ export class Toolbar {
     byId('modes').hidden = isDrums;
     byId('pedalsBtn').hidden = !isDrums;
     const cam = byId('camBtn');
+    // The camera button only means something where the camera picture is: on an instrument's stage.
+    cam.hidden = !this.isOnStage();
     const camLabel = t(s.isCameraHidden ? 'ui.showCamera' : 'ui.hideCamera');
     cam.setAttribute('aria-pressed', String(s.isCameraHidden));
     cam.dataset['i18nLabel'] = s.isCameraHidden ? 'ui.showCamera' : 'ui.hideCamera';

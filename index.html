@@ -54,9 +54,12 @@
         <section class="hero">
           <h1 data-i18n="home.title"></h1>
           <p class="lead" data-i18n="home.lead"></p>
+          <div class="hero-actions">
+            <a class="btn primary hero-cta" href="/acoustic" data-link><span data-i18n="home.playNow"></span><small data-i18n="home.playNowHint"></small></a>
+            <button class="btn ghost" id="homeTour" type="button" data-i18n="home.tourCta"></button>
+          </div>
         </section>
-        <h2 class="home-label" data-i18n="home.instruments"></h2>
-        <div class="instrument-grid" id="homeInstruments"></div>
+        <div id="homeInstruments"></div>
         <h2 class="home-label" data-i18n="home.learn"></h2>
         <div class="learn-row" id="homeLearn"></div>
         <p class="muted small home-privacy" data-i18n="app.privacy"></p>
@@ -137,6 +140,7 @@
           </ol>
           <button class="btn primary wide" id="startBtn" data-i18n="app.start"></button>
           <p class="status" id="startStatus"></p>
+          <p class="muted small" data-i18n="app.noCameraStart"></p>
           <p class="muted small" data-i18n="app.privacy"></p>
         </div>
       </div>

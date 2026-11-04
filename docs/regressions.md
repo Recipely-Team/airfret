@@ -80,6 +80,17 @@ return path crosses the strings the same way a strum does. (Also reported by oth
 projects.) *Guard:* the *Down only* strum filter, covered by `player.test.ts`
 ("ignores upstrokes when the strum filter is down-only").
 
+## Flow
+
+**Escape didn't close Explore or a lesson's intro, and the very first Start buried the stage under all
+fifteen Explore cards.** Escape only knew the popovers and the lessons drawer; the first-run guide showed
+every feature at once. *Guard:* Escape closes every overlay, then `closeOverlay()` puts the address back (it only rewrites the URL, never closes anything — the cause);
+the first run starts the guided tour instead (`tour-instrument.test.ts`); QA rows N6, N7.
+
+**A stray brace in `style.css` passed every local gate and broke the CI build.** Lint, types and tests
+never parse the stylesheet; only the production build's CSS minifier does. *Guard:* the pre-commit hook
+runs `vite build` too (well under a second).
+
 ## Tools
 
 **The sample tools silently dropped SFZ regions they didn't expect.** SFZ lets a region leave out

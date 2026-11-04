@@ -29,6 +29,9 @@ const STRING_DECAY_PER_SECOND = 3.2;
 /** A target this many beats away is too far ahead to highlight a note. */
 const TARGET_LOOKAHEAD_BEATS = 2.5;
 const HINT_GAP_OF_HEIGHT = 0.2;
+const NARROW_PX = 600;
+/** Where the hint sits on an upright phone: under the top bar, above the chord names. */
+const NARROW_HINT_OF_HEIGHT = 0.3;
 
 /**
  * **StageRenderer** — draws one frame.
@@ -95,7 +98,9 @@ export class StageRenderer {
       this.ctx.font = `400 15px ${FONT}`;
       this.ctx.textAlign = 'center';
       this.ctx.fillStyle = rgba(Palette.ink, 0.7);
-      this.ctx.fillText(hint, l.w / 2, l.centerY + l.spreadBody + l.h * HINT_GAP_OF_HEIGHT);
+      // Upright phones: the chord card fills the space under the neck, so the hint goes above it.
+      const y = l.w < NARROW_PX ? l.h * NARROW_HINT_OF_HEIGHT : l.centerY + l.spreadBody + l.h * HINT_GAP_OF_HEIGHT;
+      this.ctx.fillText(hint, l.w / 2, y);
     }
   }
 

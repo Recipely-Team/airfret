@@ -110,6 +110,18 @@ is muted in the mix so you fill the gap; a "guide" level brings it back while le
 timeline, the shadow guide and the real-song tests (tempo and alignment against a recording). Songs: public
 domain or the player's own files; backing tracks for copyrighted songs need licensing.
 
+## Practice loop — `idea`
+Pick a few bars of a lesson and loop them, slower at first and up to full tempo as the score improves —
+what Rocksmith's Riff Repeater does and players miss most elsewhere (seamless loops, short sections, pause).
+Builds on the lesson timeline and the tempo choice; the real-song tests keep 100 % honest.
+
+## Onboarding — what comparable apps do (2026-11-05) — partly `shipped`
+Simply Guitar and Fender Play move a new player one task at a time to a first sound; Handel (a webcam
+instrument) plays before camera access. Shipped: first Start runs the tour (not every feature at once), a
+"Start playing" path from home, the no-camera route on the start card. Open: a skill question before the
+first lesson (first-timer · knows chords · plays already) to pick where the course starts, and a daily
+practice goal.
+
 ## Mac app — `idea`
 Wrap the web build with Tauri for a dock icon, offline use and no browser chrome. The camera
 permission prompt moves to macOS; the WASM model and worklet already load from local files.

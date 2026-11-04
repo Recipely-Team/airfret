@@ -331,13 +331,15 @@ a.btn, a.brand { text-decoration: none; color: inherit; display: inline-flex; al
 .instrument-card svg { width: 100%; height: 64px; color: var(--accent); margin-bottom: 10px; }
 .instrument-card strong { font-size: 16px; font-weight: 600; }
 .instrument-card span { color: var(--muted); font-size: 13px; }
-.instrument-card code { color: var(--muted); font-size: 11px; opacity: 0.7; margin-top: 6px; }
 .learn-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
 .learn-card { text-align: left; padding: 16px 18px; border-radius: 14px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; text-decoration: none; display: block; }
 .learn-card:hover { border-color: var(--line-strong); background: rgba(236, 232, 225, 0.04); }
 .learn-card strong { display: block; font-weight: 600; margin-bottom: 3px; }
 .learn-card span { color: var(--muted); font-size: 13px; }
 .home-privacy { margin-top: 32px; }
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: -8px 0 12px; }
+.hero-cta { flex-direction: column; align-items: flex-start; gap: 1px; padding: 11px 20px; font-size: 15px; }
+.hero-cta small { font-size: 11.5px; font-weight: 500; opacity: 0.72; }
 @media (max-width: 900px) { .page-title { display: none; } .bar-context { margin-left: 0; } }
 
 /* Header: what you play (left) · this page's controls · what you learn · settings (right) */
@@ -367,3 +369,20 @@ a.btn, a.brand { text-decoration: none; color: inherit; display: inline-flex; al
 .field input:focus, .field textarea:focus { outline: 1px solid var(--accent); border-color: transparent; }
 .song .delete { grid-column: 2; grid-row: 1; justify-self: end; background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 12px; }
 .song .delete:hover { color: var(--miss); }
+
+/* Upright phones: instruments as compact rows (icon left), the toolbar on one line, its controls on a second. */
+@media (max-width: 600px) {
+  .home { padding: 76px 16px 40px; }
+  .instrument-grid { grid-template-columns: 1fr; gap: 8px; }
+  .instrument-card { display: grid; grid-template-columns: 92px 1fr; grid-template-rows: auto auto; column-gap: 14px; row-gap: 2px; padding: 12px 14px; align-items: center; }
+  .instrument-card svg { grid-row: 1 / 3; height: 40px; margin: 0; }
+  .instrument-card span { grid-column: 2; }
+  .hero-actions { flex-direction: column; align-items: stretch; }
+  .hero-actions .btn { justify-content: center; }
+  .hero-cta { align-items: center; }
+  .bar { gap: 6px; }
+  .bar-context { order: 10; flex-basis: 100%; }
+  .bar-divider { display: none; }
+  .picker-icon { display: none; }
+  .picker-name { max-width: 160px; }
+}
