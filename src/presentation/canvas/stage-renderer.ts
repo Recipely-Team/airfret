@@ -1,5 +1,6 @@
 import type { DrumPlayer } from '@application/drums/drum-player';
 import type { Player } from '@application/play/player';
+import type { Point } from '@domain/fretboard/point';
 import type { PedalBindings } from '@domain/input/pedal-bindings';
 import { paintKit } from '@presentation/canvas/drums/paint-kit';
 import { paintPedals } from '@presentation/canvas/drums/paint-pedals';
@@ -10,7 +11,9 @@ import { GuitarArt } from '@presentation/canvas/guitar/guitar-art';
 import { lookFor } from '@presentation/canvas/guitar/guitar-looks';
 import { FONT, rgba, Palette } from '@presentation/canvas/palette';
 import type { PaintContext } from '@presentation/canvas/paint-context';
+import type { CameraView } from '@presentation/canvas/camera-view';
 import { HandCutout } from '@presentation/canvas/painters/instrument/hand-cutout';
+import { paintHandSkeleton } from '@presentation/canvas/painters/instrument/paint-hand-skeleton';
 import { paintChordCard } from '@presentation/canvas/painters/instrument/paint-chord-card';
 import { paintChordChips } from '@presentation/canvas/painters/instrument/paint-chord-chips';
 import { paintFingering } from '@presentation/canvas/painters/instrument/paint-fingering';
@@ -32,7 +35,8 @@ const HINT_GAP_OF_HEIGHT = 0.2;
  *
  * @remarks
  * Order matters: guitar art → finger placement → strings → the player's real hands (cut from the
- * camera, so fingers sit on the strings) → labels, pick, chord chart → lesson coach and cues.
+ * camera, so fingers sit on the strings; or their skeleton in the hands-only view) → labels, pick,
+ * chord chart → lesson coach and cues.
  */
 export class StageRenderer {
   private phase = 0;
@@ -56,13 +60,13 @@ export class StageRenderer {
   }
 
   /** Drum mode frame: kit, sticks, the real hands holding them, and the pedals. */
-  drums(drums: DrumPlayer, bindings: PedalBindings, now: number, hint: string | null, brightness: number): void {
+  drums(drums: DrumPlayer, bindings: PedalBindings, now: number, hint: string | null, camera: CameraView): void {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
     this.ctx.clearRect(0, 0, w, h);
     paintKit(this.ctx, drums, now, h);
     paintSticks(this.ctx, drums.sticks);
-    this.hands.draw(this.ctx, this.video, drums.hands, w, h, brightness);
+    this.paintHands(drums.hands, w, h, camera);
     paintPedals(this.ctx, drums, bindings, w, h);
     if (hint) {
       this.ctx.font = `400 15px ${FONT}`;
@@ -72,7 +76,7 @@ export class StageRenderer {
     }
   }
 
-  draw(player: Player, lesson: LessonSession | null, tour: TourSession | null, audioNow: number, now: number, hint: string | null, brightness: number): void {
+  draw(player: Player, lesson: LessonSession | null, tour: TourSession | null, audioNow: number, now: number, hint: string | null, camera: CameraView): void {
     const dt = this.lastT ? Math.min(MAX_FRAME, now - this.lastT) : 0;
     this.lastT = now;
     this.phase += dt;
@@ -84,7 +88,7 @@ export class StageRenderer {
     paintFingering(pc);
     paintStrings(pc);
     const hands = [player.fretHand, player.strumHand].filter((h): h is NonNullable<typeof h> => h !== null);
-    this.hands.draw(this.ctx, this.video, hands, l.w, l.h, brightness);
+    this.paintHands(hands, l.w, l.h, camera);
     [paintChordChips, paintPick, paintChordCard, paintCoach, paintStrumCue].forEach((paint) => paint(pc));
     if (tour) paintTour(pc, tour);
     if (hint) {
@@ -93,6 +97,12 @@ export class StageRenderer {
       this.ctx.fillStyle = rgba(Palette.ink, 0.7);
       this.ctx.fillText(hint, l.w / 2, l.centerY + l.spreadBody + l.h * HINT_GAP_OF_HEIGHT);
     }
+  }
+
+  /** The real hands cut from the camera image, or — with the camera hidden — the tracked skeleton. */
+  private paintHands(hands: readonly (readonly Point[])[], w: number, h: number, camera: CameraView): void {
+    if (camera.isHidden) paintHandSkeleton(this.ctx, hands);
+    else this.hands.draw(this.ctx, this.video, hands, w, h, camera.brightness);
   }
 }
 

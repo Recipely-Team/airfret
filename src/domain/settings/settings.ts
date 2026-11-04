@@ -21,6 +21,8 @@ export interface Settings {
   /** Lesson mix: your own playing, 0–1. Used only while a lesson runs. */
   readonly playerVolume: number;
   readonly brightness: number;
+  /** Hands-only view: the camera picture is hidden and the hands are drawn as a skeleton. Tracking still runs. */
+  readonly isCameraHidden: boolean;
   readonly latencyMs: number;
   readonly lessonTempo: number;
   readonly lessonMode: LessonMode;
