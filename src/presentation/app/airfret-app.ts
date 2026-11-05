@@ -71,7 +71,7 @@ export class AirfretApp {
     private readonly s: Services,
     private readonly ui: AppUi,
   ) {
-    this.tours = new TourController(ui.tourBar, () => this.apply(), () => {
+    this.tours = new TourController(ui.tourBar, () => this.s.store.update({}), () => {
       const first = SONGS.find((song) => song.course === 1);
       if (first) this.openIntro(first);
     });
