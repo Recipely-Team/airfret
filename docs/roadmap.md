@@ -110,6 +110,20 @@ is muted in the mix so you fill the gap; a "guide" level brings it back while le
 timeline, the shadow guide and the real-song tests (tempo and alignment against a recording). Songs: public
 domain or the player's own files; backing tracks for copyrighted songs need licensing.
 
+## Self-play — the instrument plays by itself — `shipped`
+Outside lessons, *Watch it play* (start card and top bar) plays a piece picked for each instrument at full tempo
+— Bach on the steel string, Greensleeves on nylon, power chords on the overdrive, Oh! Susanna on the banjo, a
+boogie line on the bass — to show the instrument can really be played. A hand skeleton does it: fingers land on
+the frets just before each note (standard chord shapes and fingers, or one finger per fret in a melody), the
+pick crosses each string as it sounds, the strings vibrate. Works before Start and without a camera.
+`DemoPerformer` (sound from the lesson guide); a test checks every note sounds the fret the hand holds. QA S1–S5.
+
+## Video recording — `idea`
+Record yourself playing: the stage (instrument, hands or their skeleton, the hit highlights) together with the
+sound, saved as a video to keep or share. Canvas `captureStream` + the audio graph's `MediaStreamDestination` into
+a `MediaRecorder`; WebM/MP4 by browser. A record button in the top bar, a timer while recording, then a preview
+with Save. The hands-only view makes a clip with nothing personal in it; self-play can record a demo.
+
 ## Practice loop — `idea`
 Pick a few bars of a lesson and loop them, slower at first and up to full tempo as the score improves —
 what Rocksmith's Riff Repeater does and players miss most elsewhere (seamless loops, short sections, pause).

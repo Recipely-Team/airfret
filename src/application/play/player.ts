@@ -82,6 +82,8 @@ export class Player {
   releaseBand = 0;
   /** Free mode: what the fretting hand holds. */
   fretting: Fretting | null = null;
+  /** The instrument is playing by itself (`DemoPerformer`): what it holds replaces the tracked hands. */
+  isPerforming = false;
   /** Free mode: name of the last chord strummed. */
   lastChordName = '';
   /** Part of the finger striking the strings right now. */
@@ -119,7 +121,7 @@ export class Player {
 
   /** Fret (counted from the nut) each string is stopped at right now, 0 = open; for tone and drawing. */
   stringFret(string: number): number {
-    if (this.mode === PlayMode.free) return this.fretting?.frets[string] ?? 0;
+    if (this.mode === PlayMode.free || this.isPerforming) return this.fretting?.frets[string] ?? 0;
     if (this.mode === PlayMode.note) return this.fret;
     const shapeFret = (this.chord ? CHORD_SHAPES[this.chord]?.[string] : 0) ?? 0;
     return shapeFret > 0 ? shapeFret + this.capo : this.capo;

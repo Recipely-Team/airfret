@@ -1,6 +1,8 @@
 /** English UI copy. Keys must match every other locale. */
 export const EN: Readonly<Record<string, string>> = {
   'app.tagline': 'Play guitar in the air. Your camera sees your hands; the strings are virtual.',
+  'demo.play': 'Watch it play',
+  'demo.stop': 'Stop',
   'app.start': 'Start',
   'app.noCameraStart': 'No camera? Press Start anyway — drag the mouse across the strings, number keys pick chords.',
   'app.privacy': 'Video never leaves your computer — hand tracking runs locally in the browser.',

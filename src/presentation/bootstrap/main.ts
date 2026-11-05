@@ -1,3 +1,5 @@
+import { SONGS } from '@domain/lessons/catalog/song-catalog';
+import { launchFeature } from '@presentation/app/launch-feature';
 import '@presentation/styles/style.css';
 import { DrumPlayer } from '@application/drums/drum-player';
 import { PedalRouter } from '@application/drums/pedal-router';
@@ -68,7 +70,7 @@ function bootstrap(): void {
     pointer: new PointerInput(canvas, player, sound, drums, () => app?.isDrums ?? false),
     tourBar: new TourBar(() => app?.skipTourStep(), () => app?.endTour()),
     pedals: new PedalPanel(store, pedalInput),
-    explore: new ExploreGuide((id) => app?.tryFeature(id), () => app?.closeOverlay()),
+    explore: new ExploreGuide((id) => tryFeature(id), () => app?.closeOverlay()),
     openSettings: () => openPopover('settings'),
     home: new HomeView(() => app?.tourFromAnywhere()),
     customSong: new CustomSongForm(store, (song) => app?.openIntro(song)),
@@ -81,6 +83,19 @@ function bootstrap(): void {
     ui,
   );
   const running = app;
+  // Explore's "Try it": sets the app up for one feature and says what to do.
+  function tryFeature(id: string): void {
+    launchFeature(id, {
+      store,
+      ui,
+      reset: () => {
+        running.stopLesson();
+        running.endTour();
+      },
+      startTour: () => running.tourFromAnywhere(),
+      firstLesson: () => SONGS.find((song) => song.course === 1),
+    });
+  }
   const toolbar = new Toolbar(store, () => running.hasLesson, () => running.isOnStage);
   const settingsPanel = new SettingsPanel(store);
   const pedalRouter = new PedalRouter(store, drums, () => ({ audio: sound.now, wall: performance.now() / 1000 }));
@@ -102,6 +117,7 @@ function bootstrap(): void {
     document.documentElement.style.setProperty('--cam', String(s.brightness));
     document.documentElement.classList.toggle('cam-hidden', s.isCameraHidden);
     toolbar.render();
+    running.demo.render();
     settingsPanel.render();
     drawer.render();
     ui.pedals.render();

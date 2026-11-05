@@ -12,7 +12,7 @@ const NARROW_SCALE = 0.7;
 /** Bottom corner card: the held chord's real-guitar chart, so air practice carries over. */
 export function paintChordCard({ ctx, player }: PaintContext): void {
   const l = player.layout;
-  const chord = player.mode === PlayMode.chord ? player.chord : player.mode === PlayMode.free ? player.lastChordName : '';
+  const chord = player.isPerforming || player.mode === PlayMode.free ? player.lastChordName : player.mode === PlayMode.chord ? player.chord : '';
   if (!chord || l.strings !== GUITAR_STRING_COUNT) return;
   const k = l.w < NARROW_PX ? NARROW_SCALE : 1;
   const margin = CARD.margin * k;
