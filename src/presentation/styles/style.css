@@ -48,6 +48,15 @@ button, select, input { font: inherit; color: inherit; }
 
 #stage { position: absolute; inset: 0; }
 
+/* Recording: the button shows the running time and the accent while it records. */
+.btn.icon.rec { grid-auto-flow: column; gap: 6px; }
+#recBtn[aria-pressed="true"] { color: var(--accent, #e0a458); border-color: var(--accent, #e0a458); padding-right: 10px; }
+#recBtn[aria-pressed="true"] .rec-dot { animation: rec-pulse 1.2s ease-in-out infinite; }
+.rec-time { font-variant-numeric: tabular-nums; font-size: 12.5px; }
+@keyframes rec-pulse { 50% { opacity: 0.35; } }
+.card.clip-card { width: min(720px, 100%); }
+.clip-video { display: block; width: 100%; max-height: 60vh; margin: 12px 0 8px; border-radius: 10px; background: #000; }
+
 /* Top bar */
 .bar {
   position: absolute;
@@ -385,4 +394,9 @@ a.btn, a.brand { text-decoration: none; color: inherit; display: inline-flex; al
   .bar-divider { display: none; }
   .picker-icon { display: none; }
   .picker-name { max-width: 160px; }
+  /* While recording, the timer takes the icon's place so the bar stays on one line. */
+  #recBtn[aria-pressed="true"] svg { display: none; }
+  #recBtn[aria-pressed="true"] .rec-time { animation: rec-pulse 1.2s ease-in-out infinite; }
+  #recBtn[aria-pressed="true"] { padding: 7px 8px; }
+  .bar:has(#recBtn[aria-pressed="true"]) .brand { display: none; }
 }

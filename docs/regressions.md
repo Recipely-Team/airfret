@@ -44,6 +44,12 @@ returns early unless the set actually changes (comment there); manual QA row V4.
 first note sounds 0.3 s after the button. Found by the production feature run. Test `demo-performer.test.ts`
 ("starts playing at once").
 
+**Self-play was nearly silent.** The demo plays through the guide voice, and the voice mix keeps the guide at 0
+outside shadow lessons — so *Watch it play* came out about ten times quieter than a played note. The production
+feature run checked only that the stage moved. Found while testing video recording (the first clip's sound track
+was silent). *Fix:* `voiceMix` gives the guide full level while self-play runs, and the app re-applies the mix when
+it starts or stops. Test `voice-mix.test.ts` ("plays self-play at full level"); QA row S6.
+
 ## Drums
 
 **Drumsticks vanished and reappeared, or jumped to the other hand.**
