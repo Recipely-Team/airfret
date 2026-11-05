@@ -57,6 +57,12 @@ export class NavMenu {
       (a.querySelector('small') as HTMLElement).textContent = t(`home.about.${slug}`);
       return a;
     }));
+    // The language switch at the foot of the menu (filled by `LanguageSwitch`).
+    const lang = document.createElement('div');
+    lang.className = 'seg small lang-switch nav-lang';
+    lang.setAttribute('role', 'radiogroup');
+    lang.setAttribute('aria-label', t('ui.language'));
+    this.el.append(lang);
     const instrument = route.kind === 'instrument' ? route.instrument : null;
     byId('pickerIcon').innerHTML = instrument ? (INSTRUMENT_ICONS[instrument] ?? '') : '';
     byId('pageTitle').textContent = instrument ? name(instrument) : t('nav.choose');

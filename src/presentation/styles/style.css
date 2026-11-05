@@ -50,6 +50,12 @@ button, select, input { font: inherit; color: inherit; }
 
 #stage { position: absolute; inset: 0; }
 
+/* TR / EN switch: home page foot, start card, foot of the instrument menu. */
+.home-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+.home-foot .home-privacy { margin: 0; }
+.start-lang { margin: 10px auto 0; width: max-content; }
+.nav-lang { margin: 10px 12px 4px; width: max-content; }
+
 /* Watch it play: the song list stays compact so the top bar keeps one line. */
 #demoSong { max-width: 210px; text-overflow: ellipsis; }
 /* Mid-width screens: Lessons and Explore keep their icons (and tooltips) so the whole bar fits on one line. */
