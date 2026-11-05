@@ -48,7 +48,8 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | # | Step | Expected | Result |
 |---|---|---|---|
 | F1 | Fret a real G shape, strum | Plays G; "G" appears above the neck | |
-| F2 | Lay the index finger flat across fret 5 (barre) | All strings fretted at 5 | |
+| F2 | Lay the index finger flat across fret 5 (barre), hand at your usual distance | All strings fretted at 5; one bar drawn across them | |
+| F2b | Index flat from the D string down (partial barre); then the ring finger flat across D–G–B | Only the strings from the tip down sound at that fret | |
 | F3 | Pluck a string, then land another finger higher on it | Hammer-on: pitch changes without a new pluck | |
 | F4 | Pluck, then slide the same finger 2 frets | Pitch glides | |
 | F5 | Fret, pluck, push the string sideways | Pitch bends up, ~2 semitones at most | |
