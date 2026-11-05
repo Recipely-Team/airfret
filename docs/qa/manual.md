@@ -162,7 +162,7 @@ F/B rows (id — note):
 | W1 | On a stage, press the record button (circle, left of the camera button) | It turns accent-coloured, the dot pulses and a timer counts `0:01`, `0:02`… | |
 | W2 | Play a few chords, press it again | *Your recording* opens: a preview with sound, the length, size and format (MP4 in Chrome/Safari, WebM in Firefox) | |
 | W3 | Watch the preview | The camera picture (mirrored, dimmed as on the page), the instrument, the hands and their highlights; your playing is heard | |
-| W4 | *Save video* | A file `airfret-<instrument>-<date>-<time>.mp4` downloads and plays in the system player; the dialog closes | |
+| W4 | *Save video* | A file `airfret-<page>-<date>-<time>.mp4` downloads (named as the page: `overdrive`, `classical`) and plays in the system player; the dialog closes | |
 | W5 | Hide the camera, record again | The clip shows only the instrument and the hand skeleton — no camera picture | |
 | W6 | Record, then *Watch it play* | The demo is in the clip with its sound | |
 | W7 | Record, then go home or open another instrument | The recording stops and its preview opens | |
