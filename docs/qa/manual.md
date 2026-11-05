@@ -53,6 +53,11 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | F3 | Pluck a string, then land another finger higher on it | Hammer-on: pitch changes without a new pluck | |
 | F4 | Pluck, then slide the same finger 2 frets | Pitch glides | |
 | F5 | Fret, pluck, push the string sideways | Pitch bends up, ~2 semitones at most | |
+| F7 | Open G with the pinky curled under the neck | Plays G: the high e stays at fret 3 | |
+| F8 | Pluck the G string at fret 7, push it up most of the way to the D string | Bends about a whole step and stays on G | |
+| F9 | Hold a note with the fingertip just behind the wire, keep still | Pitch steady, no warble between two frets | |
+| F10 | Arch the ring finger onto the A string from below | Only the A string is fretted (no barre) | |
+| F11 | A chord: three fingers on fret 2 | D, G and B all sound fret 2 | |
 | F6 | Settings → Capo 2, Tuning Drop D | Capo bar drawn; open G shape sounds A; low string down a tone | |
 
 ## C. Instruments and notes
