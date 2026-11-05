@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { voiceMix } from '@application/lessons/voice-mix';
+import { SELF_PLAY_LEVEL, voiceMix } from '@application/lessons/voice-mix';
 import { DEFAULT_SETTINGS } from '@domain/settings/default-settings';
 
 const quietMe = { ...DEFAULT_SETTINGS, playerVolume: 0.2, guideVolume: 0.9 };
@@ -18,7 +18,8 @@ describe('voiceMix', () => {
     expect(voiceMix(quietMe, false, true).guide).toBe(0);
   });
 
-  it('plays self-play at full level, not muted by the guide being silent outside lessons (Watch it play was nearly silent)', () => {
-    expect(voiceMix(quietMe, false, false, true).guide).toBe(1);
+  it('plays self-play at least at full level, not muted by the guide being silent outside lessons (Watch it play was nearly silent)', () => {
+    expect(voiceMix(quietMe, false, false, true).guide).toBe(SELF_PLAY_LEVEL);
+    expect(SELF_PLAY_LEVEL).toBeGreaterThanOrEqual(1);
   });
 });

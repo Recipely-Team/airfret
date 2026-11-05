@@ -1,4 +1,5 @@
 import type { SettingsStore } from '@application/settings/settings-store';
+import { DRUMS_ID } from '@domain/drums/drums-id';
 import type { Song } from '@domain/lessons/catalog/song';
 import { LessonMode } from '@domain/lessons/session/lesson-mode';
 import { knownChord } from '@domain/music/chords/chord-voicing';
@@ -13,7 +14,8 @@ const DIAGRAM = { w: 92, h: 150, chart: 70 } as const;
 
 /**
  * **LessonIntro** — before a lesson: what it teaches, the chords as real charts with finger numbers,
- * practical tips, and a choice of how to play it, each mode explained in one line.
+ * practical tips, and a choice of how to play it, each mode explained in one line. *Watch it play* lets the
+ * song's instrument play it by itself first.
  */
 export class LessonIntro {
   private song: Song | null = null;
@@ -23,7 +25,13 @@ export class LessonIntro {
     private readonly store: SettingsStore,
     onStart: (song: Song) => void,
     onBack: () => void,
+    onWatch: (song: Song) => void,
   ) {
+    byId('introWatch').onclick = () => {
+      if (!this.song) return;
+      this.hide();
+      onWatch(this.song);
+    };
     byId('introStart').onclick = () => {
       if (!this.song) return;
       this.hide();
@@ -46,6 +54,7 @@ export class LessonIntro {
     byId('introEyebrow').textContent = song.course === undefined ? t(song.credit) : t('lesson.courseStep', { n: song.course });
     byId('introTitle').textContent = song.title;
     byId('introAbout').textContent = t(song.about);
+    byId('introWatch').hidden = song.instrument === DRUMS_ID;
     this.renderChords(song);
     byId('introTips').replaceChildren(...(song.tips ?? ['tip.general']).map((k) => {
       const li = document.createElement('li');

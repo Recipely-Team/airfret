@@ -22,6 +22,7 @@ import { openPopover, wirePopovers } from '@presentation/ui/controls/popovers';
 import { PedalPanel } from '@presentation/ui/drums/pedal-panel';
 import { ExploreGuide } from '@presentation/ui/explore/explore-guide';
 import { SettingsPanel } from '@presentation/ui/controls/settings-panel';
+import { LanguageSwitch } from '@presentation/ui/controls/language-switch';
 import { Toolbar } from '@presentation/ui/controls/toolbar';
 import { pathFor } from '@presentation/routing/route-paths';
 import { Router } from '@presentation/routing/router';
@@ -69,7 +70,11 @@ function bootstrap(): void {
     start: new StartScreen(() => app?.start() ?? Promise.resolve()),
     toast: new Toast(),
     drawer,
-    intro: new LessonIntro(store, (song) => { app?.closeOverlay(); app?.beginLesson(song); }, () => router.navigate({ kind: 'lessons' })),
+    intro: new LessonIntro(store, (song) => { app?.closeOverlay(); app?.beginLesson(song); }, () => router.navigate({ kind: 'lessons' }), (song) => {
+      // Watch it play: the song's own instrument, in the Watch it play mode with this song chosen.
+      router.navigate({ kind: 'instrument', instrument: song.instrument });
+      void app?.demo.enter(song);
+    }),
     hud: new LessonHud(store, () => app?.stopLesson()),
     result: new ResultDialog(() => { const s = ui.intro.current; if (s) app?.beginLesson(s); }, () => router.navigate({ kind: 'lessons' })),
     pointer: new PointerInput(canvas, player, sound, drums, () => app?.isDrums ?? false),
@@ -101,8 +106,14 @@ function bootstrap(): void {
       firstLesson: () => SONGS.find((song) => song.course === 1),
     });
   }
-  const toolbar = new Toolbar(store, () => running.hasLesson, () => running.isOnStage);
+  const toolbar = new Toolbar(store, () => running.hasLesson, () => running.isOnStage, {
+    isOffered: () => running.demo.hasDemo,
+    isOn: () => running.demo.isOn,
+    enter: () => void running.demo.enter(),
+    leave: () => running.demo.leave(),
+  });
   const settingsPanel = new SettingsPanel(store);
+  const languageSwitch = new LanguageSwitch(store);
   const compositor = new StageCompositor(canvas, video, () => ({ brightness: store.value.brightness, isCameraHidden: store.value.isCameraHidden }));
   const recorder = new BrowserClipRecorder(compositor, () => sound.recordingStream());
   const recordButton = new RecordButton({
@@ -139,6 +150,7 @@ function bootstrap(): void {
     ui.pedals.render();
     ui.home.render();
     ui.nav.render(running.baseRoute);
+    languageSwitch.render();
     running.apply();
   };
   store.subscribe(render);

@@ -42,11 +42,24 @@ button, select, input { font: inherit; color: inherit; }
 
 /* Hands-only view: the video stays live for tracking, it just isn't shown. */
 :root.cam-hidden #cam { opacity: 0; }
-#camBtn .cam-slash { display: none; }
+#camBtn .cam-slash, #camPowerBtn .cam-slash { display: none; }
+#camPowerBtn[aria-pressed="true"] { color: var(--accent, #e0a458); }
+#camPowerBtn[aria-pressed="true"] .cam-slash { display: inline; }
 #camBtn[aria-pressed="true"] { color: var(--accent, #e0a458); }
 #camBtn[aria-pressed="true"] .cam-slash { display: inline; }
 
 #stage { position: absolute; inset: 0; }
+
+/* TR / EN switch: home page foot, start card, foot of the instrument menu. */
+.home-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+.home-foot .home-privacy { margin: 0; }
+.start-lang { margin: 10px auto 0; width: max-content; }
+.nav-lang { margin: 10px 12px 4px; width: max-content; }
+
+/* Watch it play: the song list stays compact so the top bar keeps one line. */
+#demoSong { max-width: 210px; text-overflow: ellipsis; }
+/* Mid-width screens: Lessons and Explore keep their icons (and tooltips) so the whole bar fits on one line. */
+@media (max-width: 1360px) { .learn-link span { display: none; } .learn-link { padding: 5px 9px; } }
 
 /* Recording: the button shows the running time and the accent while it records. */
 .btn.icon.rec { grid-auto-flow: column; gap: 6px; }
@@ -398,5 +411,7 @@ a.btn, a.brand { text-decoration: none; color: inherit; display: inline-flex; al
   #recBtn[aria-pressed="true"] svg { display: none; }
   #recBtn[aria-pressed="true"] .rec-time { animation: rec-pulse 1.2s ease-in-out infinite; }
   #recBtn[aria-pressed="true"] { padding: 7px 8px; }
-  .bar:has(#recBtn[aria-pressed="true"]) .brand { display: none; }
+  /* The instrument picker names the page; the wordmark makes room for the camera and record buttons. */
+  .bar a.brand { display: none; }
+  #demoSong { flex: 1 1 0; max-width: none; }
 }

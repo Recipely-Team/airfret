@@ -5,6 +5,7 @@ import { voiceMix } from '@application/lessons/voice-mix';
 import type { GuidePlayer } from '@application/lessons/guide-player';
 import type { StartLessonUseCase } from '@application/lessons/start-lesson-use-case';
 import type { Player } from '@application/play/player';
+import { selectedInstrument } from '@application/settings/selected-instrument';
 import type { SettingsStore } from '@application/settings/settings-store';
 import { TOUR_CHORDS } from '@application/tour/tour-chords';
 import { Voice } from '@domain/audio/voice';
@@ -20,10 +21,9 @@ import type { Song } from '@domain/lessons/catalog/song';
 import { SONGS } from '@domain/lessons/catalog/song-catalog';
 import type { LessonSession } from '@domain/lessons/session/lesson-session';
 import { knownChord } from '@domain/music/chords/chord-voicing';
-import { withVoice } from '@domain/instruments/voice-catalog';
-import { effectiveTuning } from '@domain/music/tuning-catalog';
 import type { HandTrackerInterface } from '@domain/tracking/hand-tracker-interface';
 import type { AppUi } from '@presentation/app/app-ui';
+import { CameraController } from '@application/camera/camera-controller';
 import { DemoController } from '@presentation/app/demo-controller';
 import { lessonOptions } from '@presentation/app/lesson-options';
 import { stageHint } from '@presentation/app/stage-hint';
@@ -59,13 +59,13 @@ export class AirfretApp {
   private lesson: LessonSession | null = null;
   private isStarted = false;
   private isAudioOn = false;
-  private hasCamera = false;
   private lastHandsAt = 0;
   private readonly tours: TourController;
   /** The page under any overlay: home or an instrument. */
   private base: Route = { kind: 'home' };
   /** The instrument playing by itself (outside lessons). */
   readonly demo: DemoController;
+  private readonly camera: CameraController;
 
   constructor(
     private readonly s: Services,
@@ -75,9 +75,14 @@ export class AirfretApp {
       const first = SONGS.find((song) => song.course === 1);
       if (first) this.openIntro(first);
     });
-    // Self-play sounds through the guide voice: the mix changes when it starts or stops.
-    const showStart = (isPlaying: boolean) => { this.ui.start.show(this.isOnStage && !this.isStarted && !isPlaying); this.apply(); };
-    this.demo = new DemoController({ player: s.player, sound: s.sound, startAudio: () => this.startAudio(), instrumentId: () => s.store.value.instrument, instrument: () => this.instrument(), onChange: showStart });
+    // Self-play sounds through the guide voice and is a mode in the toolbar: re-render when it starts or stops.
+    const showStart = (isPlaying: boolean) => { this.ui.start.show(this.isOnStage && !this.isStarted && !isPlaying); this.s.store.update({}); };
+    this.demo = new DemoController({
+      player: s.player, sound: s.sound, startAudio: () => this.startAudio(), instrumentId: () => s.store.value.instrument, instrument: () => this.instrument(),
+      songs: () => songLibrary(s.store.value), prepare: (song) => s.store.update({ tuning: song.tuning ?? 'standard' }), onChange: showStart,
+    });
+    // When tracking stops, the last tracked hands leave the stage.
+    this.camera = new CameraController(s.tracker, () => this.ui.toast.show(t('app.cameraError'), ERROR_TOAST_MS), () => s.player.updateHands([], performance.now() / MS_PER_SECOND, s.sound.now, false));
     s.player.onEvent = (e) => {
       this.tours.onEvent(e);
       const played = e.recognized ? { chord: e.recognized.name, recognized: e.recognized } : e.chord !== undefined ? { chord: e.chord } : e.midi === undefined ? {} : { midi: e.midi };
@@ -119,17 +124,16 @@ export class AirfretApp {
     }
     if (route.kind === 'explore') this.ui.explore.open();
     this.ui.home.show(this.base.kind === 'home');
-    this.syncCamera();
+    void this.syncCamera();
     this.ui.start.show(this.isOnStage && !this.isStarted);
     this.s.store.update({});
   }
 
-  /** The camera runs only on an instrument page: nothing is watched while no instrument is open. */
-  private syncCamera(): void {
-    if (!this.hasCamera) return;
-    if (this.isOnStage) void this.s.tracker.resume();
-    else this.s.tracker.pause();
+  /** The camera runs only on an instrument page after Start, and only while the player hasn't turned it off. */
+  private syncCamera(): Promise<void> {
+    return this.camera.sync(this.isStarted && this.isOnStage && !this.s.store.value.isCameraOff);
   }
+
 
   /** Back to the page under the overlays. */
   closeOverlay(): void {
@@ -143,12 +147,10 @@ export class AirfretApp {
   /** Called from the start button: unlocks audio, then tries the camera. */
   async start(): Promise<void> {
     if (!(await this.startAudio())) return;
-    this.demo.stop();
+    this.demo.leave();
     this.isStarted = true;
-    this.ui.start.status(t('app.loadingModel'));
-    const camera = await this.s.tracker.start();
-    this.hasCamera = camera.isOk;
-    if (!camera.isOk) this.ui.toast.show(t('app.cameraError'), ERROR_TOAST_MS);
+    if (!this.s.store.value.isCameraOff) this.ui.start.status(t('app.loadingModel'));
+    await this.syncCamera();
     this.lastHandsAt = performance.now() / MS_PER_SECOND;
     this.ui.start.hide();
     const isFirstRun = !this.s.store.value.hasSeenExplore;
@@ -166,11 +168,8 @@ export class AirfretApp {
     return audio.isOk;
   }
 
-  /** The selected instrument in its chosen voice, with the tuning and capo applied to its open strings. */
   private instrument(): Instrument {
-    const st = this.s.store.value;
-    const base = withVoice(instrumentById(st.instrument), st.voices[st.instrument]);
-    return { ...base, tuning: effectiveTuning(base.tuning, st.tuning, st.capo) };
+    return selectedInstrument(this.s.store.value);
   }
 
   /** Re-applies instrument, layout, chords and mix after any settings, lesson or tour change. */
@@ -193,6 +192,7 @@ export class AirfretApp {
       this.ui.replaceRoute(this.base);
     }
     this.s.player.configure({ layout, instrument: inst, mode: st.mode, chords, strumFilter: st.strumFilter, capo: st.capo });
+    void this.syncCamera();
   }
 
   pickInstrument(id: string): void {
@@ -207,7 +207,7 @@ export class AirfretApp {
   }
 
   beginLesson(song: Song): void {
-    this.demo.stop();
+    this.demo.leave();
     const st = this.s.store.value;
     const opts = lessonOptions(st, song);
     const session = this.s.startLesson.execute(song, opts, this.s.sound.now);
@@ -224,7 +224,7 @@ export class AirfretApp {
   }
 
   stopLesson(): void {
-    this.demo.stop();
+    this.demo.leave();
     this.lesson = null;
     this.ui.hud.hide();
     this.apply();
@@ -232,7 +232,7 @@ export class AirfretApp {
 
   startTour(): void {
     this.stopLesson();
-    this.tours.start(this.hasCamera);
+    this.tours.start(this.camera.isOn);
     this.s.store.update({ mode: PlayMode.chord, instrument: tourInstrument(this.s.store.value.instrument) });
   }
 
@@ -263,7 +263,7 @@ export class AirfretApp {
       requestAnimationFrame(this.frame);
       return;
     }
-    const hint = this.demo.isPlaying ? null : stageHint({ isStarted: this.isStarted, hasCamera: this.hasCamera, isDrums: this.isDrums, secondsWithoutHands: now - this.lastHandsAt });
+    const hint = this.demo.isPlaying ? null : stageHint({ isStarted: this.isStarted, hasCamera: this.camera.isOn, isDrums: this.isDrums, secondsWithoutHands: now - this.lastHandsAt });
     // The self-playing hand is drawn as a skeleton: it isn't in the camera picture.
     const camera = { brightness: st.brightness, isHidden: st.isCameraHidden || this.demo.isPlaying };
     if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, hint, camera);
@@ -275,14 +275,15 @@ export class AirfretApp {
   };
 
   private track(nowMs: number, now: number, audioNow: number): void {
-    if (!this.hasCamera || !this.isOnStage) return;
+    if (!this.camera.isOn || !this.isOnStage) return;
     const hands = this.s.tracker.detect(nowMs);
     if (!hands) return;
     if (hands.length) this.lastHandsAt = now;
     const frame = this.s.tracker.frameSize();
     const px = hands.map((hand) => hand.landmarks.map((p) => videoToScreen(p, frame, window.innerWidth, window.innerHeight)));
     if (this.isDrums) this.s.drums.updateHands(px, now, audioNow, now);
-    else if (!this.demo.isPlaying) this.s.player.updateHands(px, now, audioNow, !this.ui.pointer.isDown);
+    else if (this.demo.isPlaying) this.s.player.strikeAlong(px, now, audioNow, !this.ui.pointer.isDown);
+    else this.s.player.updateHands(px, now, audioNow, !this.ui.pointer.isDown);
   }
 
   private tickLesson(lesson: LessonSession, audioNow: number): void {

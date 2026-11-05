@@ -144,16 +144,47 @@ F/B rows (id — note):
 | H4 | Reload the page | The choice is remembered; the button shows pressed (accent) with a slash | |
 | H5 | Screen reader / hover on the button | Says "Hide camera — show only the hands", then "Show camera" once pressed (Turkish when the UI is Turkish) | |
 | H6 | Explore → *Hands only* → Try it | Camera hides and a toast explains how to bring it back | |
-## S. Self-play
+## S. Self-play — the *Watch it play* mode
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| S1 | Fresh visit to `/acoustic` → *Watch it play* on the start card (no Start, no camera) | Sound starts; the start card hides; a hand skeleton plays Bach — fingertips on the frets, the pick moving string to string, strings vibrating | |
-| S2 | Watch a chord piece (`/overdrive`, `/banjo`) | The chord name and chart change with the music; the shape on the neck is the one sounding | |
-| S3 | Press *Stop* in the top bar | Sound stops; the start card is back (if Start wasn't pressed); the tracked hands play again | |
-| S4 | Start a lesson, change instrument, or go home while it plays | Self-play stops | |
-| S5 | Phone width | *Watch it play* / *Stop* visible under the mode switch | |
-| S6 | Press *Watch it play*, listen at normal volume | As loud as playing yourself — not a faint whisper (the guide voice used to stay muted outside lessons) | |
+| S1 | `/acoustic` → Start → mode switch | Four modes: Chords · Notes · Free (Pro) · *Watch it play* (Turkish: *Kendi çalsın*); none on the drums; the start card has no self-play button | |
+| S2 | Pick *Watch it play* | A song list and *Stop* appear (the chord set hides); the steel string's Bach starts at once — a hand skeleton plays it, fingertips on the frets, the pick moving string to string | |
+| S3 | Open the song list | The instrument's own piece first, then every song it can play — guitars get the guitar songs, basses the bass songs, your own songs included | |
+| S4 | Choose *Happy Birthday — melody* | It plays at once: the tune, with a bass note under each bar | |
+| S5 | *Stop*, then *Play* | Stops and starts the chosen song; the mode stays on. When a song ends the mode stays too | |
+| S6 | Listen at normal volume | As loud as playing yourself, also on single-note melodies | |
+| S7 | Pick *Chords* (or start a lesson, go home) | The song stops and the list hides | |
+| S8 | While it plays, strum with the mouse or your strumming hand | Your strokes sound the notes the playing hand holds; your hand shows as a second skeleton | |
+| S9 | Lessons → any song → *Watch it play* | The song's instrument opens in the mode with that song chosen and playing (also for a song you added) | |
+| S10 | A chord piece (`/overdrive`, `/banjo`) | The chord name and chart change with the music; the shape on the neck is the one sounding | |
+| S11 | iPhone with the silent switch on | The playing is heard | |
+| S12 | Phone width and 1280 px | The top bar stays tidy: the list fills the second row on a phone; one line at 1280 px | |
+
+## M. Your own melody
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| M1 | Lessons → *Add your own song* → name it, paste a melody as JSON (`{"tempo":108,"timeSignature":"4/4","notes":[{"note":"G4","duration":1},{"note":null,"duration":1}]}`) → Save | The song opens at its own tempo and meter, in note mode | |
+| M2 | Or type a melody: `G4:1 A4:0.5 B4:0.5 r:1` | Same, at the form's tempo | |
+| M3 | Its intro → *Watch it play* | The acoustic plays your melody by itself | |
+| M4 | Type `G4:1 H4:1` | "I can't read the note “H4”…" and nothing is saved | |
+
+## L. Language
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| L1 | Home page foot, start card, foot of the instrument menu | A TR / EN switch in each | |
+| L2 | Press TR anywhere | All text turns Turkish at once, every switch shows TR; it stays after a reload | |
+
+## K. Camera on and off
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| K1 | After Start, press the camera switch (video icon) | The camera light goes out, the hands-only button hides, the hint says to use the mouse; mouse and keys play | |
+| K2 | Press it again | The camera comes back and the hands play again within a second | |
+| K3 | Turn it off, reload, press Start | No camera prompt and no camera light: you play with the mouse; turning it on later asks for the camera then | |
+| K4 | Deny camera permission, then turn the switch off and on | One error message (not one per click elsewhere); off-and-on tries again | |
 
 ## W. Video recording
 

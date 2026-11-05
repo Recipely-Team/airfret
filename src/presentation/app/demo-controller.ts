@@ -1,10 +1,10 @@
-import { DEMO_SONG_BY_INSTRUMENT } from '@application/demo/demo-songs';
 import { DemoPerformer } from '@application/demo/demo-performer';
 import { showPerformance } from '@application/demo/show-performance';
+import { watchableSongs } from '@application/demo/watchable-songs';
 import type { Player } from '@application/play/player';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
 import type { Instrument } from '@domain/instruments/instrument';
-import { SONGS } from '@domain/lessons/catalog/song-catalog';
+import type { Song } from '@domain/lessons/catalog/song';
 import { t } from '@presentation/i18n/translator';
 import { byId } from '@presentation/ui/dom';
 
@@ -15,44 +15,66 @@ interface DemoHost {
   startAudio(): Promise<boolean>;
   instrumentId(): string;
   instrument(): Instrument;
-  /** Called when the demo starts or ends. */
+  /** Every song the player can open: the catalog and their own. */
+  songs(): readonly Song[];
+  /** Sets the instrument up for a song (its tuning) before it is played. */
+  prepare(song: Song): void;
+  /** Called when the mode or the playing changes. */
   onChange(isPlaying: boolean): void;
 }
 
 /**
- * The instrument playing by itself, outside lessons: the "Watch it play" buttons start a piece chosen for
- * the instrument (`DEMO_SONG_BY_INSTRUMENT`) and stop it; the stage shows a hand playing it.
+ * **Watch it play** — the mode in which the instrument plays by itself: pick a song from the list beside the
+ * mode switch (the instrument's showcase piece first, then every song it can play, the player's own included),
+ * play or stop it. The stage shows a hand playing it.
  *
  * @remarks
- * - The camera isn't needed — the demo can run before the player has pressed Start.
- * - While it plays, the tracked hands don't play the instrument (the app skips them).
+ * - The mode stays on when a song ends or is stopped; picking another mode leaves it.
+ * - While it plays, the player can still strike the strings — mouse or strumming hand — and hears what its hand holds.
  */
 export class DemoController {
   private readonly performer: DemoPerformer;
-  private readonly buttons = [byId<HTMLButtonElement>('demoBtn'), byId<HTMLButtonElement>('startDemo')];
+  private readonly button = byId<HTMLButtonElement>('demoBtn');
+  private readonly select = byId<HTMLSelectElement>('demoSong');
+  private on = false;
+  private songId = '';
 
   constructor(private readonly host: DemoHost) {
     this.performer = new DemoPerformer(host.sound);
-    for (const b of this.buttons) b.onclick = () => void this.toggle();
+    this.button.onclick = () => void (this.isPlaying ? this.stop() : this.playChosen());
+    this.select.onchange = () => {
+      this.songId = this.select.value;
+      void this.playChosen();
+    };
   }
 
   get isPlaying(): boolean {
     return this.performer.isPlaying;
   }
 
-  /** Whether the current instrument has a piece to play by itself. */
-  get hasDemo(): boolean {
-    return DEMO_SONG_BY_INSTRUMENT[this.host.instrumentId()] !== undefined;
+  /** The *Watch it play* mode is on — never on the drums, which have nothing to play by themselves. */
+  get isOn(): boolean {
+    return this.on && this.hasDemo;
   }
 
-  async toggle(): Promise<void> {
-    if (this.isPlaying) {
-      this.stop();
-      return;
-    }
-    const song = SONGS.find((s) => s.id === DEMO_SONG_BY_INSTRUMENT[this.host.instrumentId()]);
-    if (!song || !(await this.host.startAudio())) return;
-    if (this.performer.start(song, this.host.instrument(), this.host.sound.now).isOk) this.changed();
+  /** The current instrument has songs it can play by itself (not the drums). */
+  get hasDemo(): boolean {
+    return this.songs().length > 0;
+  }
+
+  /** Turns the mode on and plays `song`, or the chosen one (at first the instrument's showcase piece). */
+  async enter(song?: Song): Promise<void> {
+    this.on = true;
+    if (song) this.songId = song.id;
+    await this.playChosen();
+  }
+
+  /** Leaves the mode (another mode was picked, a lesson started, the page changed). */
+  leave(): void {
+    if (!this.on) return;
+    this.on = false;
+    this.performer.stop();
+    this.changed();
   }
 
   stop(): void {
@@ -71,14 +93,42 @@ export class DemoController {
     if (wasPlaying && frame === null) this.changed();
   }
 
-  /** Button labels, and whether the stage's demo button is offered at all. */
+  /** The song list and the Play / Stop button, shown only while the mode is on. */
   render(): void {
-    const label = t(this.isPlaying ? 'demo.stop' : 'demo.play');
-    for (const b of this.buttons) {
-      b.textContent = label;
-      b.setAttribute('aria-pressed', String(this.isPlaying));
-    }
-    this.buttons.forEach((b) => (b.hidden = !this.hasDemo));
+    this.select.hidden = !this.isOn;
+    this.button.hidden = !this.isOn;
+    if (!this.isOn) return;
+    const songs = this.songs();
+    const chosen = this.chosen(songs);
+    this.select.replaceChildren(...songs.map((s) => {
+      const o = document.createElement('option');
+      o.value = s.id;
+      o.textContent = s.title;
+      o.selected = s.id === chosen?.id;
+      return o;
+    }));
+    this.button.textContent = t(this.isPlaying ? 'demo.stop' : 'demo.start');
+    this.button.setAttribute('aria-pressed', String(this.isPlaying));
+  }
+
+  private songs(): Song[] {
+    return watchableSongs(this.host.songs(), this.host.instrumentId());
+  }
+
+  /** The chosen song if this instrument can play it, else its showcase piece. */
+  private chosen(songs: readonly Song[]): Song | undefined {
+    return songs.find((s) => s.id === this.songId) ?? songs[0];
+  }
+
+  private async playChosen(): Promise<void> {
+    const song = this.chosen(this.songs());
+    if (!song) return;
+    this.songId = song.id;
+    if (this.isPlaying) this.performer.stop();
+    this.host.prepare(song);
+    if (!(await this.host.startAudio())) return;
+    this.performer.start(song, this.host.instrument(), this.host.sound.now);
+    this.changed();
   }
 
   private changed(): void {
