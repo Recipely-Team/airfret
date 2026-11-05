@@ -9,6 +9,7 @@ export class TourController {
 
   constructor(
     private readonly bar: TourBar,
+    /** The tour locks the mode switch like a lesson: on its end the whole UI must re-render, not only the instrument. */
     private readonly onEnded: () => void,
     private readonly onFinished: () => void,
   ) {}

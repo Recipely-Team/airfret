@@ -55,6 +55,11 @@ was judged from `strumHand` — which, while the instrument plays itself, is the
 player's. *Fix:* the stroke is judged by the hand that made it (none for the mouse, which always plays). Test
 `player-along.test.ts`.
 
+**After *Exit tour* the mode switch stayed locked.** The tour locks modes and chord set like a lesson; ending
+it re-applied the instrument but never re-rendered the top bar, so every new player (the first Start runs the
+tour) found Chords · Notes · Free greyed out until some other setting changed. Found by the v0.7.0 production
+run. *Fix:* the tour's end re-renders everything (`store.update({})`). QA row A4.
+
 ## Drums
 
 **Drumsticks vanished and reappeared, or jumped to the other hand.**
