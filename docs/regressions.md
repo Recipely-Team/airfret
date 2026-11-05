@@ -84,6 +84,21 @@ neck, as a real finger (longer than the neck is wide) does; any finger, two stri
 Tests `map-fretting.test.ts` ("one finger laid flat across the strings frets every string, even when the
 hand looks smaller than the neck", partial and small-F barres, ring-finger barre, rolled finger).
 
+**Found by working through what a guitarist's fretting hand does (2026-11-05)** — each has a test in
+`fretting-hand-cases.test.ts`, named after the symptom, that failed before the fix:
+- *A finger resting under the neck pressed the high e.* A tip counted as on the neck up to 10 % of the screen height
+  past the outer string, then snapped to it; an idle pinky turned open G's high e from fret 3 to 4. *Fix:* a tip
+  presses only within 0.6 spacings of a string.
+- *A whole-step bend was impossible.* Past 0.62 spacings the tip snapped to the next string, so a bend topped out
+  near a third of a semitone. *Fix:* the bent string stays with its finger until the tip nears the next string
+  (0.8); a whole step is reached at 0.75. A tip that reaches the next string has moved there (test guards it).
+- *A finger placed just behind the wire flickered between two frets* — good technique sits on the zone boundary.
+  *Fix:* the wire (and 10 % past it) stops the fret behind it, and a tip keeps its fret until 20 % past the wire.
+- *An arched finger reaching straight across to one string read as a barre* (front-on it looks straight).
+  *Fix:* a flat finger's last two segments must look full length next to its first; an arched one's are foreshortened.
+- *In crowded shapes (A) one drifting finger took its neighbour's string, leaving a string open.* *Fix:* two tips
+  can't stop one string on one fret — the one further off moves to the free neighbour on its side.
+
 **Lifting the hand after a downstroke played an upstroke.** A webcam has no depth, so the
 return path crosses the strings the same way a strum does. (Also reported by other air-guitar
 projects.) *Guard:* the *Down only* strum filter, covered by `player.test.ts`
