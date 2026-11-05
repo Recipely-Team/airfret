@@ -6,6 +6,6 @@ export interface Fretting {
   readonly bends: readonly number[];
   /** Fingertips that are pressing a string, for drawing. */
   readonly presses: readonly { readonly string: number; readonly fret: number; readonly finger: number }[];
-  /** Fret held by an index-finger barre, or 0. */
+  /** Fret held by a barre (the index finger's when several fingers barre), or 0. */
   readonly barre: number;
 }
