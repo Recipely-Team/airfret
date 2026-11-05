@@ -50,6 +50,11 @@ feature run checked only that the stage moved. Found while testing video recordi
 was silent). *Fix:* `voiceMix` gives the guide full level while self-play runs, and the app re-applies the mix when
 it starts or stops. Test `voice-mix.test.ts` ("plays self-play at full level"); QA row S6.
 
+**A mouse stroke during self-play could be dropped.** Whether a stroke counts (nail, pad, or a finger turned away)
+was judged from `strumHand` — which, while the instrument plays itself, is the drawn self-playing hand, not the
+player's. *Fix:* the stroke is judged by the hand that made it (none for the mouse, which always plays). Test
+`player-along.test.ts`.
+
 ## Drums
 
 **Drumsticks vanished and reappeared, or jumped to the other hand.**

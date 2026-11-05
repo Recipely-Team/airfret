@@ -110,13 +110,19 @@ is muted in the mix so you fill the gap; a "guide" level brings it back while le
 timeline, the shadow guide and the real-song tests (tempo and alignment against a recording). Songs: public
 domain or the player's own files; backing tracks for copyrighted songs need licensing.
 
-## Self-play — the instrument plays by itself — `shipped`
-Outside lessons, *Watch it play* (start card and top bar) plays a piece picked for each instrument at full tempo
-— Bach on the steel string, Greensleeves on nylon, power chords on the overdrive, Oh! Susanna on the banjo, a
-boogie line on the bass — to show the instrument can really be played. A hand skeleton does it: fingers land on
-the frets just before each note (standard chord shapes and fingers, or one finger per fret in a melody), the
-pick crosses each string as it sounds, the strings vibrate. Works before Start and without a camera.
-`DemoPerformer` (sound from the lesson guide); a test checks every note sounds the fret the hand holds. QA S1–S5.
+## Self-play — the *Watch it play* mode — `shipped`
+After Start, *Watch it play* is the fourth mode in the mode switch: pick a song from the list beside it — the
+instrument's showcase piece first (Bach on the steel string, Greensleeves on nylon, power chords on the overdrive,
+Oh! Susanna on the banjo, a boogie line on the bass), then every song it can play, the player's own included — and
+play or stop it. Every song's intro opens the mode with that song. A hand skeleton plays: fingers land on the frets
+just before each note, the pick crosses each string as it sounds, the strings vibrate. The player can join in: a
+stroke (mouse or strumming hand) sounds what the playing hand holds. `DemoController`, `DemoPerformer`,
+`watchableSongs`; a test plays every song of every instrument's list and checks each note is the fret the hand
+holds. QA S1–S12.
+
+## Camera on and off — `shipped`
+The camera switch in the top bar turns the camera off (light out, no tracking; mouse, touch and keys play) and on
+again; remembered, so Start doesn't ask for the camera while it is off. `CameraController`; QA K1–K4.
 
 ## Video recording — `shipped`
 Record yourself playing: the record button in the top bar captures the stage — the camera picture as the page

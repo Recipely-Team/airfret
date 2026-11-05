@@ -27,9 +27,8 @@ import { AssetPath } from '@infrastructure/constants/assets';
 
 const Level = { master: 0.8, click: 0.5, chuck: 0.35, samples: 0.9 } as const;
 const Reverb = { seconds: 2.2, decay: 3.2 } as const;
-const KIT_LEVEL = 0.9;
-/** Drums sit in a small room: a little of the shared reverb. */
-const KIT_ROOM = 0.6;
+/** Drums sit in a small room: a little of the shared reverb (`room`). */
+const KIT = { level: 0.9, room: 0.6 } as const;
 const SMOOTHING = 0.02;
 const CHUCK = { guitarHz: 2200, bassHz: 700, q: 1.2, attack: 0.003, length: 0.06 } as const;
 /** Pick hitting the string: a 3 ms bright tick, louder for harder strokes. */
@@ -92,10 +91,10 @@ export class WebAudioEngine implements SoundOutputInterface {
     this.noise.getChannelData(0).forEach((_, i, d) => (d[i] = Math.random() * 2 - 1));
     this.drums = new DrumKit(ctx, clickBus, this.noise);
     const kitBus = ctx.createGain();
-    kitBus.gain.value = KIT_LEVEL;
+    kitBus.gain.value = KIT.level;
     kitBus.connect(this.master);
     const kitRoom = ctx.createGain();
-    kitRoom.gain.value = KIT_ROOM;
+    kitRoom.gain.value = KIT.room;
     kitBus.connect(kitRoom).connect(this.reverbIn);
     this.kit = new AcousticKit(ctx, kitBus, this.noise);
     this.sampleBus = ctx.createGain();
@@ -109,6 +108,9 @@ export class WebAudioEngine implements SoundOutputInterface {
   }
 
   async start(instrument: Instrument): Promise<Result<void, Failure>> {
+    // iPhone: web audio counts as ringer sound, so the silent switch muted every note; as media it plays.
+    const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+    if (session) session.type = 'playback';
     void this.ctx.resume();
     try {
       await this.ctx.audioWorklet.addModule(`${import.meta.env.BASE_URL}${AssetPath.stringWorklet}`);

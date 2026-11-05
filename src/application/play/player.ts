@@ -82,8 +82,13 @@ export class Player {
   releaseBand = 0;
   /** Free mode: what the fretting hand holds. */
   fretting: Fretting | null = null;
-  /** The instrument is playing by itself (`DemoPerformer`): what it holds replaces the tracked hands. */
+  /**
+   * The instrument is playing by itself (`DemoPerformer`): its hand holds the neck and is the one drawn. The
+   * player can still strike the strings (mouse, or their strumming hand) and hears what that hand holds.
+   */
   isPerforming = false;
+  /** While the instrument plays itself: the player's own strumming hand, drawn beside the performing one. */
+  guestHand: readonly Point[] | null = null;
   /** Free mode: name of the last chord strummed. */
   lastChordName = '';
   /** Part of the finger striking the strings right now. */
@@ -142,19 +147,27 @@ export class Player {
     this.releaseBand = this.strum.releaseBand(setup.layout.h);
   }
 
+  /** While the instrument plays itself: only the player's strumming hand plays, on what the performing hand holds. */
+  strikeAlong(hands: readonly (readonly Point[])[], t: number, audioNow: number, canStrum: boolean): void {
+    const { strum } = assignHands(hands, this.layout);
+    this.guestHand = strum;
+    this.strumHand = strum;
+    if (canStrum) this.feedStrum(this.strumTip(strum, t), t, audioNow, strum);
+  }
+
   /** One camera frame of hands in screen px. `canStrum` is false while the mouse strums instead. */
   updateHands(hands: readonly (readonly Point[])[], t: number, audioNow: number, canStrum: boolean): void {
     const { fret, strum } = assignHands(hands, this.layout);
     this.fretHand = fret;
     this.strumHand = strum;
     this.updateFretHand(fret, t, audioNow);
-    if (canStrum) this.feedStrum(this.strumTip(strum, t), t, audioNow);
+    if (canStrum) this.feedStrum(this.strumTip(strum, t), t, audioNow, strum);
   }
 
   /** Mouse / touch fallback for the strumming hand. */
   pointer(p: Point | null, t: number, audioNow: number): void {
     this.strumPoint = p;
-    this.feedStrum(p, t, audioNow);
+    this.feedStrum(p, t, audioNow, null);
   }
 
   /** Keyboard selection: chord in chord mode, fret in note mode. */
@@ -209,15 +222,17 @@ export class Player {
     return this.strumPoint;
   }
 
-  private feedStrum(p: Point | null, t: number, audioNow: number): void {
+  /** `hand` is the one striking: the tracked strumming hand, or null for the mouse (which always plays). */
+  private feedStrum(p: Point | null, t: number, audioNow: number, hand: readonly Point[] | null): void {
     const dt = this.lastFrame ? Math.min(Timing.maxFrame, t - this.lastFrame) : Timing.defaultFrame;
     this.lastFrame = t;
-    if (p) this.trail.push({ p, t });
+    // While the instrument plays itself the trail is its pick's.
+    if (p && !this.isPerforming) this.trail.push({ p, t });
     while (this.trail.length && t - (this.trail[0]?.t ?? t) > Timing.trail) this.trail.shift();
     const ys = strumStringYs(this.layout);
-    this.isPalmMuted = isPalmMuting(this.layout, this.strumHand);
+    this.isPalmMuted = isPalmMuting(this.layout, hand);
     const crossings = this.strum.update(p, t, ys, this.layout.h);
-    for (const c of crossings) this.play(c, audioNow + Timing.scheduleLead + c.frac * Math.min(dt, Timing.maxSpread));
+    for (const c of crossings) this.play(c, audioNow + Timing.scheduleLead + c.frac * Math.min(dt, Timing.maxSpread), hand);
     this.touching = this.strum.touching(p, ys, this.layout.h);
     this.dampRestingStrings(t, audioNow);
     this.gestures.tick(t);
@@ -236,10 +251,10 @@ export class Player {
     }
   }
 
-  private play(c: Crossing, when: number): void {
+  private play(c: Crossing, when: number, hand: readonly Point[] | null): void {
     if (this.strumFilter === StrumFilter.down && c.dir === StrumDirection.up) return;
     // A tracked hand must strike with nail or pad; the mouse always plays.
-    this.strike = this.strumHand ? fingerStrike(this.strumHand, c.dir, !this.layout.isLefty) : StrikeSurface.nail;
+    this.strike = hand ? fingerStrike(hand, c.dir, !this.layout.isLefty) : StrikeSurface.nail;
     if (this.strike === StrikeSurface.none) return;
     const midi = this.noteOf(c.string);
     const isNewGesture = when - this.lastCross.when > Timing.gestureGap || c.dir !== this.lastCross.dir;
@@ -262,7 +277,7 @@ export class Player {
   private noteOf(string: number): number | null {
     const tuning = this.instrument.tuning;
     const open = tuning[string] ?? 0;
-    if (this.mode === PlayMode.free) {
+    if (this.mode === PlayMode.free || this.isPerforming) {
       const fret = this.fretting?.frets[string] ?? 0;
       return open + this.soundingFret(fret) + (this.fretting?.bends[string] ?? 0);
     }

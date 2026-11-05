@@ -19,6 +19,7 @@ export function showPerformance(player: Player, frame: DemoFrame | null, now: nu
     player.strumPoint = null;
     player.lastChordName = '';
     player.trail.length = 0;
+    player.guestHand = null;
     return;
   }
   player.fretting = frame.fretting;
