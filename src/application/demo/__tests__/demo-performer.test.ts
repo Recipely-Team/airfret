@@ -45,6 +45,11 @@ describe('DemoPerformer — the instrument playing by itself', () => {
     });
   }
 
+  it('starts playing at once — no count-in bar of silence, even on the slow Prelude', () => {
+    const { sound } = perform('acoustic');
+    expect(Math.min(...sound.plucks.map((p) => p.when))).toBeLessThan(0.5);
+  });
+
   it('shows every pluck once, as a string set vibrating, when it sounds', () => {
     const { sound, frames } = perform('acoustic');
     const shown = frames.flatMap((f) => f.hits).length;

@@ -39,6 +39,11 @@ The app re-applies the instrument on every settings change, and the engine answe
 its sample set and loading it again, which stops every note the set is playing. *Guard:* `useSamples`
 returns early unless the set actually changes (comment there); manual QA row V4.
 
+**Self-play stayed silent for 3.4 s on the Prelude.** The demo reused the lesson session, whose count-in bar
+(no clicks in a demo) looked like nothing happening. *Fix:* the demo starts the session a count-in early, so the
+first note sounds 0.3 s after the button. Found by the production feature run. Test `demo-performer.test.ts`
+("starts playing at once").
+
 ## Drums
 
 **Drumsticks vanished and reappeared, or jumped to the other hand.**

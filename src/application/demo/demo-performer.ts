@@ -26,6 +26,8 @@ const PICK_REACH = 0.25;
 const PICK_AT = 0.3;
 /** Plucks older than this are forgotten, seconds. */
 const KEEP = 1;
+/** The first note sounds this soon after *Watch it play*, seconds — no count-in bar of silence first. */
+const FIRST_NOTE_AFTER = 0.3;
 const DEMO_OPTIONS = { tempo: 1, shouldWait: false, isEasy: false, hasGuide: true, hasDrums: false, latency: 0 } as const;
 
 /**
@@ -63,7 +65,11 @@ export class DemoPerformer {
   }
 
   start(song: Song, instrument: Instrument, audioNow: number): Result<void, Failure> {
-    const started = this.startLesson.execute(song, DEMO_OPTIONS, audioNow);
+    // A lesson opens with a count-in bar; a demo shouldn't make you wait through it (3.4 s on the Prelude).
+    const counted = this.startLesson.execute(song, DEMO_OPTIONS, audioNow);
+    if (!counted.isOk) return counted;
+    const countIn = counted.value.timeOfBeat(0) - audioNow;
+    const started = this.startLesson.execute(song, DEMO_OPTIONS, audioNow - countIn + FIRST_NOTE_AFTER);
     if (!started.isOk) return started;
     this.session = started.value;
     this.guide.reset();
