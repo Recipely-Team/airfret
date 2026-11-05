@@ -9,6 +9,8 @@ import { StartLessonUseCase } from '@application/lessons/start-lesson-use-case';
 import { Player } from '@application/play/player';
 import { SettingsStore } from '@application/settings/settings-store';
 import { WebAudioEngine } from '@infrastructure/audio/web-audio-engine';
+import { BrowserClipRecorder } from '@infrastructure/recording/browser-clip-recorder';
+import { StageCompositor } from '@infrastructure/recording/stage-compositor';
 import { BrowserPedalInput } from '@infrastructure/input/browser-pedal-input';
 import { LocalStorageSettingsRepository } from '@infrastructure/storage/local-storage-settings-repository';
 import { MediaPipeHandTracker } from '@infrastructure/tracking/mediapipe-hand-tracker';
@@ -31,6 +33,8 @@ import { LessonIntro } from '@presentation/ui/lessons/lesson-intro';
 import { LessonsDrawer } from '@presentation/ui/lessons/lessons-drawer';
 import { ResultDialog } from '@presentation/ui/lessons/result-dialog';
 import { PointerInput } from '@presentation/ui/pointer-input';
+import { ClipDialog } from '@presentation/ui/recording/clip-dialog';
+import { RecordButton } from '@presentation/ui/recording/record-button';
 import { StartScreen } from '@presentation/ui/start-screen';
 import { applyStaticCopy } from '@presentation/ui/static-copy';
 import { Toast } from '@presentation/ui/toast';
@@ -98,6 +102,15 @@ function bootstrap(): void {
   }
   const toolbar = new Toolbar(store, () => running.hasLesson, () => running.isOnStage);
   const settingsPanel = new SettingsPanel(store);
+  const compositor = new StageCompositor(canvas, video, () => ({ brightness: store.value.brightness, isCameraHidden: store.value.isCameraHidden }));
+  const recorder = new BrowserClipRecorder(compositor, () => sound.recordingStream());
+  const recordButton = new RecordButton({
+    recorder,
+    dialog: new ClipDialog((clip) => recorder.release(clip)),
+    isOnStage: () => running.isOnStage,
+    instrumentId: () => store.value.instrument,
+    say: (message) => ui.toast.show(message),
+  });
   const pedalRouter = new PedalRouter(store, drums, () => ({ audio: sound.now, wall: performance.now() / 1000 }));
   pedalInput.listen((e) => running.isDrums && pedalRouter.handle(e));
   byId('pedalsBtn').onclick = () => ui.pedals.open();
@@ -117,6 +130,7 @@ function bootstrap(): void {
     document.documentElement.style.setProperty('--cam', String(s.brightness));
     document.documentElement.classList.toggle('cam-hidden', s.isCameraHidden);
     toolbar.render();
+    recordButton.render();
     running.demo.render();
     settingsPanel.render();
     drawer.render();

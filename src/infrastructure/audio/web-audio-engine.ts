@@ -68,12 +68,16 @@ export class WebAudioEngine implements SoundOutputInterface {
   private readonly sampleSets = new Map<string, Promise<SampleSet | null>>();
   /** The sample set in use (or being loaded); null = synth only. */
   private sampleSetId: string | null = null;
+  /** The finished mix, after the limiter: what the speakers get, and what a recording taps. */
+  private readonly out: AudioNode;
+  private tap: MediaStreamAudioDestinationNode | null = null;
 
   constructor() {
     const ctx = this.ctx;
     this.master = ctx.createGain();
     this.master.gain.value = Level.master;
-    outputStage(ctx, this.master).connect(ctx.destination);
+    this.out = outputStage(ctx, this.master);
+    this.out.connect(ctx.destination);
     const reverb = ctx.createConvolver();
     reverb.buffer = impulseResponse(ctx, Reverb.seconds, Reverb.decay);
     this.reverbIn = ctx.createGain();
@@ -120,6 +124,16 @@ export class WebAudioEngine implements SoundOutputInterface {
     }
     this.setInstrument(instrument);
     return ok(undefined);
+  }
+
+  /** Everything the speakers play, as a stream for video recordings; made once and shared by every clip. */
+  recordingStream(): MediaStream {
+    void this.ctx.resume();
+    if (!this.tap) {
+      this.tap = this.ctx.createMediaStreamDestination();
+      this.out.connect(this.tap);
+    }
+    return this.tap.stream;
   }
 
   setVolume(volume: number): void {

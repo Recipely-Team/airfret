@@ -118,11 +118,14 @@ the frets just before each note (standard chord shapes and fingers, or one finge
 pick crosses each string as it sounds, the strings vibrate. Works before Start and without a camera.
 `DemoPerformer` (sound from the lesson guide); a test checks every note sounds the fret the hand holds. QA S1–S5.
 
-## Video recording — `idea`
-Record yourself playing: the stage (instrument, hands or their skeleton, the hit highlights) together with the
-sound, saved as a video to keep or share. Canvas `captureStream` + the audio graph's `MediaStreamDestination` into
-a `MediaRecorder`; WebM/MP4 by browser. A record button in the top bar, a timer while recording, then a preview
-with Save. The hands-only view makes a clip with nothing personal in it; self-play can record a demo.
+## Video recording — `shipped`
+Record yourself playing: the record button in the top bar captures the stage — the camera picture as the page
+shows it, the instrument, the hands or their skeleton, the hit highlights — with everything the instrument plays,
+then opens a preview with *Save video* (MP4 where the browser can write it, otherwise WebM) and *Discard*. Nothing
+is uploaded. The hands-only view makes a clip with nothing personal in it; self-play can be recorded as a demo.
+Clips stop at 10 minutes. `StageCompositor` + `BrowserClipRecorder` (`MediaRecorder`), sound from the engine's
+output; QA W1–W10. Open: record the microphone too (sing along), trim before saving, a share button on phones
+(Web Share with files).
 
 ## Practice loop — `idea`
 Pick a few bars of a lesson and loop them, slower at first and up to full tempo as the score improves —
