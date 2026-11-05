@@ -4,29 +4,60 @@ import { DemoPerformer } from '@application/demo/demo-performer';
 import { DEMO_SONG_BY_INSTRUMENT } from '@application/demo/demo-songs';
 import { computeLayout } from '@domain/fretboard/compute-layout';
 import { inStrumArea } from '@domain/fretboard/neck-geometry';
-import { instrumentById } from '@domain/instruments/instrument-catalog';
+import { instrumentById, INSTRUMENTS } from '@domain/instruments/instrument-catalog';
+import { watchableSongs } from '@application/demo/watchable-songs';
 import { SONGS } from '@domain/lessons/catalog/song-catalog';
+import { DRUMS_ID } from '@domain/drums/drums-id';
+import { effectiveTuning } from '@domain/music/tuning-catalog';
 
 const FRAME = 1 / 60;
 /** Enough of each piece to cover chord changes and position shifts. */
 const SECONDS = 20;
 
-function perform(instrumentId: string) {
-  const instrument = instrumentById(instrumentId);
-  const song = SONGS.find((s) => s.id === DEMO_SONG_BY_INSTRUMENT[instrumentId]);
-  if (!song) throw new Error(`no demo song for ${instrumentId}`);
+function perform(instrumentId: string, songId = DEMO_SONG_BY_INSTRUMENT[instrumentId], seconds = SECONDS) {
+  const song = SONGS.find((s) => s.id === songId);
+  if (!song) throw new Error(`no song ${songId ?? ''} for ${instrumentId}`);
+  const base = instrumentById(instrumentId);
+  const instrument = { ...base, tuning: effectiveTuning(base.tuning, song.tuning ?? 'standard', 0) };
   const l = computeLayout(1440, 900, instrument.tuning.length, false, instrument.maxFret);
   const sound = new FakeSoundOutput();
   const demo = new DemoPerformer(sound);
   expect(demo.start(song, instrument, 0).isOk).toBe(true);
   const frames = [];
-  for (let t = 0; t < SECONDS && demo.isPlaying; t += FRAME) {
+  for (let t = 0; t < seconds && demo.isPlaying; t += FRAME) {
     sound.now = t;
     const f = demo.update(l, instrument, 0, t);
     if (f) frames.push({ t, ...f });
   }
   return { instrument, l, sound, frames };
 }
+
+/** Every note that sounds is the fret the hand holds on that string; returns how many notes were checked. */
+function expectHeldNotes(instrumentId: string, songId?: string, seconds = SECONDS): number {
+  const { instrument, sound, frames } = perform(instrumentId, songId, seconds);
+  let checked = 0;
+  for (const p of sound.plucks) {
+    const f = frames.find((x) => x.t >= p.when);
+    if (!f) continue;
+    const fret = f.fretting.frets[p.string] ?? 0;
+    expect(fret, `${songId ?? instrumentId}: string ${p.string} at ${p.when.toFixed(2)} s`).toBe(p.midi - (instrument.tuning[p.string] ?? 0));
+    checked++;
+  }
+  return checked;
+}
+
+/** Long enough for several chord changes or melody positions on every song; keeps ~150 runs quick. */
+const LIST_SECONDS = 8;
+
+describe('Watch it play mode: every song in each instrument\'s list plays on that instrument', () => {
+  for (const inst of INSTRUMENTS.filter((i) => i.id !== DRUMS_ID)) {
+    for (const song of watchableSongs(SONGS, inst.id)) {
+      it(`${song.id} on ${inst.id}: every note the one the hand holds`, () => {
+        expect(expectHeldNotes(inst.id, song.id, LIST_SECONDS)).toBeGreaterThan(2);
+      });
+    }
+  }
+});
 
 describe('DemoPerformer — the instrument playing by itself', () => {
   for (const id of Object.keys(DEMO_SONG_BY_INSTRUMENT)) {

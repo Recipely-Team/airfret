@@ -25,6 +25,8 @@ export interface Settings {
   readonly brightness: number;
   /** Hands-only view: the camera picture is hidden and the hands are drawn as a skeleton. Tracking still runs. */
   readonly isCameraHidden: boolean;
+  /** The player turned the camera off: no picture, no tracking; mouse or touch plays. */
+  readonly isCameraOff: boolean;
   readonly latencyMs: number;
   readonly lessonTempo: number;
   readonly lessonMode: LessonMode;

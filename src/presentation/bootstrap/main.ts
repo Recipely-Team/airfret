@@ -69,7 +69,11 @@ function bootstrap(): void {
     start: new StartScreen(() => app?.start() ?? Promise.resolve()),
     toast: new Toast(),
     drawer,
-    intro: new LessonIntro(store, (song) => { app?.closeOverlay(); app?.beginLesson(song); }, () => router.navigate({ kind: 'lessons' })),
+    intro: new LessonIntro(store, (song) => { app?.closeOverlay(); app?.beginLesson(song); }, () => router.navigate({ kind: 'lessons' }), (song) => {
+      // Watch it play: the song's own instrument, in the Watch it play mode with this song chosen.
+      router.navigate({ kind: 'instrument', instrument: song.instrument });
+      void app?.demo.enter(song);
+    }),
     hud: new LessonHud(store, () => app?.stopLesson()),
     result: new ResultDialog(() => { const s = ui.intro.current; if (s) app?.beginLesson(s); }, () => router.navigate({ kind: 'lessons' })),
     pointer: new PointerInput(canvas, player, sound, drums, () => app?.isDrums ?? false),
@@ -101,7 +105,12 @@ function bootstrap(): void {
       firstLesson: () => SONGS.find((song) => song.course === 1),
     });
   }
-  const toolbar = new Toolbar(store, () => running.hasLesson, () => running.isOnStage);
+  const toolbar = new Toolbar(store, () => running.hasLesson, () => running.isOnStage, {
+    isOffered: () => running.demo.hasDemo,
+    isOn: () => running.demo.isOn,
+    enter: () => void running.demo.enter(),
+    leave: () => running.demo.leave(),
+  });
   const settingsPanel = new SettingsPanel(store);
   const compositor = new StageCompositor(canvas, video, () => ({ brightness: store.value.brightness, isCameraHidden: store.value.isCameraHidden }));
   const recorder = new BrowserClipRecorder(compositor, () => sound.recordingStream());

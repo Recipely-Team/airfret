@@ -90,7 +90,7 @@ export class StageRenderer {
     this.art.draw(this.ctx, l, player.instrument.chain);
     paintFingering(pc);
     paintStrings(pc);
-    const hands = [player.fretHand, player.strumHand].filter((h): h is NonNullable<typeof h> => h !== null);
+    const hands = [player.fretHand, player.strumHand, player.isPerforming ? player.guestHand : null].filter((h): h is NonNullable<typeof h> => h !== null);
     this.paintHands(hands, l.w, l.h, camera);
     [paintChordChips, paintPick, paintChordCard, paintCoach, paintStrumCue].forEach((paint) => paint(pc));
     if (tour) paintTour(pc, tour);

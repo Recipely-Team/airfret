@@ -50,6 +50,11 @@ export const SONGS: readonly Song[] = [
   // Songs
   { id: 'happy-birthday', title: 'Happy Birthday', credit: 'credit.traditional', level: 1, bpm: 100, beatsPerBar: 3, mode: PlayMode.chord, instrument: 'acoustic',
     chords: 'G:3 D7:3 D7:3 G:3 G7:3 C:3 G:3 D7:3 G:6', pattern: WALTZ, subdiv: 2, about: 'about.birthday' },
+  // The tune itself, with the bass of each chord under the bar's first note; two beats' rest put the pickup on beat 3.
+  { id: 'happy-birthday-melody', title: 'Happy Birthday — melody', credit: 'credit.traditional', level: 1, bpm: 100, beatsPerBar: 3, mode: PlayMode.note, instrument: 'acoustic',
+    notes: 'r:2 D4:0.75 D4:0.25 E4+G2:1 D4:1 G4:1 F#4+D3:2 D4:0.75 D4:0.25 E4+D3:1 D4:1 A4:1 G4+G2:2 D4:0.75 D4:0.25 ' +
+      'D5+G2:1 B4:1 G4:1 F#4+C3:1 E4:1 C5:0.75 C5:0.25 B4+G2:1 G4:1 A4+D3:1 G4+G2:3',
+    about: 'about.birthdayMelody' },
   { id: 'jingle-bells', title: 'Jingle Bells', credit: 'credit.pierpont', level: 1, bpm: 112, beatsPerBar: 4, mode: PlayMode.chord, instrument: 'acoustic',
     chords: 'G:16 C:4 G:4 A7:4 D7:4 G:16 C:4 G:4 D7:4 G:4', pattern: 'D.DUD.DU', subdiv: 2, about: 'about.jingle' },
   { id: 'silent-night', title: 'Silent Night', credit: 'credit.gruber', level: 1, bpm: 84, beatsPerBar: 3, mode: PlayMode.chord, instrument: 'nylon',
