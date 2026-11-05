@@ -75,7 +75,8 @@ export class AirfretApp {
       const first = SONGS.find((song) => song.course === 1);
       if (first) this.openIntro(first);
     });
-    const showStart = (isPlaying: boolean) => this.ui.start.show(this.isOnStage && !this.isStarted && !isPlaying);
+    // Self-play sounds through the guide voice: the mix changes when it starts or stops.
+    const showStart = (isPlaying: boolean) => { this.ui.start.show(this.isOnStage && !this.isStarted && !isPlaying); this.apply(); };
     this.demo = new DemoController({ player: s.player, sound: s.sound, startAudio: () => this.startAudio(), instrumentId: () => s.store.value.instrument, instrument: () => this.instrument(), onChange: showStart });
     s.player.onEvent = (e) => {
       this.tours.onEvent(e);
@@ -178,7 +179,7 @@ export class AirfretApp {
     const inst = this.instrument();
     this.s.sound.setInstrument(inst);
     this.s.sound.setVolume(st.volume);
-    const mix = voiceMix(st, this.lesson !== null, this.lesson?.opts.hasGuide ?? false);
+    const mix = voiceMix(st, this.lesson !== null, this.lesson?.opts.hasGuide ?? false, this.demo.isPlaying);
     this.s.sound.setVoiceVolume(Voice.player, mix.player);
     this.s.sound.setVoiceVolume(Voice.guide, mix.guide);
     const w = window.innerWidth;
