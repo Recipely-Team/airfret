@@ -75,6 +75,15 @@ and the fingertip, so "segment crosses ≥ 3 strings" fired on ordinary fretting
 be flat — all three joints on the strings, nearly straight, along the fret wire. Test
 `map-fretting.test.ts` ("does not mistake an arched finger reaching one string for a barre").
 
+**One finger laid flat across the strings didn't press them (reported by a guitarist).** The barre counted
+only the strings between the index fingertip and its middle joint, and needed three of them. The camera
+often shows the hand smaller than the neck drawn over it, so that stretch covered two strings and the barre
+never fired; other fingers couldn't barre at all, and free mode drew nothing for one. *Fix:* the finger's
+angle decides — a flat finger running across the strings holds every string from its tip to the edge of the
+neck, as a real finger (longer than the neck is wide) does; any finger, two strings or more; drawn as a bar.
+Tests `map-fretting.test.ts` ("one finger laid flat across the strings frets every string, even when the
+hand looks smaller than the neck", partial and small-F barres, ring-finger barre, rolled finger).
+
 **Lifting the hand after a downstroke played an upstroke.** A webcam has no depth, so the
 return path crosses the strings the same way a strum does. (Also reported by other air-guitar
 projects.) *Guard:* the *Down only* strum filter, covered by `player.test.ts`

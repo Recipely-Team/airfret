@@ -1,6 +1,6 @@
 import { Voice } from '@domain/audio/voice';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
-import type { Fretting } from '@domain/fretboard/fretting';
+import type { Fretting } from '@domain/fretboard/fretting/fretting';
 
 /** Strings vibrating louder than this are "ringing" and can be changed without a new pluck. */
 const RINGING_ENERGY = 0.06;

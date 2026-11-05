@@ -15,7 +15,7 @@ const BEHIND_FRET = 0.72;
  * @remarks
  * - Chord mode: the held (or lesson's next) chord's real fingering — numbered dots, a barre bar, ×/○ at the nut.
  * - Note mode: the held fret band, and the lesson's next note.
- * - Free mode: what each fingertip is pressing; the capo bar when one is set.
+ * - Free mode: what each fingertip is pressing, a bar where a finger lies flat across a fret; the capo bar when one is set.
  */
 export function paintFingering({ ctx, player, target, now }: PaintContext): void {
   const l = player.layout;
@@ -35,7 +35,7 @@ export function paintFingering({ ctx, player, target, now }: PaintContext): void
     const pos = target?.midi === undefined ? null : findPosition(target.midi, player.instrument.tuning, l.maxFret);
     if (pos) fingerDot(ctx, pos.fret > 0 ? fx(pos.fret + player.capo) : l.nutX - 14, stringY(l, pos.string, fx(Math.max(1, pos.fret))), '', 0.45 + 0.3 * Math.sin(now * 5), true);
   } else {
-    for (const p of player.fretting?.presses ?? []) fingerDot(ctx, fx(p.fret), stringY(l, p.string, fx(p.fret)), String(p.finger), 0.9, false);
+    paintPresses(ctx, player, fx);
   }
 }
 
@@ -47,14 +47,8 @@ function paintShape(ctx: CanvasRenderingContext2D, player: PaintContext['player'
   const capo = player.capo;
   const barreFret = barre(shape, fingers);
   if (barreFret > 0) {
-    const x = fx(barreFret + capo);
     const strings = shape.map((f, i) => (f !== null && f >= barreFret ? i : -1)).filter((i) => i >= 0);
-    const y0 = stringY(l, strings[0] ?? 0, x);
-    const y1 = stringY(l, strings[strings.length - 1] ?? 0, x);
-    ctx.beginPath();
-    ctx.roundRect(x - 9, Math.min(y0, y1) - 9, 18, Math.abs(y1 - y0) + 18, 9);
-    ctx.fillStyle = isGhost ? rgba(Palette.ink, alpha * 0.35) : rgba(Palette.accent, alpha * 0.85);
-    ctx.fill();
+    barreBar(ctx, player, fx(barreFret + capo), strings, isGhost ? rgba(Palette.ink, alpha * 0.35) : rgba(Palette.accent, alpha * 0.85));
   }
   shape.forEach((f, i) => {
     if (f === null) {
@@ -67,6 +61,33 @@ function paintShape(ctx: CanvasRenderingContext2D, player: PaintContext['player'
     if (f === 0 || f === barreFret) return;
     fingerDot(ctx, fx(f + capo), stringY(l, i, fx(f + capo)), String(fingers?.[i] ?? ''), alpha, isGhost);
   });
+}
+
+/** Free mode: a dot per fingertip, and a bar where one finger holds several strings on a fret (a barre). */
+function paintPresses(ctx: CanvasRenderingContext2D, player: PaintContext['player'], fx: (f: number) => number): void {
+  const l = player.layout;
+  const groups = new Map<string, { finger: number; fret: number; strings: number[] }>();
+  for (const p of player.fretting?.presses ?? []) {
+    const key = `${p.finger}:${p.fret}`;
+    const g = groups.get(key) ?? { finger: p.finger, fret: p.fret, strings: [] };
+    g.strings.push(p.string);
+    groups.set(key, g);
+  }
+  for (const g of groups.values()) {
+    const x = fx(g.fret);
+    if (g.strings.length > 1) barreBar(ctx, player, x, g.strings, rgba(Palette.accent, 0.8));
+    fingerDot(ctx, x, stringY(l, Math.min(...g.strings), x), String(g.finger), 0.9, false);
+  }
+}
+
+/** A rounded bar across `strings` at screen x: one finger laid flat over them. */
+function barreBar(ctx: CanvasRenderingContext2D, player: PaintContext['player'], x: number, strings: readonly number[], color: string): void {
+  const y0 = stringY(player.layout, Math.min(...strings), x);
+  const y1 = stringY(player.layout, Math.max(...strings), x);
+  ctx.beginPath();
+  ctx.roundRect(x - 9, y0 - 9, 18, y1 - y0 + 18, 9);
+  ctx.fillStyle = color;
+  ctx.fill();
 }
 
 function barre(shape: readonly (number | null)[], fingers: readonly (number | null)[] | undefined): number {

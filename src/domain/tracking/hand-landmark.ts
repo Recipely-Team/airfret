@@ -9,11 +9,15 @@ export const HandLandmark = {
   indexTip: 8,
   middleMcp: 9,
   middlePip: 10,
+  middleDip: 11,
   middleTip: 12,
+  ringMcp: 13,
   ringPip: 14,
+  ringDip: 15,
   ringTip: 16,
   pinkyMcp: 17,
   pinkyPip: 18,
+  pinkyDip: 19,
   pinkyTip: 20,
 } as const;
 
