@@ -17,4 +17,8 @@ describe('voiceMix', () => {
     expect(voiceMix(quietMe, true, false).guide).toBe(0);
     expect(voiceMix(quietMe, false, true).guide).toBe(0);
   });
+
+  it('plays self-play at full level, not muted by the guide being silent outside lessons (Watch it play was nearly silent)', () => {
+    expect(voiceMix(quietMe, false, false, true).guide).toBe(1);
+  });
 });

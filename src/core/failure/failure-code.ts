@@ -4,6 +4,7 @@ export const FailureCode = {
   trackingUnavailable: 'tracking-unavailable',
   audioUnavailable: 'audio-unavailable',
   invalidChart: 'invalid-chart',
+  recordingUnavailable: 'recording-unavailable',
 } as const;
 
 export type FailureCode = (typeof FailureCode)[keyof typeof FailureCode];
