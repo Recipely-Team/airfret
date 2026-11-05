@@ -41,6 +41,7 @@ import { StartScreen } from '@presentation/ui/start-screen';
 import { applyStaticCopy } from '@presentation/ui/static-copy';
 import { Toast } from '@presentation/ui/toast';
 import { TourBar } from '@presentation/ui/tour-bar';
+import { showBuildTag } from '@presentation/ui/build-tag';
 
 /**
  * **Composition root** — the only place that knows concrete infrastructure classes.
@@ -153,6 +154,7 @@ function bootstrap(): void {
     languageSwitch.render();
     running.apply();
   };
+  showBuildTag();
   store.subscribe(render);
   window.addEventListener('resize', () => running.apply());
   render();

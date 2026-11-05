@@ -50,6 +50,12 @@ button, select, input { font: inherit; color: inherit; }
 
 #stage { position: absolute; inset: 0; }
 
+/* The version, bottom right on every page: small and faint, never in the way. */
+.build-tag {
+  position: absolute; right: 10px; bottom: 6px; z-index: 3; pointer-events: none;
+  font-size: 10.5px; letter-spacing: 0.02em; color: var(--muted); opacity: 0.55; font-variant-numeric: tabular-nums;
+}
+
 /* TR / EN switch: home page foot, start card, foot of the instrument menu. */
 .home-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
 .home-foot .home-privacy { margin: 0; }
