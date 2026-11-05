@@ -159,6 +159,9 @@ F/B rows (id — note):
 | S8 | While it plays, strum with the mouse or your strumming hand | Your strokes sound the notes the playing hand holds; your hand shows as a second skeleton | |
 | S9 | Lessons → any song → *Watch it play* | The song's instrument opens in the mode with that song chosen and playing (also for a song you added) | |
 | S10 | A chord piece (`/overdrive`, `/banjo`) | The chord name and chart change with the music; the shape on the neck is the one sounding | |
+| S13 | While it plays, rest a finger (mouse or touch) on a ringing string | It stops, like on a real guitar — whoever plucked it | |
+| S14 | Tap one string (no swipe), with or without self-play | That string plays once | |
+| S15 | Let a song play to its end, then play yourself for a minute | Plays as normally — no stutter, wrong notes or missed strokes | |
 | S11 | iPhone with the silent switch on | The playing is heard | |
 | S12 | Phone width and 1280 px | The top bar stays tidy: the list fills the second row on a phone; one line at 1280 px | |
 

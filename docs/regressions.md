@@ -60,6 +60,14 @@ it re-applied the instrument but never re-rendered the top bar, so every new pla
 tour) found Chords · Notes · Free greyed out until some other setting changed. Found by the v0.7.0 production
 run. *Fix:* the tour's end re-renders everything (`store.update({})`). QA row A4.
 
+**With the mouse or a finger on a touch screen, a string could be neither tapped nor muted.** A string only
+counted as touched once the fingertip had pushed past it from one side, so a finger put down right on it touched
+nothing; and the pointer fed the player only when it moved, so a resting finger was never re-checked. A tap played
+nothing and a resting finger never stopped a ringing string. *Fix:* a fingertip put down on a string touches it,
+a held pointer is fed every frame, and a short tap plucks the string under it (`TapDetector`). During self-play a
+resting finger stops the string in both voices. Tests `tap-detector.test.ts`, `touch-and-mute.test.ts`,
+`player-along.test.ts`; guard `player-after-self-play.test.ts` (no state left behind by self-play).
+
 ## Drums
 
 **Drumsticks vanished and reappeared, or jumped to the other hand.**

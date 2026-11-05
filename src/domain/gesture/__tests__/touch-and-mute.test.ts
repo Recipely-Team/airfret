@@ -20,6 +20,13 @@ describe('string contact', () => {
     expect(d.touching({ x: 1000, y: line - band * 0.5 }, ys, l.h)).toEqual([]);
     expect(d.touching(null, ys, l.h)).toEqual([]);
   });
+
+  it('reports a string as touched when the fingertip is put down right on it (a resting finger never muted it)', () => {
+    const d = new StrumDetector();
+    const line = ys[2]!;
+    d.update({ x: 1000, y: line + 1 }, 0, ys, l.h);
+    expect(d.touching({ x: 1000, y: line + 1 }, ys, l.h)).toEqual([2]);
+  });
 });
 
 describe('pluck position (on the real string, not the screen)', () => {
