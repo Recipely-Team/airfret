@@ -68,6 +68,10 @@ a held pointer is fed every frame, and a short tap plucks the string under it (`
 resting finger stops the string in both voices. Tests `tap-detector.test.ts`, `touch-and-mute.test.ts`,
 `player-along.test.ts`; guard `player-after-self-play.test.ts` (no state left behind by self-play).
 
+**Self-play waited through a song's opening rests.** Skipping the count-in still started at beat 0, so a song
+that opens with rests before its pickup (Auld Lang Syne: 2.1 s) began in silence. *Fix:* self-play starts at the
+first note. Test `demo-performer.test.ts` ("starts at the first note even when the song opens with rests").
+
 ## Drums
 
 **Drumsticks vanished and reappeared, or jumped to the other hand.**

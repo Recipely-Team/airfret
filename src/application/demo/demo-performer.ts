@@ -65,10 +65,11 @@ export class DemoPerformer {
   }
 
   start(song: Song, instrument: Instrument, audioNow: number): Result<void, Failure> {
-    // A lesson opens with a count-in bar; a demo shouldn't make you wait through it (3.4 s on the Prelude).
+    // A lesson opens with a count-in bar, and a song may open with rests before its pickup; a demo shouldn't make
+    // you wait through either (3.4 s on the Prelude, 2.1 s on Auld Lang Syne): it starts at the first note.
     const counted = this.startLesson.execute(song, DEMO_OPTIONS, audioNow);
     if (!counted.isOk) return counted;
-    const countIn = counted.value.timeOfBeat(0) - audioNow;
+    const countIn = counted.value.timeOfBeat(counted.value.chart.targets[0]?.beat ?? 0) - audioNow;
     const started = this.startLesson.execute(song, DEMO_OPTIONS, audioNow - countIn + FIRST_NOTE_AFTER);
     if (!started.isOk) return started;
     this.session = started.value;
