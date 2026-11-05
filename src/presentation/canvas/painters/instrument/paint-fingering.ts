@@ -15,7 +15,7 @@ const BEHIND_FRET = 0.72;
  * @remarks
  * - Chord mode: the held (or lesson's next) chord's real fingering — numbered dots, a barre bar, ×/○ at the nut.
  * - Note mode: the held fret band, and the lesson's next note.
- * - Free mode: what each fingertip is pressing, a bar where a finger lies flat across a fret; the capo bar when one is set.
+ * - Free mode, and the instrument playing by itself: what each fingertip is pressing, a bar where a finger lies flat across a fret; the capo bar when one is set.
  */
 export function paintFingering({ ctx, player, target, now }: PaintContext): void {
   const l = player.layout;
@@ -26,7 +26,9 @@ export function paintFingering({ ctx, player, target, now }: PaintContext): void
   };
   if (player.capo > 0) paintCapo(ctx, player.layout, l.fretX[player.capo - 1] ?? l.nutX, l.fretX[player.capo] ?? l.nutX);
 
-  if (player.mode === PlayMode.chord) {
+  if (player.isPerforming) {
+    paintPresses(ctx, player, fx);
+  } else if (player.mode === PlayMode.chord) {
     const isTargetOther = target?.chord !== undefined && target.chord !== player.chord;
     if (isTargetOther && target.chord) paintShape(ctx, player, target.chord, fx, 0.35 + 0.2 * Math.sin(now * 5), true);
     if (player.chord && !player.isMuted) paintShape(ctx, player, player.chord, fx, 0.95, false);

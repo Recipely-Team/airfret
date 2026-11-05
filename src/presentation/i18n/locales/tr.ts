@@ -1,6 +1,8 @@
 /** Turkish UI copy. Keys must match every other locale. */
 export const TR: Readonly<Record<string, string>> = {
   'app.tagline': 'Havada gitar çal. Kamera ellerini görür; teller sanal.',
+  'demo.play': 'Kendi çalsın',
+  'demo.stop': 'Durdur',
   'app.start': 'Başla',
   'app.noCameraStart': 'Kamera yok mu? Yine de Başla’ya bas — fareyi teller üzerinde sürükle, rakam tuşları akor seçer.',
   'app.privacy': 'Görüntü bilgisayarından çıkmaz — el takibi tarayıcıda, yerelde çalışır.',

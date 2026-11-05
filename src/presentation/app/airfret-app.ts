@@ -18,14 +18,14 @@ import { PlayMode } from '@domain/instruments/play-mode';
 import { chordSetById } from '@domain/lessons/catalog/chord-set-catalog';
 import type { Song } from '@domain/lessons/catalog/song';
 import { SONGS } from '@domain/lessons/catalog/song-catalog';
-import { LessonMode } from '@domain/lessons/session/lesson-mode';
 import type { LessonSession } from '@domain/lessons/session/lesson-session';
 import { knownChord } from '@domain/music/chords/chord-voicing';
 import { withVoice } from '@domain/instruments/voice-catalog';
 import { effectiveTuning } from '@domain/music/tuning-catalog';
 import type { HandTrackerInterface } from '@domain/tracking/hand-tracker-interface';
 import type { AppUi } from '@presentation/app/app-ui';
-import { launchFeature } from '@presentation/app/launch-feature';
+import { DemoController } from '@presentation/app/demo-controller';
+import { lessonOptions } from '@presentation/app/lesson-options';
 import { stageHint } from '@presentation/app/stage-hint';
 import { TourController } from '@presentation/app/tour-controller';
 import type { Route } from '@presentation/routing/route';
@@ -58,11 +58,14 @@ interface Services {
 export class AirfretApp {
   private lesson: LessonSession | null = null;
   private isStarted = false;
+  private isAudioOn = false;
   private hasCamera = false;
   private lastHandsAt = 0;
   private readonly tours: TourController;
   /** The page under any overlay: home or an instrument. */
   private base: Route = { kind: 'home' };
+  /** The instrument playing by itself (outside lessons). */
+  readonly demo: DemoController;
 
   constructor(
     private readonly s: Services,
@@ -72,6 +75,8 @@ export class AirfretApp {
       const first = SONGS.find((song) => song.course === 1);
       if (first) this.openIntro(first);
     });
+    const showStart = (isPlaying: boolean) => this.ui.start.show(this.isOnStage && !this.isStarted && !isPlaying);
+    this.demo = new DemoController({ player: s.player, sound: s.sound, startAudio: () => this.startAudio(), instrumentId: () => s.store.value.instrument, instrument: () => this.instrument(), onChange: showStart });
     s.player.onEvent = (e) => {
       this.tours.onEvent(e);
       const played = e.recognized ? { chord: e.recognized.name, recognized: e.recognized } : e.chord !== undefined ? { chord: e.chord } : e.midi === undefined ? {} : { midi: e.midi };
@@ -136,13 +141,9 @@ export class AirfretApp {
 
   /** Called from the start button: unlocks audio, then tries the camera. */
   async start(): Promise<void> {
-    const audio = await this.s.sound.start(this.instrument());
-    if (!audio.isOk) {
-      this.ui.start.status(audio.failure.detail);
-      return;
-    }
+    if (!(await this.startAudio())) return;
+    this.demo.stop();
     this.isStarted = true;
-    this.apply();
     this.ui.start.status(t('app.loadingModel'));
     const camera = await this.s.tracker.start();
     this.hasCamera = camera.isOk;
@@ -152,6 +153,16 @@ export class AirfretApp {
     const isFirstRun = !this.s.store.value.hasSeenExplore;
     this.s.store.update({ hasSeenExplore: true });
     if (isFirstRun && tourInstrument(this.s.store.value.instrument) === this.s.store.value.instrument) this.startTour();
+  }
+
+  /** Unlocks audio once (Start, or the demo before Start); false when the browser refuses. */
+  private async startAudio(): Promise<boolean> {
+    if (this.isAudioOn) return true;
+    const audio = await this.s.sound.start(this.instrument());
+    if (!audio.isOk) this.ui.start.status(audio.failure.detail);
+    this.isAudioOn = audio.isOk;
+    if (audio.isOk) this.apply();
+    return audio.isOk;
   }
 
   /** The selected instrument in its chosen voice, with the tuning and capo applied to its open strings. */
@@ -184,6 +195,7 @@ export class AirfretApp {
   }
 
   pickInstrument(id: string): void {
+    this.demo.stop();
     const st = this.s.store.value;
     const patch = this.hasLesson ? { instrument: id } : { instrument: id, mode: st.mode === PlayMode.free ? PlayMode.free : instrumentById(id).defaultMode, tuning: 'standard' };
     this.s.store.update(id === 'drive' && st.chordSet === 'pop' && !this.hasLesson ? { ...patch, chordSet: 'rock' } : patch);
@@ -194,16 +206,9 @@ export class AirfretApp {
   }
 
   beginLesson(song: Song): void {
+    this.demo.stop();
     const st = this.s.store.value;
-    const opts = {
-      tempo: st.lessonTempo,
-      shouldWait: st.lessonMode === LessonMode.wait,
-      hasGuide: st.lessonMode === LessonMode.shadow,
-      // Course patterns are already simple; library songs can be thinned to one strum per bar.
-      isEasy: song.course === undefined && st.isLessonEasy,
-      hasDrums: st.hasLessonDrums,
-      latency: st.latencyMs / MS_PER_SECOND,
-    };
+    const opts = lessonOptions(st, song);
     const session = this.s.startLesson.execute(song, opts, this.s.sound.now);
     if (!session.isOk) {
       this.ui.toast.show(session.failure.detail);
@@ -218,6 +223,7 @@ export class AirfretApp {
   }
 
   stopLesson(): void {
+    this.demo.stop();
     this.lesson = null;
     this.ui.hud.hide();
     this.apply();
@@ -256,8 +262,14 @@ export class AirfretApp {
       requestAnimationFrame(this.frame);
       return;
     }
-    if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, stageHint({ isStarted: this.isStarted, hasCamera: this.hasCamera, isDrums: this.isDrums, secondsWithoutHands: now - this.lastHandsAt }), { brightness: st.brightness, isHidden: st.isCameraHidden });
-    else this.s.renderer.draw(this.s.player, this.lesson, this.tours.session, audioNow, now, stageHint({ isStarted: this.isStarted, hasCamera: this.hasCamera, isDrums: this.isDrums, secondsWithoutHands: now - this.lastHandsAt }), { brightness: st.brightness, isHidden: st.isCameraHidden });
+    const hint = this.demo.isPlaying ? null : stageHint({ isStarted: this.isStarted, hasCamera: this.hasCamera, isDrums: this.isDrums, secondsWithoutHands: now - this.lastHandsAt });
+    // The self-playing hand is drawn as a skeleton: it isn't in the camera picture.
+    const camera = { brightness: st.brightness, isHidden: st.isCameraHidden || this.demo.isPlaying };
+    if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, hint, camera);
+    else {
+      this.demo.tick(now);
+      this.s.renderer.draw(this.s.player, this.lesson, this.tours.session, audioNow, now, hint, camera);
+    }
     requestAnimationFrame(this.frame);
   };
 
@@ -269,7 +281,7 @@ export class AirfretApp {
     const frame = this.s.tracker.frameSize();
     const px = hands.map((hand) => hand.landmarks.map((p) => videoToScreen(p, frame, window.innerWidth, window.innerHeight)));
     if (this.isDrums) this.s.drums.updateHands(px, now, audioNow, now);
-    else this.s.player.updateHands(px, now, audioNow, !this.ui.pointer.isDown);
+    else if (!this.demo.isPlaying) this.s.player.updateHands(px, now, audioNow, !this.ui.pointer.isDown);
   }
 
   private tickLesson(lesson: LessonSession, audioNow: number): void {
@@ -281,19 +293,5 @@ export class AirfretApp {
     if (lesson.accuracy() > best) this.s.store.update({ best: { ...this.s.store.value.best, [lesson.song.id]: lesson.accuracy() } });
     this.ui.result.show(lesson);
     this.stopLesson();
-  }
-
-  /** Explore's "Try it": sets the app up for one feature and says what to do. */
-  tryFeature(id: string): void {
-    launchFeature(id, {
-      store: this.s.store,
-      ui: this.ui,
-      reset: () => {
-        this.stopLesson();
-        this.endTour();
-      },
-      startTour: () => this.tourFromAnywhere(),
-      firstLesson: () => SONGS.find((song) => song.course === 1),
-    });
   }
 }
