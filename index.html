@@ -71,7 +71,10 @@
         <div id="homeInstruments"></div>
         <h2 class="home-label" data-i18n="home.learn"></h2>
         <div class="learn-row" id="homeLearn"></div>
-        <p class="muted small home-privacy" data-i18n="app.privacy"></p>
+        <div class="home-foot">
+          <p class="muted small home-privacy" data-i18n="app.privacy"></p>
+          <div class="seg small lang-switch" role="radiogroup" data-i18n-label="ui.language"></div>
+        </div>
       </main>
 
       <div class="lesson-bar" id="lessonBar" hidden>
@@ -149,6 +152,7 @@
           </ol>
           <button class="btn primary wide" id="startBtn" data-i18n="app.start"></button>
           <p class="status" id="startStatus"></p>
+          <div class="seg small lang-switch start-lang" role="radiogroup" data-i18n-label="ui.language"></div>
           <p class="muted small" data-i18n="app.noCameraStart"></p>
           <p class="muted small" data-i18n="app.privacy"></p>
         </div>
@@ -185,7 +189,7 @@
           <h2 data-i18n="custom.title"></h2>
           <p class="muted" data-i18n="custom.about"></p>
           <label class="field"><span data-i18n="custom.name"></span><input id="customTitle" maxlength="60" required /></label>
-          <label class="field"><span data-i18n="custom.chords"></span><textarea id="customChords" rows="3" spellcheck="false" placeholder="G D Em C  |  G:2 D:2 Em C"></textarea></label>
+          <label class="field"><span data-i18n="custom.chords"></span><textarea id="customChords" rows="5" spellcheck="false" placeholder="G D Em C  |  G:2 D:2 Em C  |  G4:1 A4:0.5 B4:0.5 r:1"></textarea></label>
           <p class="muted small" data-i18n="custom.chordsHelp"></p>
           <div class="intro-row">
             <label class="field small"><span>BPM</span><input id="customBpm" type="number" min="40" max="220" value="90" /></label>

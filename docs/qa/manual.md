@@ -161,6 +161,22 @@ F/B rows (id — note):
 | S11 | iPhone with the silent switch on | The playing is heard | |
 | S12 | Phone width and 1280 px | The top bar stays tidy: the list fills the second row on a phone; one line at 1280 px | |
 
+## M. Your own melody
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| M1 | Lessons → *Add your own song* → name it, paste a melody as JSON (`{"tempo":108,"timeSignature":"4/4","notes":[{"note":"G4","duration":1},{"note":null,"duration":1}]}`) → Save | The song opens at its own tempo and meter, in note mode | |
+| M2 | Or type a melody: `G4:1 A4:0.5 B4:0.5 r:1` | Same, at the form's tempo | |
+| M3 | Its intro → *Watch it play* | The acoustic plays your melody by itself | |
+| M4 | Type `G4:1 H4:1` | "I can't read the note “H4”…" and nothing is saved | |
+
+## L. Language
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| L1 | Home page foot, start card, foot of the instrument menu | A TR / EN switch in each | |
+| L2 | Press TR anywhere | All text turns Turkish at once, every switch shows TR; it stays after a reload | |
+
 ## K. Camera on and off
 
 | # | Step | Expected | Result |
