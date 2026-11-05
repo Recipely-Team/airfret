@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vitest/config';
@@ -8,7 +9,18 @@ const LAYERS = ['core', 'domain', 'application', 'infrastructure', 'presentation
 const vercel = JSON.parse(readFileSync('vercel.json', 'utf8')) as { headers: { source: string; headers: { key: string; value: string }[] }[] };
 const SECURITY_HEADERS = Object.fromEntries((vercel.headers[0]?.headers ?? []).map((h) => [h.key, h.value]));
 
+/** What the corner of the page shows: the release (package.json, bumped with each release) and the commit built. */
+const VERSION = (JSON.parse(readFileSync('package.json', 'utf8')) as { version: string }).version;
+const COMMIT = (() => {
+  try {
+    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+  } catch {
+    return '';
+  }
+})();
+
 export default defineConfig({
+  define: { __APP_VERSION__: JSON.stringify(VERSION), __APP_COMMIT__: JSON.stringify(COMMIT) },
   resolve: {
     alias: Object.fromEntries(LAYERS.map((l) => [`@${l}`, fileURLToPath(new URL(`./src/${l}`, import.meta.url))])),
   },

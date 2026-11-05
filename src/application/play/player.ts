@@ -17,6 +17,7 @@ import type { Point } from '@domain/fretboard/point';
 import type { Crossing } from '@domain/gesture/crossing';
 import { OneEuroFilter } from '@domain/gesture/one-euro-filter';
 import { StrumDetector } from '@domain/gesture/strum-detector';
+import { TapDetector } from '@domain/gesture/tap-detector';
 import { StrumDirection } from '@domain/gesture/strum-direction';
 import { speedToAmp } from '@domain/gesture/strum-velocity';
 import type { Instrument } from '@domain/instruments/instrument';
@@ -30,8 +31,7 @@ import { extendedFingers } from '@domain/tracking/hand-pose';
 const Timing = {
   /** Crossings further apart than this start a new strum gesture, seconds. */
   gestureGap: 0.1,
-  /** Small safety offset so scheduled plucks are never in the past. */
-  scheduleLead: 0.004,
+  scheduleLead: 0.004, // so scheduled plucks are never in the past
   /** Sub-frame strum spread is capped at this, seconds. */
   maxSpread: 0.035,
   defaultFrame: 0.016,
@@ -61,8 +61,7 @@ interface PlayerSetup {
  * @remarks
  * - The fretting hand selects a chord (chord mode) or a fret (note mode); a fist mutes; changing chord squeaks the wound strings.
  * - The strumming fingertip bends each string it presses and plucks it when it slips off; where along the string it plucks sets the tone.
- * - Re-strumming lets strings ring on; only a fingertip *resting* on a string (≥ 0.15 s) stops it.
- * - Exposes its state read-only for the renderer: points, hands, touched strings, per-string energy.
+ * - Re-strumming lets strings ring on; only a fingertip *resting* on a string (≥ 0.15 s) stops it. A tap plucks one.
  */
 export class Player {
   layout!: FretboardLayout;
@@ -82,10 +81,7 @@ export class Player {
   releaseBand = 0;
   /** Free mode: what the fretting hand holds. */
   fretting: Fretting | null = null;
-  /**
-   * The instrument is playing by itself (`DemoPerformer`): its hand holds the neck and is the one drawn. The
-   * player can still strike the strings (mouse, or their strumming hand) and hears what that hand holds.
-   */
+  /** Playing by itself (`DemoPerformer`): its hand holds the neck; the player's strokes sound what it holds. */
   isPerforming = false;
   /** While the instrument plays itself: the player's own strumming hand, drawn beside the performing one. */
   guestHand: readonly Point[] | null = null;
@@ -107,6 +103,7 @@ export class Player {
   private strumFilter: StrumFilter = StrumFilter.both;
   private manualFret: number | null = null;
   private readonly strum = new StrumDetector();
+  private readonly taps = new TapDetector();
   private readonly fretSmooth = [new OneEuroFilter(FRET_FILTER.minCutoff, FRET_FILTER.beta), new OneEuroFilter(FRET_FILTER.minCutoff, FRET_FILTER.beta)] as const;
   private readonly strumSmooth = [new OneEuroFilter(STRUM_FILTER.minCutoff, STRUM_FILTER.beta), new OneEuroFilter(STRUM_FILTER.minCutoff, STRUM_FILTER.beta)] as const;
   private stringCount = 0;
@@ -164,10 +161,11 @@ export class Player {
     if (canStrum) this.feedStrum(this.strumTip(strum, t), t, audioNow, strum);
   }
 
-  /** Mouse / touch fallback for the strumming hand. */
+  /** Mouse / touch fallback for the strumming hand; a tap on one string plucks it (`TapDetector`). */
   pointer(p: Point | null, t: number, audioNow: number): void {
     this.strumPoint = p;
-    this.feedStrum(p, t, audioNow, null);
+    const tap = this.taps.update(p, t, this.feedStrum(p, t, audioNow, null), this.layout);
+    if (tap) this.play(tap, audioNow + Timing.scheduleLead, null);
   }
 
   /** Keyboard selection: chord in chord mode, fret in note mode. */
@@ -223,7 +221,7 @@ export class Player {
   }
 
   /** `hand` is the one striking: the tracked strumming hand, or null for the mouse (which always plays). */
-  private feedStrum(p: Point | null, t: number, audioNow: number, hand: readonly Point[] | null): void {
+  private feedStrum(p: Point | null, t: number, audioNow: number, hand: readonly Point[] | null): boolean {
     const dt = this.lastFrame ? Math.min(Timing.maxFrame, t - this.lastFrame) : Timing.defaultFrame;
     this.lastFrame = t;
     // While the instrument plays itself the trail is its pick's.
@@ -236,6 +234,7 @@ export class Player {
     this.touching = this.strum.touching(p, ys, this.layout.h);
     this.dampRestingStrings(t, audioNow);
     this.gestures.tick(t);
+    return crossings.length > 0;
   }
 
   /** Only a fingertip that stays on a string mutes it — a hand sweeping past lets everything ring. */
@@ -244,7 +243,8 @@ export class Player {
     for (const s of this.touching) {
       const touch = this.touchedSince.get(s) ?? { since: t, isDamped: false };
       if (!touch.isDamped && t - touch.since >= REST_TO_DAMP_SECONDS) {
-        this.sound.touch(s, audioNow);
+        // While the instrument plays itself it is one guitar: a finger stops the string whoever plucked it.
+        this.sound.touch(s, audioNow, this.isPerforming ? [Voice.player, Voice.guide] : [Voice.player]);
         touch.isDamped = true;
       }
       this.touchedSince.set(s, touch);

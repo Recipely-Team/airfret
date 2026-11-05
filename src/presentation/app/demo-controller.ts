@@ -7,6 +7,7 @@ import type { Instrument } from '@domain/instruments/instrument';
 import type { Song } from '@domain/lessons/catalog/song';
 import { t } from '@presentation/i18n/translator';
 import { byId } from '@presentation/ui/dom';
+import { SongPicker } from '@presentation/ui/controls/song-picker';
 
 interface DemoHost {
   readonly player: Player;
@@ -24,8 +25,8 @@ interface DemoHost {
 }
 
 /**
- * **Watch it play** — the mode in which the instrument plays by itself: pick a song from the list beside the
- * mode switch (the instrument's showcase piece first, then every song it can play, the player's own included),
+ * **Watch it play** — the mode in which the instrument plays by itself: pick a song (searchable, `SongPicker`)
+ * beside the mode switch (the instrument's showcase piece first, then every song it can play, the player's own included),
  * play or stop it. The stage shows a hand playing it.
  *
  * @remarks
@@ -35,17 +36,17 @@ interface DemoHost {
 export class DemoController {
   private readonly performer: DemoPerformer;
   private readonly button = byId<HTMLButtonElement>('demoBtn');
-  private readonly select = byId<HTMLSelectElement>('demoSong');
+  private readonly picker: SongPicker;
   private on = false;
   private songId = '';
 
   constructor(private readonly host: DemoHost) {
     this.performer = new DemoPerformer(host.sound);
     this.button.onclick = () => void (this.isPlaying ? this.stop() : this.playChosen());
-    this.select.onchange = () => {
-      this.songId = this.select.value;
+    this.picker = new SongPicker((song) => {
+      this.songId = song.id;
       void this.playChosen();
-    };
+    });
   }
 
   get isPlaying(): boolean {
@@ -95,18 +96,11 @@ export class DemoController {
 
   /** The song list and the Play / Stop button, shown only while the mode is on. */
   render(): void {
-    this.select.hidden = !this.isOn;
+    this.picker.hidden = !this.isOn;
     this.button.hidden = !this.isOn;
     if (!this.isOn) return;
     const songs = this.songs();
-    const chosen = this.chosen(songs);
-    this.select.replaceChildren(...songs.map((s) => {
-      const o = document.createElement('option');
-      o.value = s.id;
-      o.textContent = s.title;
-      o.selected = s.id === chosen?.id;
-      return o;
-    }));
+    this.picker.show(songs, this.chosen(songs));
     this.button.textContent = t(this.isPlaying ? 'demo.stop' : 'demo.start');
     this.button.setAttribute('aria-pressed', String(this.isPlaying));
   }

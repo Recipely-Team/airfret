@@ -24,19 +24,13 @@ import type { SampleSet } from '@infrastructure/audio/samples/sample-set';
 import { SAMPLE_SET_BY_INSTRUMENT } from '@infrastructure/audio/samples/sample-sets';
 import { ringSeconds, stringPan, stringPluck } from '@infrastructure/audio/strings/string-pluck';
 import { AssetPath } from '@infrastructure/constants/assets';
+import { CHUCK, PICK, SQUEAK, TOUCH } from '@infrastructure/audio/string-noises';
 
 const Level = { master: 0.8, click: 0.5, chuck: 0.35, samples: 0.9 } as const;
 const Reverb = { seconds: 2.2, decay: 3.2 } as const;
 /** Drums sit in a small room: a little of the shared reverb (`room`). */
 const KIT = { level: 0.9, room: 0.6 } as const;
 const SMOOTHING = 0.02;
-const CHUCK = { guitarHz: 2200, bassHz: 700, q: 1.2, attack: 0.003, length: 0.06 } as const;
-/** Pick hitting the string: a 3 ms bright tick, louder for harder strokes. */
-const PICK = { highpassHz: 3000, level: 0.09, length: 0.004 } as const;
-/** Fingertip landing on a string. */
-const TOUCH = { bandHz: 3200, level: 0.025, length: 0.03 } as const;
-/** Fingers sliding over wound strings: a short rising squeak. */
-const SQUEAK = { fromHz: 1400, toHz: 3200, q: 6, level: 0.05, length: 0.12 } as const;
 
 /**
  * **WebAudioEngine** — the `SoundOutputInterface` on Web Audio.
@@ -108,7 +102,7 @@ export class WebAudioEngine implements SoundOutputInterface {
   }
 
   async start(instrument: Instrument): Promise<Result<void, Failure>> {
-    // iPhone: web audio counts as ringer sound, so the silent switch muted every note; as media it plays.
+    // iPhone: as ringer sound the silent switch muted every note; as media it plays.
     const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
     if (session) session.type = 'playback';
     void this.ctx.resume();
@@ -217,8 +211,8 @@ export class WebAudioEngine implements SoundOutputInterface {
     });
   }
 
-  touch(string: number, when: number): void {
-    this.damp(string, when);
+  touch(string: number, when: number, voices: readonly Voice[]): void {
+    for (const v of voices) this.dampVoice(v, string, when);
     this.noiseBurst('bandpass', TOUCH.bandHz, 1, when, TOUCH.level, TOUCH.length);
   }
 
@@ -242,8 +236,12 @@ export class WebAudioEngine implements SoundOutputInterface {
   }
 
   damp(string: number, when: number): void {
-    this.banks.get(Voice.player)?.port.postMessage({ type: 'damp', when, string });
-    this.samples.damp(Voice.player, string, when);
+    this.dampVoice(Voice.player, string, when);
+  }
+
+  private dampVoice(voice: Voice, string: number, when: number): void {
+    this.banks.get(voice)?.port.postMessage({ type: 'damp', when, string });
+    this.samples.damp(voice, string, when);
   }
 
   private noiseBurst(type: BiquadFilterType, freq: number, q: number, when: number, level: number, length: number): void {
