@@ -50,6 +50,23 @@ button, select, input { font: inherit; color: inherit; }
 
 #stage { position: absolute; inset: 0; }
 
+/* Song search: the lessons drawer and the Watch it play picker. */
+.search {
+  width: 100%; box-sizing: border-box; margin: 4px 0 10px; padding: 8px 11px; border-radius: 9px;
+  border: 1px solid var(--line-strong); background: rgba(11, 11, 12, 0.6); color: var(--ink); font: inherit; font-size: 14px;
+}
+.search:focus { outline: 1px solid var(--accent); border-color: transparent; }
+.song-list .empty { display: block; padding: 18px 4px; }
+.song-pick { max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; cursor: pointer; }
+.song-pick::after { content: ' ▾'; color: var(--muted); }
+.popover.song-picker { position: fixed; z-index: 20; padding: 10px; max-height: min(70vh, 520px); display: flex; flex-direction: column; }
+.song-picker-list { overflow-y: auto; display: grid; gap: 2px; }
+.song-option { display: grid; gap: 1px; text-align: left; padding: 7px 9px; border-radius: 8px; border: 0; background: transparent; color: var(--ink); font: inherit; cursor: pointer; }
+.song-option:hover, .song-option:focus-visible { background: rgba(236, 232, 225, 0.06); outline: none; }
+.song-option[aria-selected='true'] strong { color: var(--accent); }
+.song-option small { color: var(--muted); font-size: 12px; }
+.song-picker .empty { padding: 10px 4px; margin: 0; }
+
 /* The version, bottom right on every page: small and faint, never in the way. */
 .build-tag {
   position: absolute; right: 10px; bottom: 6px; z-index: 3; pointer-events: none;
@@ -63,7 +80,7 @@ button, select, input { font: inherit; color: inherit; }
 .nav-lang { margin: 10px 12px 4px; width: max-content; }
 
 /* Watch it play: the song list stays compact so the top bar keeps one line. */
-#demoSong { max-width: 210px; text-overflow: ellipsis; }
+
 /* Mid-width screens: Lessons and Explore keep their icons (and tooltips) so the whole bar fits on one line. */
 @media (max-width: 1360px) { .learn-link span { display: none; } .learn-link { padding: 5px 9px; } }
 

@@ -174,6 +174,14 @@ F/B rows (id — note):
 | M3 | Its intro → *Watch it play* | The acoustic plays your melody by itself | |
 | M4 | Type `G4:1 H4:1` | "I can't read the note “H4”…" and nothing is saved | |
 
+## Q. Finding a song (query)
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| Q1 | Lessons → type in the search box | The list narrows as you type, groups without a match disappear; "No song matches …" when none does | |
+| Q2 | Search in Turkish, with or without Turkish letters (`doğum günü`, `dogum`, `sessiz`, `ninni`) | The birthday songs, Silent Night, Twinkle | |
+| Q3 | *Watch it play* → the song button → type → Enter | The panel shows only matching songs; Enter plays the first; a click outside or Escape closes it | |
+
 ## L. Language
 
 | # | Step | Expected | Result |
