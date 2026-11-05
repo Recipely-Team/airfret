@@ -23,6 +23,7 @@ import { PedalPanel } from '@presentation/ui/drums/pedal-panel';
 import { ExploreGuide } from '@presentation/ui/explore/explore-guide';
 import { SettingsPanel } from '@presentation/ui/controls/settings-panel';
 import { Toolbar } from '@presentation/ui/controls/toolbar';
+import { pathFor } from '@presentation/routing/route-paths';
 import { Router } from '@presentation/routing/router';
 import { HomeView } from '@presentation/ui/navigation/home-view';
 import { NavMenu } from '@presentation/ui/navigation/nav-menu';
@@ -108,7 +109,8 @@ function bootstrap(): void {
     recorder,
     dialog: new ClipDialog((clip) => recorder.release(clip)),
     isOnStage: () => running.isOnStage,
-    instrumentId: () => store.value.instrument,
+    // Clips are named as the page is (`overdrive`, `classical`), not by the internal id (`drive`, `nylon`).
+    instrumentId: () => pathFor({ kind: 'instrument', instrument: store.value.instrument }).slice(1),
     say: (message) => ui.toast.show(message),
   });
   const pedalRouter = new PedalRouter(store, drums, () => ({ audio: sound.now, wall: performance.now() / 1000 }));
