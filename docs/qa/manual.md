@@ -139,6 +139,16 @@ F/B rows (id — note):
 | H4 | Reload the page | The choice is remembered; the button shows pressed (accent) with a slash | |
 | H5 | Screen reader / hover on the button | Says "Hide camera — show only the hands", then "Show camera" once pressed (Turkish when the UI is Turkish) | |
 | H6 | Explore → *Hands only* → Try it | Camera hides and a toast explains how to bring it back | |
+## S. Self-play
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| S1 | Fresh visit to `/acoustic` → *Watch it play* on the start card (no Start, no camera) | Sound starts; the start card hides; a hand skeleton plays Bach — fingertips on the frets, the pick moving string to string, strings vibrating | |
+| S2 | Watch a chord piece (`/overdrive`, `/banjo`) | The chord name and chart change with the music; the shape on the neck is the one sounding | |
+| S3 | Press *Stop* in the top bar | Sound stops; the start card is back (if Start wasn't pressed); the tracked hands play again | |
+| S4 | Start a lesson, change instrument, or go home while it plays | Self-play stops | |
+| S5 | Phone width | *Watch it play* / *Stop* visible under the mode switch | |
+
 ## V. Instrument voices
 
 | # | Step | Expected | Result |

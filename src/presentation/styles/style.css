@@ -381,7 +381,7 @@ a.btn, a.brand { text-decoration: none; color: inherit; display: inline-flex; al
   .hero-actions .btn { justify-content: center; }
   .hero-cta { align-items: center; }
   .bar { gap: 6px; }
-  .bar-context { order: 10; flex-basis: 100%; }
+  .bar-context { order: 10; flex-basis: 100%; flex-wrap: wrap; row-gap: 6px; }
   .bar-divider { display: none; }
   .picker-icon { display: none; }
   .picker-name { max-width: 160px; }
