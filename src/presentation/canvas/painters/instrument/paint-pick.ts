@@ -38,7 +38,7 @@ export function paintPick({ ctx, player, now }: PaintContext): void {
     const label = player.isPalmMuted ? t('strike.palm') : t(`strike.${player.strike}`);
     ctx.fillText(label, p.x + RING + 6, p.y + 4);
   }
-  if (player.mode === PlayMode.free && player.lastChordName) {
+  if ((player.mode === PlayMode.free || player.isPerforming) && player.lastChordName) {
     ctx.font = `600 34px ${FONT}`;
     ctx.textAlign = 'center';
     ctx.fillStyle = rgba(Palette.ink, 0.9);

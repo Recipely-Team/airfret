@@ -53,6 +53,11 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | F3 | Pluck a string, then land another finger higher on it | Hammer-on: pitch changes without a new pluck | |
 | F4 | Pluck, then slide the same finger 2 frets | Pitch glides | |
 | F5 | Fret, pluck, push the string sideways | Pitch bends up, ~2 semitones at most | |
+| F7 | Open G with the pinky curled under the neck | Plays G: the high e stays at fret 3 | |
+| F8 | Pluck the G string at fret 7, push it up most of the way to the D string | Bends about a whole step and stays on G | |
+| F9 | Hold a note with the fingertip just behind the wire, keep still | Pitch steady, no warble between two frets | |
+| F10 | Arch the ring finger onto the A string from below | Only the A string is fretted (no barre) | |
+| F11 | A chord: three fingers on fret 2 | D, G and B all sound fret 2 | |
 | F6 | Settings → Capo 2, Tuning Drop D | Capo bar drawn; open G shape sounds A; low string down a tone | |
 
 ## C. Instruments and notes
@@ -139,6 +144,16 @@ F/B rows (id — note):
 | H4 | Reload the page | The choice is remembered; the button shows pressed (accent) with a slash | |
 | H5 | Screen reader / hover on the button | Says "Hide camera — show only the hands", then "Show camera" once pressed (Turkish when the UI is Turkish) | |
 | H6 | Explore → *Hands only* → Try it | Camera hides and a toast explains how to bring it back | |
+## S. Self-play
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| S1 | Fresh visit to `/acoustic` → *Watch it play* on the start card (no Start, no camera) | Sound starts; the start card hides; a hand skeleton plays Bach — fingertips on the frets, the pick moving string to string, strings vibrating | |
+| S2 | Watch a chord piece (`/overdrive`, `/banjo`) | The chord name and chart change with the music; the shape on the neck is the one sounding | |
+| S3 | Press *Stop* in the top bar | Sound stops; the start card is back (if Start wasn't pressed); the tracked hands play again | |
+| S4 | Start a lesson, change instrument, or go home while it plays | Self-play stops | |
+| S5 | Phone width | *Watch it play* / *Stop* visible under the mode switch | |
+
 ## V. Instrument voices
 
 | # | Step | Expected | Result |

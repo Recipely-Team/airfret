@@ -12,7 +12,7 @@ const CHIP_GAP = 4;
  * the stretch of neck that selects it. Nothing covers the fingerboard itself.
  */
 export function paintChordChips({ ctx, player, target, now }: PaintContext): void {
-  if (player.mode !== PlayMode.chord) return;
+  if (player.mode !== PlayMode.chord || player.isPerforming) return;
   const l = player.layout;
   for (const s of chipPlacements(l, player.chords.length)) {
     const name = player.chords[s.index] ?? '';

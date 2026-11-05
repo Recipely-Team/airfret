@@ -19,6 +19,12 @@ const BARRE_SPAN_SLACK = 1.5;
 const BARRE_MAX_DIP_BEND = 0.44;
 /** Max bend at the PIP joint, radians (~35°): a hooked finger with a straight last segment isn't flat. */
 const BARRE_MAX_PIP_BEND = 0.6;
+/**
+ * A flat finger's last two segments look at least this long next to its first (MCP → PIP): they lie in the
+ * fretboard's plane. An arched finger's dive into the neck and look short — up to ~40° out of plane passes.
+ * (Index: 2.4 + 1.9 cm against 4 cm, ≈ 1.07 when flat.)
+ */
+const FLAT_MIN_LENGTH = 0.8;
 /** Max sideways drift per unit across the strings (~27°): the finger lies along the fret wire, often slightly rolled. */
 const BARRE_MAX_SLANT = 0.5;
 
@@ -26,8 +32,9 @@ const BARRE_MAX_SLANT = 0.5;
  * Fingers laid flat across a fret, read from each finger's angle.
  *
  * @remarks
- * - Flat: tip, DIP and PIP all over the strings, the finger nearly straight at both joints, and its last two
- *   segments running across the strings (along the fret wire) rather than along them.
+ * - Flat: tip, DIP and PIP all over the strings, the finger nearly straight at both joints, its last two
+ *   segments at full length (not foreshortened by diving into the neck, `FLAT_MIN_LENGTH`) and running
+ *   across the strings (along the fret wire) rather than along them.
  * - A flat finger holds down every string from its tip towards its knuckle, to the edge of the neck — on a
  *   real guitar a finger is longer than the neck is wide, and the camera may show the hand smaller than the
  *   neck drawn over it, so where the knuckle lands on screen says nothing about how far the finger reaches.
@@ -49,6 +56,7 @@ export function findBarres(l: FretboardLayout, hand: readonly Point[]): Barre[] 
 function flatAcross(l: FretboardLayout, mcp: Point, pip: Point, dip: Point, tip: Point): { fret: number; strings: number[] } | null {
   const onStrings = (p: Point) => onNeck(l, p) && Math.abs(p.y - l.centerY) <= spreadAt(l, p.x) * BARRE_SPAN_SLACK;
   if (!onStrings(pip) || !onStrings(dip) || !onStrings(tip)) return null;
+  if (Math.hypot(tip.x - pip.x, tip.y - pip.y) < FLAT_MIN_LENGTH * Math.hypot(pip.x - mcp.x, pip.y - mcp.y)) return null;
   if (bendAt(pip, dip, tip) > BARRE_MAX_DIP_BEND || bendAt(mcp, pip, dip) > BARRE_MAX_PIP_BEND) return null;
   const across = tip.y - pip.y;
   if (Math.abs(tip.x - pip.x) >= Math.abs(across) * BARRE_MAX_SLANT) return null;
