@@ -9,6 +9,8 @@ const MIN_DT = 1e-3;
 const ABOVE = -1;
 const BELOW = 1;
 const UNKNOWN = 0;
+/** A fingertip put down this close to a string (share of the release band) is on it. */
+const LANDED_OF_BAND = 0.5;
 
 /**
  * **StrumDetector** — turns the strumming fingertip's path into string crossings.
@@ -65,7 +67,9 @@ export class StrumDetector {
     return ys.flatMap((line, i) => {
       const d = p.y - line;
       const armed = this.side[i] ?? UNKNOWN;
-      return armed !== UNKNOWN && Math.sign(d) === -armed && Math.abs(d) <= band ? [i] : [];
+      // Pressed in from one side; or landed right on it (a tap, a finger put down on the string).
+      const isPressed = armed !== UNKNOWN && Math.sign(d) === -armed && Math.abs(d) <= band;
+      return isPressed || (armed === UNKNOWN && Math.abs(d) <= band * LANDED_OF_BAND) ? [i] : [];
     });
   }
 

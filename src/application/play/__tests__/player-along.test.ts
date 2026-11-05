@@ -48,4 +48,24 @@ describe('Playing along while the instrument plays itself', () => {
     const { player } = performing(PlayMode.chord);
     expect(player.trail).toEqual([]);
   });
+
+  it('a finger resting on a string during self-play stops it in both voices — one guitar, whoever plucked it', () => {
+    const { sound, player } = performing(PlayMode.chord);
+    const ys = strumStringYs(player.layout);
+    const x = (player.layout.strumX0 + player.layout.strumX1) / 2;
+    player.pointer(null, 1.5, 0);
+    for (let t = 2; t < 2.4; t += 1 / 60) player.pointer({ x, y: ys[2] ?? 0 }, t, 0);
+    expect(sound.touches).toContain(2);
+    expect(sound.touchedVoices.at(-1)).toEqual(['player', 'guide']);
+  });
+
+  it('outside self-play a resting finger stops only the player\'s own string', () => {
+    const { sound, player } = performing(PlayMode.chord);
+    player.isPerforming = false;
+    const ys = strumStringYs(player.layout);
+    const x = (player.layout.strumX0 + player.layout.strumX1) / 2;
+    player.pointer(null, 1.5, 0);
+    for (let t = 2; t < 2.4; t += 1 / 60) player.pointer({ x, y: ys[2] ?? 0 }, t, 0);
+    expect(sound.touchedVoices.at(-1)).toEqual(['player']);
+  });
 });

@@ -49,8 +49,12 @@ export class FakeSoundOutput implements SoundOutputInterface {
   readonly touches: number[] = [];
   fretNoises = 0;
 
-  touch(string: number): void {
+  /** Each touch's voices, in order. */
+  readonly touchedVoices: (readonly Voice[])[] = [];
+
+  touch(string: number, _when: number, voices: readonly Voice[]): void {
     this.touches.push(string);
+    this.touchedVoices.push(voices);
   }
 
   fretNoise(): void {

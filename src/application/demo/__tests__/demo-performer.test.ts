@@ -81,6 +81,13 @@ describe('DemoPerformer — the instrument playing by itself', () => {
     expect(Math.min(...sound.plucks.map((p) => p.when))).toBeLessThan(0.5);
   });
 
+  it('starts at the first note even when the song opens with rests before its pickup (Auld Lang Syne waited 2.1 s)', () => {
+    for (const id of ['auld-lang-syne', 'happy-birthday-melody', 'fur-elise']) {
+      const { sound } = perform('acoustic', id, 3);
+      expect(Math.min(...sound.plucks.map((p) => p.when)), id).toBeLessThan(0.5);
+    }
+  });
+
   it('shows every pluck once, as a string set vibrating, when it sounds', () => {
     const { sound, frames } = perform('acoustic');
     const shown = frames.flatMap((f) => f.hits).length;

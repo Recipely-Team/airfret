@@ -9,7 +9,8 @@ description: Promoting Airfret from dev to main (production on Vercel). Use when
 
 1. `dev` is green: `npm run check`, `npm run build`, CI green on `dev`.
 2. The manual QA pass (`docs/qa/manual.md`) on the `dev` preview URL — at least sections A, B, D.
-3. Open the release PR from `dev` itself:
+3. Bump `version` in `package.json` to the release (the page's corner shows it, with the commit), commit it on
+   `dev` through a PR. Then open the release PR from `dev` itself:
    ```bash
    gh pr create --base main --head dev --title "release: <what a player will notice>" --body "<body>"
    ```

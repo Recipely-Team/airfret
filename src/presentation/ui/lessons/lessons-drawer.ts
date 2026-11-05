@@ -5,6 +5,8 @@ import type { Song } from '@domain/lessons/catalog/song';
 import { SONGS } from '@domain/lessons/catalog/song-catalog';
 import { t } from '@presentation/i18n/translator';
 import { byId } from '@presentation/ui/dom';
+import { searchSongs } from '@application/lessons/search-songs';
+import { songSearchText } from '@presentation/ui/lessons/song-search-text';
 
 const MAX_LEVEL = 3;
 const PERCENT = 100;
@@ -13,10 +15,12 @@ const PASSED = 0.7;
 
 /**
  * **LessonsDrawer** — the beginner course first (numbered, ticked when passed), then songs,
- * melodies and bass lines. Picking one opens its intro card.
+ * melodies and bass lines. Picking one opens its intro card. The search box above filters every group as you
+ * type (`searchSongs`: title, composer, instrument, description; Turkish letters and accents don't matter).
  */
 export class LessonsDrawer {
   private readonly el = byId('lessons');
+  private readonly search = byId<HTMLInputElement>('songSearch');
 
   constructor(
     private readonly store: SettingsStore,
@@ -33,6 +37,7 @@ export class LessonsDrawer {
       this.close();
       onClose();
     };
+    this.search.oninput = () => this.render();
     byId('tourBtn').onclick = () => {
       this.close();
       onTour();
@@ -59,12 +64,19 @@ export class LessonsDrawer {
       ['lesson.noteMode', SONGS.filter((s) => s.mode === PlayMode.note && s.instrument !== 'bass')],
       ['lesson.bass', SONGS.filter((s) => s.instrument === 'bass')],
     ];
-    for (const [key, songs] of groups) {
+    this.search.placeholder = t('lesson.searchHint');
+    const query = this.search.value;
+    let shown = 0;
+    for (const [key, all] of groups) {
+      const songs = searchSongs(all, query, songSearchText);
+      if (!songs.length) continue;
+      shown += songs.length;
       const label = document.createElement('div');
       label.className = 'group-label';
       label.textContent = t(key);
       list.append(label, ...songs.map((s) => this.row(s)));
     }
+    if (!shown) list.append(cell('empty muted', t('lesson.noMatch', { query: query.trim() })));
   }
 
   private row(song: Song): HTMLElement {

@@ -26,8 +26,8 @@ export interface SoundOutputInterface {
   damp(string: number, when: number): void;
   /** Percussive strum on strings muted by the fretting hand. */
   chuck(amp: number, when: number): void;
-  /** A fingertip lands on a string: the string stops ringing, with a faint scrape. */
-  touch(string: number, when: number): void;
+  /** A fingertip lands on a string: the string stops ringing in each of `voices`, with a faint scrape. */
+  touch(string: number, when: number, voices: readonly Voice[]): void;
   /** Fingers sliding over wound strings during a chord change. */
   fretNoise(when: number): void;
   /** A drum-kit stroke or pedal. */

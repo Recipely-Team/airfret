@@ -26,7 +26,7 @@
           <div class="seg" id="modes" role="radiogroup"></div>
           <select id="chordSet" class="select" data-i18n-label="ui.chordSet"></select>
           <button class="btn ghost" id="pedalsBtn" type="button" data-i18n="pedals.title" hidden></button>
-          <select id="demoSong" class="select" data-i18n-label="demo.song" hidden></select>
+          <button class="select song-pick" id="demoSong" type="button" aria-haspopup="listbox" aria-expanded="false" hidden></button>
           <button class="btn ghost" id="demoBtn" type="button" aria-pressed="false" hidden></button>
         </div>
         <div class="spacer"></div>
@@ -134,6 +134,7 @@
           <h2 data-i18n="lesson.title"></h2>
           <button class="btn ghost" id="lessonsClose" data-i18n="ui.close"></button>
         </div>
+        <input type="search" class="search" id="songSearch" autocomplete="off" spellcheck="false" data-i18n-label="lesson.search" />
         <div class="song-list" id="songList"></div>
         <div class="lesson-opts">
           <button class="btn wide" id="customBtn" data-i18n="custom.add"></button>
@@ -231,7 +232,13 @@
         </div>
       </div>
 
+      <div class="popover song-picker" id="songPicker" hidden>
+        <input type="search" class="search" id="songPickerSearch" autocomplete="off" spellcheck="false" data-i18n-label="lesson.search" />
+        <div class="song-picker-list" id="songPickerList" role="listbox"></div>
+      </div>
+
       <div class="toast" id="toast" hidden></div>
+      <div class="build-tag" id="buildTag" aria-hidden="true"></div>
     </div>
     <script type="module" src="/src/presentation/bootstrap/main.ts"></script>
   </body>
