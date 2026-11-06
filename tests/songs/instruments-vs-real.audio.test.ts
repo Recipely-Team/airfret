@@ -5,6 +5,7 @@ import { Voice } from '@domain/audio/voice';
 import { StrikeSurface } from '@domain/gesture/strike-surface';
 import type { Instrument } from '@domain/instruments/instrument';
 import { INSTRUMENTS } from '@domain/instruments/instrument-catalog';
+import { PIANO } from '@domain/keys/piano';
 import { voicesFor, withVoice } from '@domain/instruments/voice-catalog';
 import type { SampleManifest } from '@infrastructure/audio/samples/sample-manifest';
 import type { SampleRef } from '@infrastructure/audio/samples/sample-ref';
@@ -25,6 +26,11 @@ import { render, SR } from './render-performance';
  */
 /** What the app plays must be this close to true pitch (a trained ear notices about 5 c on a held note). */
 const IN_TUNE_CENTS = 3;
+/**
+ * A piano's lowest octave (below C2): its thick strings are so stiff that their partials run sharp, and pianos are
+ * tuned stretched; the meter reads the partial-pulled pitch (A0 +15 c, C1 +6 c on the KW upright). Held to this.
+ */
+const PIANO_BASS = { belowMidi: 36, cents: 20 } as const;
 /** The synth's own pitch error; its dispersion allpass flattens low notes slightly (issue #14). */
 const SYNTH_IN_TUNE_CENTS = 10;
 /** Median distance of the synth from the recordings: |ln(T60 synth / T60 real)| and early harmonic profile (dB). */
@@ -45,6 +51,8 @@ const SYNTH_LIMITS: Record<string, { decayLog: number; profileDb: number }> = {
   // Measured 2026-11-05: decay ×1.7, but the tone colour is the furthest of all — the banjo takes are
   // short (0.6–2 s) and their early harmonics swing ±20 dB note to note, so the profile metric is noisy here.
   banjo: { decayLog: 0.55, profileDb: 32 },
+  // Measured 2026-11-06 against the KW upright: decay ×2.9 too short, tone colour 14.3 dB off.
+  piano: { decayLog: 1.1, profileDb: 14.5 },
 };
 /** One recorded note in this many is compared (all strings and the whole range still come up). */
 const EVERY = 3;
@@ -105,7 +113,8 @@ describe('Every instrument against recordings of the real instrument', () => {
     for (const shift of [-40, -13, 13, 40]) expect(cents(fundamental(repitch(x, shift), nominal(43)), 43) - base).toBeCloseTo(shift, 0);
   });
 
-  for (const inst of INSTRUMENTS) {
+  // The piano isn't in the fretted catalogue, but is held to the same bar.
+  for (const inst of [...INSTRUMENTS, PIANO]) {
     const setId = SAMPLE_SET_BY_INSTRUMENT[inst.id];
     if (!setId) continue;
     const refs = recordings(setId).filter((_, i) => i % EVERY === 0);
@@ -113,11 +122,16 @@ describe('Every instrument against recordings of the real instrument', () => {
     it(`${inst.id}: what the app plays is in tune on every string, across the whole range`, () => {
       const lowest = Math.min(...refs.map((r) => r.lo));
       const highest = Math.max(...refs.map((r) => r.hi));
-      const stretched = [{ midi: lowest - 2, string: 0 }, { midi: highest + 2, string: inst.tuning.length - 1 }];
+      // Past the recordings by a whole tone (drop tunings, the top frets) — but a piano has nothing beyond its 88 keys.
+      const isFixedRange = inst.frets === 0;
+      const low = isFixedRange ? Math.max(lowest - 2, inst.tuning[0] ?? lowest) : lowest - 2;
+      const high = isFixedRange ? Math.min(highest + 2, inst.tuning[inst.tuning.length - 1] ?? highest) : highest + 2;
+      const stretched = [{ midi: low, string: 0 }, { midi: high, string: inst.tuning.length - 1 }];
       const off = [...refs, ...stretched].map((r) => ({ midi: r.midi, c: cents(fundamental(play(inst, stringFor(inst, r), r.midi, true), nominal(r.midi)), r.midi) }));
-      const worst = off.reduce((a, b) => (Math.abs(b.c) > Math.abs(a.c) ? b : a));
+      const limit = (midi: number) => (inst.frets === 0 && midi < PIANO_BASS.belowMidi ? PIANO_BASS.cents : IN_TUNE_CENTS);
+      const worst = off.reduce((a, b) => (Math.abs(b.c) / limit(b.midi) > Math.abs(a.c) / limit(a.midi) ? b : a));
       console.info(`${inst.id}: ${off.length} notes, worst ${worst.c.toFixed(1)} c at MIDI ${worst.midi}`);
-      expect(Math.abs(worst.c)).toBeLessThan(IN_TUNE_CENTS);
+      expect(Math.abs(worst.c)).toBeLessThan(limit(worst.midi));
     });
 
     it(`${inst.id}: the synth fallback is in tune and no further from the recordings than today`, () => {

@@ -1,4 +1,7 @@
 import type { DrumPlayer } from '@application/drums/drum-player';
+import type { PianoPlayer } from '@application/keys/piano-player';
+import { computeKeyboardLayout } from '@domain/keys/compute-keyboard-layout';
+import { PIANO_ID } from '@domain/keys/piano-id';
 import type { BackingTrack } from '@application/lessons/backing-track';
 import { songLibrary } from '@application/lessons/song-library';
 import { voiceMix } from '@application/lessons/voice-mix';
@@ -43,6 +46,7 @@ interface Services {
   readonly tracker: HandTrackerInterface;
   readonly player: Player;
   readonly drums: DrumPlayer;
+  readonly piano: PianoPlayer;
   readonly renderer: StageRenderer;
   readonly backing: BackingTrack;
   readonly guide: GuidePlayer;
@@ -60,7 +64,7 @@ export class AirfretApp {
   private isStarted = false;
   private isAudioOn = false;
   private lastHandsAt = 0;
-  private readonly tours: TourController;
+  readonly tours: TourController;
   /** The page under any overlay: home or an instrument. */
   private base: Route = { kind: 'home' };
   /** The instrument playing by itself (outside lessons). */
@@ -73,7 +77,7 @@ export class AirfretApp {
   ) {
     this.tours = new TourController(ui.tourBar, () => this.s.store.update({}), () => {
       const first = SONGS.find((song) => song.course === 1);
-      if (first) this.openIntro(first);
+      if (first) this.ui.navigate({ kind: 'lesson', songId: first.id });
     });
     // Self-play sounds through the guide voice and is a mode in the toolbar: re-render when it starts or stops.
     const showStart = (isPlaying: boolean) => { this.ui.start.show(this.isOnStage && !this.isStarted && !isPlaying); this.s.store.update({}); };
@@ -186,6 +190,7 @@ export class AirfretApp {
     this.s.renderer.resize(w, h);
     const chords = this.tours.session ? TOUR_CHORDS : this.lesson?.song.mode === PlayMode.chord ? this.lesson.chordSet : chordSetById(st.chordSet).chords.filter(knownChord);
     this.s.drums.configure(computeKitLayout(w, h, st.isLefty), w, h, st.hihatMode);
+    this.s.piano.configure(computeKeyboardLayout(w, h));
     const layout = computeLayout(w, h, inst.tuning.length, st.isLefty, inst.maxFret);
     if (this.base.kind === 'instrument' && this.base.instrument !== st.instrument) {
       this.base = { kind: 'instrument', instrument: st.instrument };
@@ -200,10 +205,6 @@ export class AirfretApp {
     const st = this.s.store.value;
     const patch = this.hasLesson ? { instrument: id } : { instrument: id, mode: st.mode === PlayMode.free ? PlayMode.free : instrumentById(id).defaultMode, tuning: 'standard' };
     this.s.store.update(id === 'drive' && st.chordSet === 'pop' && !this.hasLesson ? { ...patch, chordSet: 'rock' } : patch);
-  }
-
-  openIntro(song: Song): void {
-    this.ui.navigate({ kind: 'lesson', songId: song.id });
   }
 
   beginLesson(song: Song): void {
@@ -236,10 +237,6 @@ export class AirfretApp {
     this.s.store.update({ mode: PlayMode.chord, instrument: tourInstrument(this.s.store.value.instrument) });
   }
 
-  skipTourStep(): void {
-    this.tours.skip();
-  }
-
   endTour(): void {
     this.tours.end();
   }
@@ -263,10 +260,11 @@ export class AirfretApp {
       requestAnimationFrame(this.frame);
       return;
     }
-    const hint = this.demo.isPlaying ? null : stageHint({ isStarted: this.isStarted, hasCamera: this.camera.isOn, isDrums: this.isDrums, secondsWithoutHands: now - this.lastHandsAt });
+    const hint = this.demo.isPlaying ? null : stageHint({ isStarted: this.isStarted, hasCamera: this.camera.isOn, instrument: st.instrument, secondsWithoutHands: now - this.lastHandsAt });
     // The self-playing hand is drawn as a skeleton: it isn't in the camera picture.
     const camera = { brightness: st.brightness, isHidden: st.isCameraHidden || this.demo.isPlaying };
     if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, hint, camera);
+    else if (st.instrument === PIANO_ID) this.s.renderer.piano(this.s.piano, now, hint, camera);
     else {
       this.demo.tick(now);
       this.s.renderer.draw(this.s.player, this.lesson, this.tours.session, audioNow, now, hint, camera);
@@ -282,6 +280,7 @@ export class AirfretApp {
     const frame = this.s.tracker.frameSize();
     const px = hands.map((hand) => hand.landmarks.map((p) => videoToScreen(p, frame, window.innerWidth, window.innerHeight)));
     if (this.isDrums) this.s.drums.updateHands(px, now, audioNow, now);
+    else if (this.s.store.value.instrument === PIANO_ID) this.s.piano.updateHands(px, now, audioNow);
     else if (this.demo.isPlaying) this.s.player.strikeAlong(px, now, audioNow, !this.ui.pointer.isDown);
     else this.s.player.updateHands(px, now, audioNow, !this.ui.pointer.isDown);
   }

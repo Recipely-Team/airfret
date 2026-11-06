@@ -1,6 +1,7 @@
 import type { SettingsStore } from '@application/settings/settings-store';
 import { PlayMode } from '@domain/instruments/play-mode';
 import { DRUMS_ID } from '@domain/drums/drums-id';
+import { PIANO_ID } from '@domain/keys/piano-id';
 import { CHORD_SETS } from '@domain/lessons/catalog/chord-set-catalog';
 import { t } from '@presentation/i18n/translator';
 import { byId } from '@presentation/ui/dom';
@@ -36,7 +37,9 @@ export class Toolbar {
     const isLocked = this.isLessonActive();
     const isDrums = s.instrument === DRUMS_ID;
     byId('barContext').hidden = !this.isOnStage();
-    byId('modes').hidden = isDrums;
+    // The piano has no strumming modes or chord sets: every key is just a note.
+    const hasModes = !isDrums && s.instrument !== PIANO_ID;
+    byId('modes').hidden = !hasModes;
     byId('pedalsBtn').hidden = !isDrums;
     const cam = byId('camBtn');
     // The camera button only means something where the camera picture is: on an instrument's stage.
@@ -67,7 +70,7 @@ export class Toolbar {
       }),
     );
     select.disabled = isLocked;
-    select.hidden = s.mode !== PlayMode.chord || isDrums || this.selfPlay.isOn();
+    select.hidden = s.mode !== PlayMode.chord || !hasModes || this.selfPlay.isOn();
   }
 
   private pick(mode: PlayMode | typeof SELF_PLAY): void {

@@ -1,10 +1,9 @@
-import { DRUMS_ID } from '@domain/drums/drums-id';
-import { instrumentById } from '@domain/instruments/instrument-catalog';
 import { t } from '@presentation/i18n/translator';
 import type { Route } from '@presentation/routing/route';
 import { INSTRUMENT_SLUGS, pathFor } from '@presentation/routing/route-paths';
 import { byId } from '@presentation/ui/dom';
 import { INSTRUMENT_ICONS } from '@presentation/ui/navigation/instrument-icons';
+import { instrumentName } from '@presentation/ui/navigation/instrument-name';
 
 /**
  * **NavMenu** — the instrument picker. It does one thing: choose what to play. Learning and settings
@@ -42,7 +41,7 @@ export class NavMenu {
   /** Lists the instruments and updates the picker button to show the current one. */
   render(route: Route): void {
     const current = pathFor(route);
-    const name = (id: string) => t(id === DRUMS_ID ? 'inst.drums' : instrumentById(id).name);
+    const name = (id: string) => instrumentName(id);
     const head = document.createElement('div');
     head.className = 'nav-head';
     head.textContent = t('nav.choose');

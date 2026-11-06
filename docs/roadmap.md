@@ -83,7 +83,12 @@ song test before it ships. Grouped by how much of the existing code they reuse.
 - Violin, viola, cello, double bass, kemençe, erhu
 
 **Keyboards (finger-per-key tracking)**
-- Piano (88 keys, sustain pedal via the pedal inputs), electric piano, organ, accordion, synthesizer
+- ~~Piano~~ (shipped 2026-11-06: every fingertip of both hands presses keys through two lines — over the black
+  keys, then below them — velocity from speed; mouse and multi-touch; Space is the sustain pedal; 3 octaves on
+  a wide screen, 2 on a tablet, C4–E5 on a phone; CC0 Kawai upright recordings, in tune within 0.5 c above C2).
+  Open: an octave shift to reach all 88 keys, self-play and lessons on the piano (the self-playing hand is a
+  guitarist's), a real-song test, the pedal inputs as sustain, more than one dynamic layer.
+- Electric piano, organ, accordion, synthesizer
 
 **Percussion (reuse the drum kit's stick and pad code)**
 - Darbuka, def / bendir, cajón, congas and bongos, tabla, djembe, handpan, timpani

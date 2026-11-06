@@ -1,4 +1,6 @@
 import type { DrumPlayer } from '@application/drums/drum-player';
+import type { PianoPlayer } from '@application/keys/piano-player';
+import { paintKeyboard } from '@presentation/canvas/keys/paint-keyboard';
 import type { Player } from '@application/play/player';
 import type { Point } from '@domain/fretboard/point';
 import type { PedalBindings } from '@domain/input/pedal-bindings';
@@ -62,6 +64,19 @@ export class StageRenderer {
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
+  /** Piano frame: the keyboard with what sounds lit, then the real hands (or their skeleton) over it. */
+  piano(piano: PianoPlayer, now: number, hint: string | null, camera: CameraView): void {
+    const w = this.canvas.clientWidth || window.innerWidth;
+    const h = this.canvas.clientHeight || window.innerHeight;
+    const dt = this.lastT ? Math.min(MAX_FRAME, now - this.lastT) : 0;
+    this.lastT = now;
+    piano.fade(dt);
+    this.ctx.clearRect(0, 0, w, h);
+    paintKeyboard(this.ctx, piano);
+    this.paintHands(piano.hands, w, h, camera);
+    this.hint(hint, w, h * 0.16);
+  }
+
   /** Drum mode frame: kit, sticks, the real hands holding them, and the pedals. */
   drums(drums: DrumPlayer, bindings: PedalBindings, now: number, hint: string | null, camera: CameraView): void {
     const w = this.canvas.clientWidth || window.innerWidth;
@@ -71,12 +86,15 @@ export class StageRenderer {
     paintSticks(this.ctx, drums.sticks);
     this.paintHands(drums.hands, w, h, camera);
     paintPedals(this.ctx, drums, bindings, w, h);
-    if (hint) {
-      this.ctx.font = `400 15px ${FONT}`;
-      this.ctx.textAlign = 'center';
-      this.ctx.fillStyle = rgba(Palette.ink, 0.7);
-      this.ctx.fillText(hint, w / 2, h * 0.16);
-    }
+    this.hint(hint, w, h * 0.16);
+  }
+
+  private hint(text: string | null, w: number, y: number): void {
+    if (!text) return;
+    this.ctx.font = `400 15px ${FONT}`;
+    this.ctx.textAlign = 'center';
+    this.ctx.fillStyle = rgba(Palette.ink, 0.7);
+    this.ctx.fillText(text, w / 2, y);
   }
 
   draw(player: Player, lesson: LessonSession | null, tour: TourSession | null, audioNow: number, now: number, hint: string | null, camera: CameraView): void {
