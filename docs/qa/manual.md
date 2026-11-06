@@ -92,6 +92,7 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | C4.7 | Press a key with a fingertip and slide sideways without lifting | A glissando: every white key it passes sounds once (black keys if it started on a black key), even a fast slide | |
 | C4.8 | Mouse or touch: press and drag fast across the keyboard | Every key on the way plays, none skipped | |
 | C4.9 | ◀ ▶ in the top bar, or ← → | The keyboard slides an octave; the range shows between the arrows; A0 and C8 are the ends | |
+| C4.10 | `/harpsichord` | Dark naturals, light sharps; F1 to F6 with ◀ ▶; every key equally loud however it is struck; a key stops when it rises | |
 
 ## C5. Saz (baglama)
 

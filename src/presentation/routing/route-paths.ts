@@ -21,6 +21,7 @@ export const INSTRUMENT_SLUGS: readonly (readonly [slug: string, instrument: str
   ['greek-bouzouki', 'greekBouzouki'],
   ['banjo', 'banjo'],
   ['piano', PIANO_ID],
+  ['harpsichord', 'harpsichord'],
   ['drums', DRUMS_ID],
 ];
 

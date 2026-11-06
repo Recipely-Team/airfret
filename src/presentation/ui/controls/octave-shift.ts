@@ -1,6 +1,6 @@
 import type { SettingsStore } from '@application/settings/settings-store';
 import { computeKeyboardLayout, shiftLimits } from '@domain/keys/compute-keyboard-layout';
-import { PIANO_ID } from '@domain/keys/piano-id';
+import { isKeyboard, keyboardFor } from '@domain/keys/keyboard-instruments';
 import { midiToName } from '@domain/music/pitch';
 import { byId } from '@presentation/ui/dom';
 
@@ -13,7 +13,7 @@ export class OctaveShift {
     byId('octDown').onclick = () => this.shift(-1);
     byId('octUp').onclick = () => this.shift(1);
     window.addEventListener('keydown', (e) => {
-      if (this.store.value.instrument !== PIANO_ID || e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+      if (!isKeyboard(this.store.value.instrument) || e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
       if (e.key === 'ArrowLeft') this.shift(-1);
       if (e.key === 'ArrowRight') this.shift(1);
     });
@@ -21,18 +21,18 @@ export class OctaveShift {
 
   render(isOnStage: boolean): void {
     const s = this.store.value;
-    const isPiano = s.instrument === PIANO_ID && isOnStage;
-    byId('octaves').hidden = !isPiano;
-    if (!isPiano) return;
-    const l = computeKeyboardLayout(window.innerWidth, window.innerHeight, s.pianoShift);
-    const { down, up } = shiftLimits(window.innerWidth);
+    const keys = keyboardFor(s.instrument);
+    byId('octaves').hidden = !keys || !isOnStage;
+    if (!keys || !isOnStage) return;
+    const l = computeKeyboardLayout(window.innerWidth, window.innerHeight, s.pianoShift, keys);
+    const { down, up } = shiftLimits(window.innerWidth, keys);
     byId('octRange').textContent = `${midiToName(l.firstMidi)}–${midiToName(l.lastMidi)}`;
     byId<HTMLButtonElement>('octDown').disabled = s.pianoShift <= down;
     byId<HTMLButtonElement>('octUp').disabled = s.pianoShift >= up;
   }
 
   private shift(by: number): void {
-    const { down, up } = shiftLimits(window.innerWidth);
+    const { down, up } = shiftLimits(window.innerWidth, keyboardFor(this.store.value.instrument));
     const next = Math.max(down, Math.min(up, this.store.value.pianoShift + by));
     if (next !== this.store.value.pianoShift) this.store.update({ pianoShift: next });
   }
