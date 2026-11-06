@@ -77,6 +77,13 @@ quiet recordings (the conga taps, the softest tumba hit, peaking under −45 dB)
 files that decoded to nothing, so those strokes fell back to the synth. *Fix:* gain first, then trim. Guard: the
 browser check counts synth oscillators per stroke (0 when every take is real); file sizes listed in the PR.
 
+**The air piano played as soon as it saw a hand, and keys stayed lit.** A key played when a fingertip crossed a
+fixed line on the screen, so a hand coming into view or moving over the keyboard played notes, and a hand resting
+over the keys (its fingertips below the line) held them down. *Fix:* a press is a finger dipping below its own
+knuckle by more than it usually rests there (a slowly following baseline): moving or resting the hand plays and
+holds nothing. Tests `keyboard.test.ts` ("plays nothing when a hand moves into view", "holds no key down while a
+hand rests over the keys"); QA C4.2.
+
 ## Drums
 
 **Drumsticks vanished and reappeared, or jumped to the other hand.**
