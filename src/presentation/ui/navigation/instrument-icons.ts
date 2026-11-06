@@ -30,5 +30,8 @@ export const INSTRUMENT_ICONS: Readonly<Record<string, string>> = {
   djembe: `${OPEN}<ellipse cx="60" cy="12" rx="18" ry="5"/><path d="M42 12c0 10 12 12 13 18l-4 14h18l-4-14c1-6 13-8 13-18"/></svg>`,
   tabla: `${OPEN}<ellipse cx="44" cy="18" rx="15" ry="5.5"/><path d="M29 18c0 14 6 22 15 22s15-8 15-22"/><ellipse cx="78" cy="16" rx="10" ry="4"/><path d="M68 16l1 24h18l1-24"/><circle cx="78" cy="16" r="2.5"/></svg>`,
   handpan: `${OPEN}<ellipse cx="60" cy="24" rx="40" ry="18"/><ellipse cx="60" cy="24" rx="7" ry="4"/><ellipse cx="38" cy="20" rx="5" ry="3"/><ellipse cx="82" cy="20" rx="5" ry="3"/><ellipse cx="44" cy="32" rx="5" ry="3"/><ellipse cx="76" cy="32" rx="5" ry="3"/></svg>`,
+  marimba: `${OPEN}<path d="M14 30h92M18 38h84"/><path d="M20 14v16M30 12v18M40 10v20M50 8v22M60 10v20M70 12v18M80 14v16M90 16v14M100 18v12"/></svg>`,
+  xylophone: `${OPEN}<path d="M22 12h8v26h-8zM36 14h8v22h-8zM50 16h8v18h-8zM64 18h8v14h-8zM78 20h8v10h-8z"/><path d="M92 8l12 30M104 8l-4 12"/></svg>`,
+  glockenspiel: `${OPEN}<rect x="12" y="8" width="96" height="32" rx="3"/><path d="M22 14v20M32 15v18M42 16v16M52 17v14M62 18v12M72 18v12M82 19v10M92 19v10"/></svg>`,
   drums: `${OPEN}<ellipse cx="60" cy="32" rx="13" ry="13"/><ellipse cx="38" cy="30" rx="11" ry="4"/><path d="M27 30v8M49 30v8M27 38c0 2 22 2 22 0"/><ellipse cx="84" cy="33" rx="12" ry="4.5"/><path d="M72 33v8M96 33v8M72 41c0 2 24 2 24 0"/><ellipse cx="52" cy="15" rx="7" ry="2.6"/><ellipse cx="70" cy="15" rx="7" ry="2.6"/><path d="M14 10h20M24 10v34M88 8h22M99 8v36"/></svg>`,
 };

@@ -98,7 +98,7 @@ song test before it ships. Grouped by how much of the existing code they reuse.
 - ~~Darbuka, def, bendir, cajón, congas, bongos, djembe, tabla, handpan~~ (shipped 2026-11-06: hand drums are data —
   heads and strokes — for one player and one voice); the darbuka (Commons, CC BY-SA) and congas (VSCO 2 CE, CC0) play
   real recordings, the rest are synthesised until recordings are found; timpani (pitched, pedal)
-- Mallets: marimba, xylophone, vibraphone, glockenspiel
+- ~~Mallets: marimba, xylophone, glockenspiel~~ (shipped 2026-11-06: VSCO-2-CE recordings, bars ring on after the key rises). Vibraphone still open (no free recordings found yet)
 
 **Air-only**
 - Theremin (pitch from one hand's height, volume from the other) — the most natural webcam instrument

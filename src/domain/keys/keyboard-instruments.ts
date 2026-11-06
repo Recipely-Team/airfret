@@ -15,10 +15,22 @@ const HARPSICHORD: Instrument = {
   chain: ChainKind.harpsichord, defaultMode: PlayMode.note, voice: 'fitted', isRecorded: false,
 };
 
+/**
+ * A mallet instrument: struck bars laid out like a keyboard, voiced from VSCO 2 CE's recordings (CC0; the
+ * names in that library are an octave low — measured, see CREDITS.md). The string synth is only the fallback
+ * while they load: a short, bright decay standing in for a struck bar.
+ */
+function mallet(id: string, t60: number, bright: number): Instrument {
+  return { ...PIANO, id, name: `inst.${id}`, t60, t60Exponent: 0.5, bright, pick: 0.5, level: 0.45, voice: 'recorded', isRecorded: true };
+}
+
 /** The keyboard instruments, by id: each opens the keys page with its own sound, range and colours. */
 export const KEYBOARDS: Readonly<Record<string, KeyboardInstrument>> = {
-  [PIANO_ID]: { instrument: PIANO, low: PIANO_LOWEST_MIDI, high: 108, isTouchSensitive: true, isReversedColours: false },
-  harpsichord: { instrument: HARPSICHORD, low: 29, high: 89, isTouchSensitive: false, isReversedColours: true },
+  [PIANO_ID]: { instrument: PIANO, low: PIANO_LOWEST_MIDI, high: 108, isTouchSensitive: true, look: 'ivory', isDamped: true },
+  harpsichord: { instrument: HARPSICHORD, low: 29, high: 89, isTouchSensitive: false, look: 'reversed', isDamped: true },
+  marimba: { instrument: mallet('marimba', 2.2, 0.4), low: 45, high: 96, isTouchSensitive: true, look: 'rosewood', isDamped: false },
+  xylophone: { instrument: mallet('xylophone', 0.7, 0.85), low: 65, high: 108, isTouchSensitive: true, look: 'rosewood', isDamped: false },
+  glockenspiel: { instrument: mallet('glockenspiel', 4, 0.95), low: 79, high: 108, isTouchSensitive: true, look: 'metal', isDamped: false },
 };
 
 /** The keyboard instrument with this id, if it is one. */
