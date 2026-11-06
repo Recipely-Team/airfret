@@ -1,11 +1,16 @@
 import { ChainKind } from '@domain/instruments/chain-kind';
 import type { Instrument } from '@domain/instruments/instrument';
 import { PlayMode } from '@domain/instruments/play-mode';
-import { BASS5_TUNING, BASS6_TUNING, BASS_TUNING, GUITAR7_TUNING, GUITAR_TUNING } from '@domain/music/tunings';
+import { SAZ_FRET_CENTS } from '@domain/instruments/saz-frets';
+import { BASS5_TUNING, BASS6_TUNING, BASS_TUNING, GUITAR7_TUNING, GUITAR_TUNING, SAZ_TUNING } from '@domain/music/tunings';
 
 const MAX_FRET = 12;
 /** Fret counts of the professional instruments each voice models. */
 const FRETS = { steel: 20, classical: 19, electric: 22, extended: 24, bass: 24, banjo: 22 } as const;
+/** A saz's courses: an octave string below the top and bottom courses (G2, A2), a unison pair in the middle. */
+const SAZ_COURSES = [-12, 0, -12];
+/** Frets on screen: one octave of the saz's 17. */
+const SAZ_VISIBLE_FRETS = 17;
 /** A 12-string's courses: octave pairs on the four low strings, unison pairs on B and E. */
 const TWELVE_COURSES = [12, 12, 12, 12, 0, 0];
 
@@ -23,6 +28,9 @@ const TWELVE_COURSES = [12, 12, 12, 12, 0, 0];
  * - The 12-string is the steel-string with a second string per course (`courses`), voiced from the steel
  *   recordings; the 7-string guitar adds a low B to the clean electric (its recordings, 24 frets); the 6-string
  *   bass adds a high C to the five — all three reuse sets already measured, so their decay laws are the same.
+ * - The saz (baglama) has 17 frets an octave at Tura's ratios (`fretCents`), three courses with octave strings,
+ *   and the synth voice only: no freely licensed saz recordings yet. Its decay (3.2 s·(110/f)^0.6) and
+ *   brightness are set by ear from a wire-strung long-neck lute, not measured — the first recordings replace them.
  *   `tests/songs/instruments-vs-real.audio.test.ts` holds every instrument against those recordings.
  */
 export const INSTRUMENTS: readonly Instrument[] = [
@@ -35,6 +43,7 @@ export const INSTRUMENTS: readonly Instrument[] = [
   { id: 'bass', name: 'inst.bass', tuning: BASS_TUNING, maxFret: MAX_FRET, frets: FRETS.bass, t60: 7.9, t60Exponent: 0.49, bright: 0.22, pick: 0.22, level: 0.85, chain: ChainKind.bass, defaultMode: PlayMode.note, voice: 'recorded', isRecorded: true },
   { id: 'bass5', name: 'inst.bass5', tuning: BASS5_TUNING, maxFret: MAX_FRET, frets: FRETS.bass, t60: 7.9, t60Exponent: 0.49, bright: 0.22, pick: 0.22, level: 0.85, chain: ChainKind.bass, defaultMode: PlayMode.note, voice: 'recorded', isRecorded: true },
   { id: 'bass6', name: 'inst.bass6', tuning: BASS6_TUNING, maxFret: MAX_FRET, frets: FRETS.bass, t60: 7.9, t60Exponent: 0.49, bright: 0.24, pick: 0.22, level: 0.8, chain: ChainKind.bass, defaultMode: PlayMode.note, voice: 'recorded', isRecorded: true },
+  { id: 'saz', name: 'inst.saz', tuning: SAZ_TUNING, maxFret: SAZ_VISIBLE_FRETS, frets: 23, t60: 3.2, t60Exponent: 0.6, bright: 0.86, pick: 0.07, level: 0.42, chain: ChainKind.saz, defaultMode: PlayMode.note, voice: 'fitted', isRecorded: false, courses: SAZ_COURSES, fretCents: SAZ_FRET_CENTS, modes: [PlayMode.note, PlayMode.free] },
   { id: 'banjo', name: 'inst.banjo', tuning: GUITAR_TUNING, maxFret: MAX_FRET, frets: FRETS.banjo, t60: 1.36, t60Exponent: 0.7, bright: 0.97, pick: 0.09, level: 0.4, chain: ChainKind.banjo, defaultMode: PlayMode.chord, voice: 'recorded', isRecorded: true },
 ];
 

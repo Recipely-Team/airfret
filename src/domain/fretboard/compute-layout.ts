@@ -1,4 +1,5 @@
 import type { FretboardLayout } from '@domain/fretboard/fretboard-layout';
+import { fretSemitones } from '@domain/fretboard/fret-scale';
 import { SEMITONES_PER_OCTAVE } from '@domain/music/note-names';
 
 /** Proportions of the screen the instrument occupies. */
@@ -16,14 +17,18 @@ const Proportion = {
   realSpacing: 0.55,
 } as const;
 
-/** Builds the fretboard geometry for a screen size, string count and handedness. */
-export function computeLayout(w: number, h: number, strings: number, isLefty: boolean, maxFret: number): FretboardLayout {
+/**
+ * Builds the fretboard geometry for a screen size, string count and handedness. Frets sit where the string's
+ * pitch puts them (blended with even spacing): twelve equal semitones an octave, or `octaveCents` (a saz).
+ */
+export function computeLayout(w: number, h: number, strings: number, isLefty: boolean, maxFret: number, octaveCents?: readonly number[]): FretboardLayout {
+  const fretSemis = fretSemitones(maxFret, octaveCents);
   const spreadBody = Math.min(h * Proportion.spreadOfHeight, w * Proportion.spreadOfWidth);
   const mx = (x: number) => (isLefty ? w - x : x);
   const nut = w * Proportion.nutX;
   const end = w * Proportion.neckEndX;
-  const real = (n: number) =>
-    (1 - Math.pow(2, -n / SEMITONES_PER_OCTAVE)) / (1 - Math.pow(2, -maxFret / SEMITONES_PER_OCTAVE));
+  const stop = (n: number) => Math.pow(2, -(fretSemis[n] ?? n) / SEMITONES_PER_OCTAVE);
+  const real = (n: number) => (1 - stop(n)) / (1 - stop(maxFret));
   const fretX: number[] = [];
   for (let n = 0; n <= maxFret; n++) {
     const t = Proportion.realSpacing * real(n) + (1 - Proportion.realSpacing) * (n / maxFret);
@@ -43,5 +48,7 @@ export function computeLayout(w: number, h: number, strings: number, isLefty: bo
     spreadBody,
     fretX,
     maxFret,
+    fretSemis,
+    ...(octaveCents ? { octaveCents } : {}),
   };
 }

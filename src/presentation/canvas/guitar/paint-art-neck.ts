@@ -88,7 +88,8 @@ function paintFretWires(ctx: CanvasRenderingContext2D, l: FretboardLayout, look:
 }
 
 function paintInlays(ctx: CanvasRenderingContext2D, l: FretboardLayout, look: GuitarLook, frets: number[], spacing: (x: number) => number): void {
-  if (look.style === 'classical') return;
+  // A classical guitar has none on its face; a saz none at all (its 17 frets don't match a guitar's markers).
+  if (look.style === 'classical' || look.style === 'saz') return;
   const dot = (x: number, y: number, r: number) => {
     const pearl = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
     pearl.addColorStop(0, '#ffffff');

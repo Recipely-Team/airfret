@@ -32,4 +32,11 @@ export interface Instrument {
    * octave, 0 = unison). Both sound on every pluck. Absent on single-course instruments.
    */
   readonly courses?: readonly number[];
+  /**
+   * One octave of fret positions in cents above the open string, when they aren't twelve equal semitones: a
+   * saz's 17 (Yalcin Tura's ratios), with the in-between notes Turkish folk music needs.
+   */
+  readonly fretCents?: readonly number[];
+  /** The play modes it offers, when not all of them (a saz has no guitar chord shapes). */
+  readonly modes?: readonly PlayMode[];
 }

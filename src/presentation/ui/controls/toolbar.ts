@@ -2,6 +2,7 @@ import type { SettingsStore } from '@application/settings/settings-store';
 import { PlayMode } from '@domain/instruments/play-mode';
 import { DRUMS_ID } from '@domain/drums/drums-id';
 import { PIANO_ID } from '@domain/keys/piano-id';
+import { instrumentById } from '@domain/instruments/instrument-catalog';
 import { CHORD_SETS } from '@domain/lessons/catalog/chord-set-catalog';
 import { t } from '@presentation/i18n/translator';
 import { byId } from '@presentation/ui/dom';
@@ -56,7 +57,9 @@ export class Toolbar {
     cam.dataset['i18nLabel'] = s.isCameraHidden ? 'ui.showCamera' : 'ui.hideCamera';
     cam.setAttribute('aria-label', camLabel);
     cam.title = camLabel;
-    const modes: { value: PlayMode | typeof SELF_PLAY; label: string }[] = Object.values(PlayMode).map((m) => ({ value: m, label: t(`mode.${m}`) }));
+    // An instrument may offer fewer modes (a saz has no guitar chord shapes).
+    const allowed = instrumentById(s.instrument).modes ?? Object.values(PlayMode);
+    const modes: { value: PlayMode | typeof SELF_PLAY; label: string }[] = allowed.map((m) => ({ value: m, label: t(`mode.${m}`) }));
     if (this.selfPlay.isOffered()) modes.push({ value: SELF_PLAY, label: t('demo.play') });
     renderSegmented(byId('modes'), modes, this.selfPlay.isOn() ? SELF_PLAY : s.mode, (mode) => this.pick(mode), isLocked);
     const select = byId<HTMLSelectElement>('chordSet');

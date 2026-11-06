@@ -21,4 +21,8 @@ export interface FretboardLayout {
   /** x of each fret wire; index 0 is the nut. */
   readonly fretX: readonly number[];
   readonly maxFret: number;
+  /** Pitch of each fret above the open string, in semitones (0, 1, 2… on a guitar; a saz has in-between frets). */
+  readonly fretSemis: readonly number[];
+  /** The fret table it was built from (one octave, cents), when it isn't twelve equal semitones. */
+  readonly octaveCents?: readonly number[];
 }

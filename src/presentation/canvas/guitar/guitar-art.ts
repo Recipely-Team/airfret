@@ -38,7 +38,7 @@ export class GuitarArt {
     const ctx = canvas.getContext('2d');
     if (!ctx) return canvas;
     ctx.scale(dpr, dpr);
-    const righty = computeLayout(l.w, l.h, l.strings, false, l.maxFret);
+    const righty = computeLayout(l.w, l.h, l.strings, false, l.maxFret, l.octaveCents);
     const look = lookFor(chain);
     const g = bodyGeometry(righty, look);
     paintArtBody(ctx, righty, g, look);

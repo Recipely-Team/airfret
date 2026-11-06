@@ -14,6 +14,12 @@ const ACOUSTIC: GuitarLook = {
 const LOOKS: Readonly<Record<ChainKind, GuitarLook>> = {
   acoustic: ACOUSTIC,
   piano: ACOUSTIC,
+  saz: {
+    // Spruce top over a deep mulberry bowl (burst), a walnut neck, plain steel strings.
+    style: 'saz', top: '#d6bd8b', topGrain: '#b79a63', burst: '#5b2a14', board: '#3a2617', boardGrain: '#24170d',
+    headstock: '#3a2617', binding: '#e9dcc0', inlay: '#e8e2d2', hardware: '#cfcabf', pickguard: 'transparent',
+    wound: '#d4d2cd', plain: '#dedbd5', woundCount: 0,
+  },
   nylon: {
     style: 'classical', top: '#b9804d', topGrain: '#8f5a31', burst: '#3b2112', board: '#2a1a12', boardGrain: '#180e09',
     headstock: '#2a1a12', binding: '#e9dcc0', inlay: '#2a1a12', hardware: '#c9b98f', pickguard: 'transparent',

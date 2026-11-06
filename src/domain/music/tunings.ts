@@ -15,6 +15,12 @@ export const BASS6_TUNING: readonly number[] = [23, 28, 33, 38, 43, 48];
 /** B1 E2 A2 D3 G3 B3 E4 — the 7-string guitar adds a low B under the six. */
 export const GUITAR7_TUNING: readonly number[] = [35, 40, 45, 50, 55, 59, 64];
 
+/**
+ * The saz in Bozuk (Kara) duzen, written top string first as it is held (ust, orta, alt): G3 · D3 · A3. The
+ * bottom course is the melody string — the highest, as a guitar's top E is.
+ */
+export const SAZ_TUNING: readonly number[] = [55, 50, 57];
+
 /** A lowest string below this (G#1) is a bass's; every guitar tuning, a 7-string in drop A included, stays above. */
 const BASS_BELOW_MIDI = 32;
 
