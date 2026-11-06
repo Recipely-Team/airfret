@@ -1,3 +1,4 @@
+import { partnerOf } from '@infrastructure/audio/strings/course-pair';
 import { clamp } from '@core/math/clamp';
 import type { PluckRequest } from '@domain/audio/pluck-request';
 import { StrikeSurface } from '@domain/gesture/strike-surface';
@@ -27,7 +28,8 @@ export function ringSeconds(inst: Instrument, freq: number): number {
 
 /** Left–right place of a string in the stereo image, low strings left. */
 export function stringPan(inst: Instrument, string: number): number {
-  return (string / Math.max(1, inst.tuning.length - 1) - 0.5) * STEREO_WIDTH;
+  // A 12-string's paired string sits with its partner.
+  return (partnerOf(string) / Math.max(1, inst.tuning.length - 1) - 0.5) * STEREO_WIDTH;
 }
 
 /**

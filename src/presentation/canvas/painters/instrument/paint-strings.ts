@@ -1,15 +1,17 @@
 import { stringY } from '@domain/fretboard/neck-geometry';
 import type { PaintContext } from '@presentation/canvas/paint-context';
 
-/** Gauges in inches, low → high: light acoustic set, nylon, electric 10s, bass 45s, light banjo set. */
+/** Gauges in inches, low → high: light acoustic set, nylon, electric 10s (a 7-string's low B first), bass 45s, light banjo set. */
 const GAUGES = {
   acoustic: [0.053, 0.042, 0.032, 0.024, 0.016, 0.012],
   classical: [0.044, 0.035, 0.03, 0.04, 0.032, 0.028],
-  electric: [0.046, 0.036, 0.026, 0.017, 0.013, 0.01],
-  /** A 5-string set; a 4-string uses its top four. */
-  bass: [0.13, 0.105, 0.085, 0.065, 0.045],
+  electric: [0.059, 0.046, 0.036, 0.026, 0.017, 0.013, 0.01],
+  /** A 6-string set, B to C: a 5-string uses B to G, a 4-string E to G. */
+  bass: [0.13, 0.105, 0.085, 0.065, 0.045, 0.03],
   banjo: [0.042, 0.032, 0.024, 0.018, 0.013, 0.01],
 } as const;
+/** A 12-string's paired string: this far from its partner (share of the string gap), an octave string this much thinner. */
+const COURSE = { offsetOfGap: 0.28, octaveWidth: 0.5 } as const;
 /** px per inch of gauge at a 900 px tall screen. */
 const PX_PER_INCH = 62;
 const REFERENCE_HEIGHT = 900;
@@ -25,10 +27,12 @@ const SHADOW_OFFSET = 3;
  * - A fretted string vibrates only between its fret and the bridge — the part behind the finger is still.
  * - Vibration is drawn as a motion-blurred envelope (the way a fast-moving string looks), sin(π·u) along the length.
  * - A string under the strumming fingertip bends to it as a tent and snaps back when released.
+ * - A 12-string draws each course's second string beside the first (`Instrument.courses`).
  */
 export function paintStrings({ ctx, player, look, phase }: PaintContext): void {
   const l = player.layout;
-  const gauges = GAUGES[look.style].slice(-l.strings);
+  const gauges = look.style === 'bass' ? GAUGES.bass.slice(l.strings > 4 ? 0 : 1, (l.strings > 4 ? 0 : 1) + l.strings) : GAUGES[look.style].slice(-l.strings);
+  const courses = player.instrument.courses;
   const scale = (l.h / REFERENCE_HEIGHT) * PX_PER_INCH;
   const pick = player.strumPoint;
   for (let i = 0; i < l.strings; i++) {
@@ -81,6 +85,17 @@ export function paintStrings({ ctx, player, look, phase }: PaintContext): void {
     }
 
     const core = (x: number, u: number) => tent(x) + Math.sin(Math.PI * u) * amp * wobble * 0.35;
+    // A 12-string's pair: a second string just above this one, rung with it — thinner when an octave higher.
+    const pair = courses?.[i];
+    if (pair !== undefined) {
+      ctx.save();
+      ctx.translate(0, -((2 * l.spreadBody) / Math.max(1, l.strings - 1)) * COURSE.offsetOfGap);
+      ctx.strokeStyle = shade(look.plain, -0.15);
+      ctx.lineWidth = Math.max(0.6, pair > 0 ? width * COURSE.octaveWidth : width);
+      path(core);
+      ctx.stroke();
+      ctx.restore();
+    }
     ctx.strokeStyle = shade(isWound ? look.wound : look.plain, -0.35);
     ctx.lineWidth = width;
     path(core);

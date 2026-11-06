@@ -1,13 +1,13 @@
 import { CHORD_SHAPES } from '@domain/music/chords/chord-shapes';
 import { LETTER_SEMITONES, SEMITONES_PER_OCTAVE } from '@domain/music/note-names';
-import { GUITAR_STRING_COUNT } from '@domain/music/tunings';
+import { GUITAR_STRING_COUNT, isBassRange } from '@domain/music/tunings';
 
 const ROOT_PATTERN = /^([A-G])([#b]?)/;
 const MINOR_PATTERN = /^[A-G][#b]?m(?!aj)/;
 const FIFTH = 7;
 const MINOR_THIRD = 3;
 const MAJOR_THIRD = 4;
-/** Root, fifth, octave, tenth: one tone per string of a 4-string bass. */
+/** Root, fifth, octave, tenth: one tone per string of a 4-string bass; longer basses have one string more below. */
 const BASS_OUTLINE_STRINGS = 4;
 
 /** True when the chord has a guitar shape. */
@@ -28,24 +28,29 @@ export function chordRoot(name: string): number {
  * MIDI notes per string for a chord on the given tuning (null = muted).
  *
  * @remarks
- * - Six strings use the shape table.
- * - A bass outlines the chord: root, fifth, octave, and the third above it, starting on its E string —
- *   a 5-string's low B stays silent, as a player keeps it for the lowest notes.
+ * - Guitars use the six-string shape table; a 7-string plays it on its upper six and keeps the low B quiet.
+ * - A bass (by range, `isBassRange`) outlines the chord: root, fifth, octave, the third above it and, on a
+ *   6-string's high C, the root two octaves up — starting on its E string: an extended bass's low B stays
+ *   silent, as a player keeps it for the lowest notes.
  */
 export function chordNotes(name: string, tuning: readonly number[]): (number | null)[] {
-  if (tuning.length === GUITAR_STRING_COUNT) {
+  if (!isBassRange(tuning)) {
     const shape = CHORD_SHAPES[name];
-    if (!shape) return tuning.map(() => null);
+    const extra = tuning.length - GUITAR_STRING_COUNT;
+    if (!shape || extra < 0) return tuning.map(() => null);
     return tuning.map((open, i) => {
-      const fret = shape[i];
+      const fret = i < extra ? null : shape[i - extra];
       return fret === null || fret === undefined ? null : open + fret;
     });
   }
   const pc = chordRoot(name);
-  const skipped = Math.max(0, tuning.length - BASS_OUTLINE_STRINGS);
+  const skipped = tuning.length > BASS_OUTLINE_STRINGS ? 1 : 0;
   let root = tuning[skipped] ?? 0;
   while (((root % SEMITONES_PER_OCTAVE) + SEMITONES_PER_OCTAVE) % SEMITONES_PER_OCTAVE !== pc) root++;
   const third = MINOR_PATTERN.test(name) ? MINOR_THIRD : MAJOR_THIRD;
-  const tones = [root, root + FIFTH, root + SEMITONES_PER_OCTAVE, root + SEMITONES_PER_OCTAVE + third];
-  return [...tuning.slice(0, skipped).map(() => null), ...tones].slice(0, tuning.length);
+  const tones = [root, root + FIFTH, root + SEMITONES_PER_OCTAVE, root + SEMITONES_PER_OCTAVE + third, root + 2 * SEMITONES_PER_OCTAVE];
+  return tuning.map((open, i) => {
+    const tone = i < skipped ? undefined : tones[i - skipped];
+    return tone === undefined || tone < open ? null : tone;
+  });
 }
