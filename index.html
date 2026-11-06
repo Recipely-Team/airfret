@@ -26,6 +26,11 @@
           <div class="seg" id="modes" role="radiogroup"></div>
           <select id="chordSet" class="select" data-i18n-label="ui.chordSet"></select>
           <button class="btn ghost" id="pedalsBtn" type="button" data-i18n="pedals.title" hidden></button>
+          <div class="octaves" id="octaves" hidden>
+            <button class="btn icon" id="octDown" type="button" data-i18n-label="piano.lower">◀</button>
+            <span class="octave-range" id="octRange"></span>
+            <button class="btn icon" id="octUp" type="button" data-i18n-label="piano.higher">▶</button>
+          </div>
           <button class="select song-pick" id="demoSong" type="button" aria-haspopup="listbox" aria-expanded="false" hidden></button>
           <button class="btn ghost" id="demoBtn" type="button" aria-pressed="false" hidden></button>
         </div>

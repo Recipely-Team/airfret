@@ -27,6 +27,8 @@ export interface Settings {
   readonly isCameraHidden: boolean;
   /** The player turned the camera off: no picture, no tracking; mouse or touch plays. */
   readonly isCameraOff: boolean;
+  /** How many octaves the piano keyboard is slid from its home position (negative = lower). */
+  readonly pianoShift: number;
   readonly latencyMs: number;
   readonly lessonTempo: number;
   readonly lessonMode: LessonMode;

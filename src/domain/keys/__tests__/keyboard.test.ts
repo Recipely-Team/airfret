@@ -52,27 +52,27 @@ function stroke(d: KeyPressDetector, x: number, toY: number, speed = 1.5, t0 = 0
   const dt = (toY - fromY) / desk.h / speed / steps;
   const out = [];
   for (let i = 0; i <= steps; i++) out.push(d.update({ x, y: fromY + ((toY - fromY) * i) / steps }, t0 + i * dt, desk));
-  return out.filter((r) => r.press || r.release);
+  return out.filter((r) => r.presses.length || r.releases.length);
 }
 
 describe('Pressing keys with a fingertip', () => {
   it('presses the white key a fingertip comes down on, past the black keys', () => {
     const e = white(desk, 52)!;
     const events = stroke(new KeyPressDetector(), (e.x0 + e.x1) / 2, desk.bottom - 5);
-    expect(events.map((r) => r.press?.midi)).toEqual([52]);
+    expect(events.map((r) => r.presses[0]?.midi)).toEqual([52]);
   });
 
   it('presses a black key from its middle, and does not press the white under it as well', () => {
     const cs = black(desk, 49)!;
     const events = stroke(new KeyPressDetector(), (cs.x0 + cs.x1) / 2, desk.bottom - 5);
-    expect(events.map((r) => r.press?.midi)).toEqual([49]);
+    expect(events.map((r) => r.presses[0]?.midi)).toEqual([49]);
   });
 
   it('plays a fast stroke louder than a gentle one', () => {
     const g = white(desk, 55)!;
     const x = (g.x0 + g.x1) / 2;
-    const hard = stroke(new KeyPressDetector(), x, desk.bottom - 5, 3)[0]?.press?.velocity ?? 0;
-    const soft = stroke(new KeyPressDetector(), x, desk.bottom - 5, 0.3)[0]?.press?.velocity ?? 0;
+    const hard = stroke(new KeyPressDetector(), x, desk.bottom - 5, 3)[0]?.presses[0]?.velocity ?? 0;
+    const soft = stroke(new KeyPressDetector(), x, desk.bottom - 5, 0.3)[0]?.presses[0]?.velocity ?? 0;
     expect(hard).toBeGreaterThan(soft);
     expect(soft).toBeGreaterThan(0);
   });
@@ -82,9 +82,9 @@ describe('Pressing keys with a fingertip', () => {
     const a = white(desk, 57)!;
     const x = (a.x0 + a.x1) / 2;
     stroke(d, x, desk.bottom - 5);
-    for (let i = 0; i < 10; i++) expect(d.update({ x: x + (i % 2), y: desk.bottom - 5 + (i % 3) }, 1 + i / 30, desk)).toEqual({ press: null, release: null });
+    for (let i = 0; i < 10; i++) expect(d.update({ x: x + (i % 2), y: desk.bottom - 5 + (i % 3) }, 1 + i / 30, desk)).toEqual({ presses: [], releases: [] });
     expect(d.holding).toBe(57);
-    expect(d.update({ x, y: desk.top - 80 }, 2, desk).release).toBe(57);
+    expect(d.update({ x, y: desk.top - 80 }, 2, desk).releases).toEqual([57]);
     expect(d.holding).toBeNull();
   });
 
@@ -97,6 +97,51 @@ describe('Pressing keys with a fingertip', () => {
     const d = new KeyPressDetector();
     const c = white(desk, 60)!;
     stroke(d, (c.x0 + c.x1) / 2, desk.bottom - 5);
-    expect(d.update(null, 2, desk).release).toBe(60);
+    expect(d.update(null, 2, desk).releases).toEqual([60]);
+  });
+
+  it('slides a pressed finger along the white keys as a glissando, every key once, even when the hand jumps several keys a frame', () => {
+    const d = new KeyPressDetector();
+    const c = white(desk, 60)!;
+    stroke(d, (c.x0 + c.x1) / 2, desk.bottom - 5);
+    const g = white(desk, 67)!;
+    // One camera frame later the fingertip is already four white keys further: C → G passes D, E, F.
+    const r = d.update({ x: (g.x0 + g.x1) / 2, y: desk.bottom - 5 }, 1, desk);
+    expect(r.presses.map((p) => p.midi)).toEqual([62, 64, 65, 67]);
+    expect(r.releases).toEqual([60, 62, 64, 65]);
+    expect(d.holding).toBe(67);
+    const back = d.update({ x: (c.x0 + c.x1) / 2, y: desk.bottom - 5 }, 1.1, desk);
+    expect(back.presses.map((p) => p.midi)).toEqual([65, 64, 62, 60]);
+  });
+
+  it('keeps a glissando on the black keys when it started on one', () => {
+    const d = new KeyPressDetector();
+    const cs = black(desk, 61)!;
+    stroke(d, (cs.x0 + cs.x1) / 2, desk.bottom - 5);
+    const as = black(desk, 70)!;
+    const r = d.update({ x: (as.x0 + as.x1) / 2, y: desk.bottom - 5 }, 1, desk);
+    expect(r.presses.map((p) => p.midi)).toEqual([63, 66, 68, 70]);
+  });
+});
+
+describe('Sliding the keyboard to reach all 88 keys', () => {
+  it('moves by octaves, from A0 at the far left to C8 at the far right, never past them', async () => {
+    const { shiftLimits } = await import('@domain/keys/compute-keyboard-layout');
+    const { down, up } = shiftLimits(1440);
+    expect(computeKeyboardLayout(1440, 900, 1).firstMidi).toBe(60);
+    expect(computeKeyboardLayout(1440, 900, down).firstMidi).toBe(21);
+    expect(computeKeyboardLayout(1440, 900, up).lastMidi).toBe(108);
+    expect(computeKeyboardLayout(1440, 900, up + 3).lastMidi).toBe(108);
+    expect(computeKeyboardLayout(1440, 900, down - 3).firstMidi).toBe(21);
+  });
+
+  it('reaches every key of the piano on any screen', async () => {
+    const { shiftLimits } = await import('@domain/keys/compute-keyboard-layout');
+    for (const w of [1440, 800, 390]) {
+      const { down, up } = shiftLimits(w);
+      const reached = new Set<number>();
+      for (let s = down; s <= up; s++) for (const k of computeKeyboardLayout(w, 900, s).keys) reached.add(k.midi);
+      expect(reached.size, `width ${w}`).toBe(88);
+    }
   });
 });

@@ -50,6 +50,10 @@ button, select, input { font: inherit; color: inherit; }
 
 #stage { position: absolute; inset: 0; }
 
+/* Piano: slide the keyboard an octave at a time; the range it shows sits between the arrows. */
+.octaves { display: inline-flex; align-items: center; gap: 6px; }
+.octave-range { min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; }
+
 /* Song search: the lessons drawer and the Watch it play picker. */
 .search {
   width: 100%; box-sizing: border-box; margin: 4px 0 10px; padding: 8px 11px; border-radius: 9px;

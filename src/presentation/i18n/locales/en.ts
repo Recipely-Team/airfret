@@ -33,6 +33,8 @@ export const EN: Readonly<Record<string, string>> = {
   'inst.twelve': "12-string",
   'inst.guitar7': "7-string",
   'inst.bass6': "6-string bass",
+  'piano.lower': 'An octave lower',
+  'piano.higher': 'An octave higher',
   'inst.piano': "Piano",
   'inst.banjo': 'Banjo',
 

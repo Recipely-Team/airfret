@@ -89,6 +89,9 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | C4.4 | No camera: click a key, drag across several, touch with two fingers | Each plays; dragging plays each key it reaches; two touches play two notes | |
 | C4.5 | Hold Space, play, release a key, then release Space | Notes ring on while Space is held and stop when it's let go | |
 | C4.6 | Phone width | C4 to E5 fills the screen; the top bar fits | |
+| C4.7 | Press a key with a fingertip and slide sideways without lifting | A glissando: every white key it passes sounds once (black keys if it started on a black key), even a fast slide | |
+| C4.8 | Mouse or touch: press and drag fast across the keyboard | Every key on the way plays, none skipped | |
+| C4.9 | ◀ ▶ in the top bar, or ← → | The keyboard slides an octave; the range shows between the arrows; A0 and C8 are the ends | |
 
 ## C2. Drums
 

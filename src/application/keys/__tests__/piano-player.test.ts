@@ -89,4 +89,12 @@ describe('Playing the piano', () => {
     piano.fade(5);
     expect(piano.glow.has(60)).toBe(false);
   });
+
+  it('plays every key a fast slide passes, though the pointer jumps several keys between two events', () => {
+    const { sound, piano } = setup();
+    piano.pointer(1, centre(60), 0);
+    piano.pointer(1, centre(72), 0.05);
+    expect(sound.plucks.map((p) => p.midi)).toEqual([60, 62, 64, 65, 67, 69, 71, 72]);
+    expect(piano.pressed).toEqual([72]);
+  });
 });
