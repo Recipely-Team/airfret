@@ -21,4 +21,7 @@ export const SAMPLE_SET_BY_INSTRUMENT: Readonly<Record<string, string>> = {
   marimba: 'marimba',
   xylophone: 'xylophone',
   glockenspiel: 'glockenspiel',
+  clarinet: 'clarinet',
+  flute: 'flute',
+  trumpet: 'trumpet',
 };

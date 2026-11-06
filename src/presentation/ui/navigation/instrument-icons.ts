@@ -33,5 +33,8 @@ export const INSTRUMENT_ICONS: Readonly<Record<string, string>> = {
   marimba: `${OPEN}<path d="M14 30h92M18 38h84"/><path d="M20 14v16M30 12v18M40 10v20M50 8v22M60 10v20M70 12v18M80 14v16M90 16v14M100 18v12"/></svg>`,
   xylophone: `${OPEN}<path d="M22 12h8v26h-8zM36 14h8v22h-8zM50 16h8v18h-8zM64 18h8v14h-8zM78 20h8v10h-8z"/><path d="M92 8l12 30M104 8l-4 12"/></svg>`,
   glockenspiel: `${OPEN}<rect x="12" y="8" width="96" height="32" rx="3"/><path d="M22 14v20M32 15v18M42 16v16M52 17v14M62 18v12M72 18v12M82 19v10M92 19v10"/></svg>`,
+  clarinet: `${OPEN}<path d="M8 22h12M20 18h70l4 2v4l-4 2H20zM94 20l10-6v20l-10-6"/><circle cx="36" cy="22" r="1.6"/><circle cx="48" cy="22" r="1.6"/><circle cx="60" cy="22" r="1.6"/><circle cx="72" cy="22" r="1.6"/></svg>`,
+  flute: `${OPEN}<path d="M8 20h104v6H8z"/><path d="M22 23h6"/><circle cx="46" cy="23" r="1.6"/><circle cx="56" cy="23" r="1.6"/><circle cx="66" cy="23" r="1.6"/><circle cx="82" cy="23" r="1.6"/><circle cx="92" cy="23" r="1.6"/></svg>`,
+  trumpet: `${OPEN}<path d="M8 22h4M12 19h62v6H12zM74 19l26-10v30L74 25"/><path d="M34 19v-8h6v8M44 19v-8h6v8M54 19v-8h6v8M30 25c0 10 34 10 34 0"/></svg>`,
   drums: `${OPEN}<ellipse cx="60" cy="32" rx="13" ry="13"/><ellipse cx="38" cy="30" rx="11" ry="4"/><path d="M27 30v8M49 30v8M27 38c0 2 22 2 22 0"/><ellipse cx="84" cy="33" rx="12" ry="4.5"/><path d="M72 33v8M96 33v8M72 41c0 2 24 2 24 0"/><ellipse cx="52" cy="15" rx="7" ry="2.6"/><ellipse cx="70" cy="15" rx="7" ry="2.6"/><path d="M14 10h20M24 10v34M88 8h22M99 8v36"/></svg>`,
 };
