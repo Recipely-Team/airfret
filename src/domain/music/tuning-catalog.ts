@@ -56,15 +56,16 @@ const GUITARS: Readonly<Record<number, readonly Tuning[]>> = { 3: SAZ_TUNINGS, 6
 
 /**
  * Tunings available for an instrument, by its family and string count (every tuning's offsets match its
- * strings): a 6-string bass gets bass tunings, not a guitar's drop D.
+ * strings): a 6-string bass gets bass tunings, not a guitar's drop D. An instrument's `own` list wins (a ukulele).
  */
-export function tuningsFor(base: readonly number[]): readonly Tuning[] {
+export function tuningsFor(base: readonly number[], own?: readonly Tuning[]): readonly Tuning[] {
+  if (own) return own;
   const family = isBassRange(base) ? BASSES : GUITARS;
   return family[base.length] ?? [{ id: 'standard', name: 'tuning.standard', offsets: base.map(() => 0) }];
 }
 
 /** Open-string pitches after the tuning and a capo: a capo raises every string by its fret. */
-export function effectiveTuning(base: readonly number[], tuningId: string, capo: number): number[] {
-  const offsets = tuningsFor(base).find((t) => t.id === tuningId)?.offsets;
+export function effectiveTuning(base: readonly number[], tuningId: string, capo: number, own?: readonly Tuning[]): number[] {
+  const offsets = tuningsFor(base, own).find((t) => t.id === tuningId)?.offsets;
   return base.map((m, i) => m + (offsets?.[i] ?? 0) + capo);
 }

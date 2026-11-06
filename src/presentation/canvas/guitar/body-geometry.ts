@@ -16,9 +16,9 @@ export interface BodyGeometry {
 }
 
 /** Fraction of body length from the joint to the bridge, per style (dreadnought ≈ 0.66). */
-const BRIDGE_AT = { acoustic: 0.66, classical: 0.66, electric: 0.56, bass: 0.6, banjo: 0.72, saz: 0.74 } as const;
+const BRIDGE_AT = { acoustic: 0.66, classical: 0.66, electric: 0.56, bass: 0.6, banjo: 0.72, saz: 0.74, ukulele: 0.66, mandolin: 0.7, balalaika: 0.78, bouzouki: 0.72 } as const;
 /** A banjo pot is round: as wide as it is long. */
-const WIDTH_OF_LENGTH = { acoustic: 0.8, classical: 0.76, electric: 0.7, bass: 0.72, banjo: 1, saz: 0.62 } as const;
+const WIDTH_OF_LENGTH = { acoustic: 0.8, classical: 0.76, electric: 0.7, bass: 0.72, banjo: 1, saz: 0.62, ukulele: 0.72, mandolin: 0.78, balalaika: 0.95, bouzouki: 0.8 } as const;
 const MAX_WIDTH_OF_HEIGHT = 0.92;
 /** How far a banjo's fingerboard reaches onto the head, as a fraction of the pot. */
 const BANJO_BOARD_OVER_HEAD = 0.22;
@@ -36,10 +36,10 @@ export function bodyGeometry(l: FretboardLayout, look: GuitarLook): BodyGeometry
     const start = l.strumX1 - d * BRIDGE_AT.banjo;
     return { x0: start, length: d, width: d, cy: l.centerY, holeX: start + d / 2, holeR: d / 2, boardEnd: Math.max(x0, start + d * BANJO_BOARD_OVER_HEAD) };
   }
-  const isHollow = look.style === 'acoustic' || look.style === 'classical' || look.style === 'saz';
+  const isHollow = look.style !== 'electric' && look.style !== 'bass';
   const holeX = x0 + length * (isHollow ? 0.3 : 0.2);
   // A saz's top has small soundholes, not a guitar's rosette.
-  const holeR = length * (look.style === 'saz' ? 0.03 : 0.085);
+  const holeR = length * (look.style === 'saz' ? 0.03 : look.style === 'balalaika' ? 0.05 : 0.085);
   const boardEnd = isHollow ? holeX - holeR - length * 0.012 : x0 + length * 0.1;
   return { x0, length, width, cy: l.centerY, holeX, holeR, boardEnd };
 }

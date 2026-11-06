@@ -11,5 +11,5 @@ export function selectedInstrument(st: Settings): Instrument {
   // The piano isn't one of the fretted instruments: no voices to choose, no tunings or capo.
   if (st.instrument === PIANO_ID) return PIANO;
   const base = withVoice(instrumentById(st.instrument), st.voices[st.instrument]);
-  return { ...base, tuning: effectiveTuning(base.tuning, st.tuning, st.capo) };
+  return { ...base, tuning: effectiveTuning(base.tuning, st.tuning, st.capo, base.tunings) };
 }

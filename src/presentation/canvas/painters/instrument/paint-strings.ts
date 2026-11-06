@@ -11,6 +11,11 @@ const GAUGES = {
   banjo: [0.042, 0.032, 0.024, 0.018, 0.013, 0.01],
   /** Top · middle · bottom course, plain steel. */
   saz: [0.012, 0.014, 0.01],
+  ukulele: [0.028, 0.034, 0.03, 0.025],
+  mandolin: [0.04, 0.026, 0.016, 0.011],
+  balalaika: [0.016, 0.016, 0.012],
+  /** Irish G D A D; the Greek trichordo uses the top three. */
+  bouzouki: [0.046, 0.034, 0.022, 0.014],
 } as const;
 /** A 12-string's paired string: this far from its partner (share of the string gap), an octave string this much thinner. */
 const COURSE = { offsetOfGap: 0.28, octaveWidth: 0.5 } as const;
