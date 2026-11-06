@@ -382,7 +382,7 @@ Layers and rules: `CLAUDE.md`, `architecture.md`.
 
 ## src/presentation/canvas/keys/
 
-- `paint-keyboard.ts` — Ivory, ebony and the case: natural materials, as the guitars are.
+- `paint-keyboard.ts` — Ivory, ebony and the case: natural materials, as the guitars are; rosewood and metal for struck bars.
 
 ## src/presentation/canvas/painters/instrument/
 

@@ -55,6 +55,6 @@ describe('The harpsichord', () => {
     expect(hard).toBe(soft);
     const [pHard, pSoft] = play('piano');
     expect(pHard).toBeGreaterThan(pSoft ?? 1);
-    expect(harpsichord.isReversedColours).toBe(true);
+    expect(harpsichord.look).toBe('reversed');
   });
 });

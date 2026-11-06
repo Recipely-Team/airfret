@@ -8,6 +8,11 @@ export interface KeyboardInstrument {
   readonly high: number;
   /** A piano plays louder the harder a key is struck; a harpsichord's plucked strings sound the same however hard. */
   readonly isTouchSensitive: boolean;
-  /** Dark naturals and light sharps, as on a French harpsichord, instead of a piano's ivory and ebony. */
-  readonly isReversedColours: boolean;
+  /**
+   * How its keys look: a piano's ivory and ebony, a French harpsichord's reversed (dark naturals), a marimba's
+   * rosewood bars, a glockenspiel's or xylophone's metal or bright wood.
+   */
+  readonly look: 'ivory' | 'reversed' | 'rosewood' | 'metal';
+  /** A damper stops a note when its key rises (piano, harpsichord); a struck bar rings on (marimba, glockenspiel). */
+  readonly isDamped: boolean;
 }

@@ -2,8 +2,13 @@ import type { PianoPlayer } from '@application/keys/piano-player';
 import type { PianoKey } from '@domain/keys/piano-key';
 import { FONT, Palette, rgba } from '@presentation/canvas/palette';
 
-/** Ivory, ebony and the case: natural materials, as the guitars are. */
+/** Ivory, ebony and the case: natural materials, as the guitars are; rosewood and metal for struck bars. */
 const COLOURS = { ivory: '#f2ece0', ivoryShade: '#d9d1c2', ebony: '#17140f', ebonyTop: '#3a342b', case: '#1d120c', felt: '#6b1f1f' } as const;
+/** Bars: top and edge of a natural, then of a sharp. */
+const BARS = {
+  rosewood: { light: '#a8573a', dark: '#6b2f1c', sharpLight: '#8e4630', sharpDark: '#5a2616' },
+  metal: { light: '#e4e6e9', dark: '#9aa0a6', sharpLight: '#cfd2d6', sharpDark: '#868c93' },
+} as const;
 const CASE_PAD = 10;
 const RADIUS = 4;
 /** A pressed key sinks this far (share of the key length) and darkens. */
@@ -28,9 +33,10 @@ export function paintKeyboard(ctx: CanvasRenderingContext2D, piano: PianoPlayer)
   ctx.fillStyle = COLOURS.felt;
   ctx.fillRect(x0, l.top - CASE_PAD * 0.8, x1 - x0, CASE_PAD * 0.6);
   const down = new Set(piano.pressed);
-  const isReversed = piano.keyboard?.isReversedColours ?? false;
-  for (const k of keys.filter((x) => !x.isBlack)) paintKey(ctx, k, down.has(k.midi), piano.glow.get(k.midi) ?? 0, keyLength, isReversed);
-  for (const k of keys.filter((x) => x.isBlack)) paintKey(ctx, k, down.has(k.midi), piano.glow.get(k.midi) ?? 0, keyLength, isReversed);
+  const look = piano.keyboard?.look ?? 'ivory';
+  const isReversed = look === 'reversed';
+  for (const k of keys.filter((x) => !x.isBlack)) paintKey(ctx, k, down.has(k.midi), piano.glow.get(k.midi) ?? 0, keyLength, look);
+  for (const k of keys.filter((x) => x.isBlack)) paintKey(ctx, k, down.has(k.midi), piano.glow.get(k.midi) ?? 0, keyLength, look);
   ctx.font = `500 ${Math.max(9, Math.min(13, (x1 - x0) / keys.length))}px ${FONT}`;
   ctx.textAlign = 'center';
   ctx.fillStyle = isReversed ? 'rgba(236, 228, 210, 0.6)' : 'rgba(40, 32, 24, 0.55)';
@@ -40,16 +46,21 @@ export function paintKeyboard(ctx: CanvasRenderingContext2D, piano: PianoPlayer)
   }
 }
 
-function paintKey(ctx: CanvasRenderingContext2D, k: PianoKey, isDown: boolean, glow: number, keyLength: number, isReversed: boolean): void {
+function paintKey(ctx: CanvasRenderingContext2D, k: PianoKey, isDown: boolean, glow: number, keyLength: number, look: 'ivory' | 'reversed' | 'rosewood' | 'metal'): void {
   // A harpsichord's naturals are dark and its sharps light: the key's colour, not its shape, swaps.
-  const isDark = k.isBlack !== isReversed;
+  const isDark = k.isBlack !== (look === 'reversed');
   const sink = isDown ? keyLength * PRESS_DEPTH : 0;
   const w = k.x1 - k.x0;
   const gap = k.isBlack ? 0 : 1;
   const y0 = k.y0 + sink;
   const h = k.y1 - k.y0;
   const grad = ctx.createLinearGradient(0, y0, 0, y0 + h);
-  if (isDark) {
+  if (look === 'rosewood' || look === 'metal') {
+    // A struck bar: its own wood or metal, the sharps a shade darker.
+    const bar = BARS[look];
+    grad.addColorStop(0, k.isBlack ? bar.sharpLight : bar.light);
+    grad.addColorStop(1, k.isBlack ? bar.sharpDark : bar.dark);
+  } else if (isDark) {
     grad.addColorStop(0, COLOURS.ebonyTop);
     grad.addColorStop(0.85, COLOURS.ebony);
     grad.addColorStop(1, '#000');

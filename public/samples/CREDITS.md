@@ -13,6 +13,7 @@ stay under CC BY-SA 4.0.
 | `piano/` | FreePats — *Upright Piano KW* (small, 2019-07-03; a Kawai upright recorded by Gonzalo and Roberto), freepats.zenvoid.org/Piano/acoustic-grand-piano.html, archive SHA-256 `e346ef19…7047f` | CC0 1.0 | Verified (cc0.txt and readme.txt in the archive). 26 recordings, a minor third apart, C1–B7 |
 | `hand-drums/darbuka-*` | Wikimedia Commons — *Derbake Grave.ogg* (düm) and *Derbake Agudo.ogg* (tek; ka is it played lower), by **ZappaMidiPF** | **CC BY-SA 4.0** | Verified on the file pages; trimmed and level-matched, so these two files are CC BY-SA 4.0 |
 | `hand-drums/conga-*`, `tumba-*` | VS Chamber Orchestra 2 Community Edition (Versilian Studios; recorded by Sam Gossner and Simon Dalzell), github.com/sgossner/VSCO-2-CE — *Conga-*, *Tumba-HitN* and *-Tap1* | CC0 1.0 | Verified (LICENSE in the repo) |
+| `marimba/`, `xylophone/`, `glockenspiel/` | VS Chamber Orchestra 2 Community Edition (Versilian Studios), github.com/sgossner/VSCO-2-CE — *Percussion/Marimba* (outrigger mallets, loud), *Xylo* (medium, ff), *Glock* (medium) | CC0 1.0 | Verified (LICENSE in the repo). The library names its notes an octave low (middle C = C3); pitches measured and mapped to the true octave. 10, 8 and 6 recordings |
 | `steel/` | Meta Open Sound guitars (`INSGuitar…` files) | Freely redistributable | Confirmed by the owner, 2026-11-04; record the licence name and link here |
 | `nylon/` | Meta Open Sound guitars (`INSGuitar…` files) | Freely redistributable | Confirmed by the owner, 2026-11-04; record the licence name and link here |
 
