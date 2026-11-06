@@ -17,6 +17,8 @@ import type { Instrument } from '@domain/instruments/instrument';
 import type { Song } from '@domain/lessons/catalog/song';
 import type { LessonSession } from '@domain/lessons/session/lesson-session';
 import { planFingering } from '@domain/music/fingering/plan-fingering';
+import { fretForSemitones, playableRange, semitoneSpan } from '@domain/music/fretted-range';
+import { fitSong } from '@domain/performance/fit-song';
 
 /** Fingers land this long before the note they fret, as a real hand gets there first, seconds. */
 const FRET_LEAD = 0.06;
@@ -64,7 +66,10 @@ export class DemoPerformer {
     return this.session?.song ?? null;
   }
 
-  start(song: Song, instrument: Instrument, audioNow: number): Result<void, Failure> {
+  start(written: Song, instrument: Instrument, audioNow: number): Result<void, Failure> {
+    // A tune moved into the instrument's range by octaves: a ukulele or a mandolin plays a guitar melody higher up.
+    const range = playableRange(instrument);
+    const song = fitSong(written, range.low, range.high);
     // A lesson opens with a count-in bar, and a song may open with rests before its pickup; a demo shouldn't make
     // you wait through either (3.4 s on the Prelude, 2.1 s on Auld Lang Syne): it starts at the first note.
     const counted = this.startLesson.execute(song, DEMO_OPTIONS, audioNow);
@@ -81,7 +86,7 @@ export class DemoPerformer {
     this.fretting = null;
     this.chord = '';
     const onsets = started.value.chart.targets.map((t) => (t.midi === undefined ? [] : [t.midi, ...(t.harmony ?? [])]));
-    this.plan = planFingering(onsets, instrument.tuning, instrument.frets);
+    this.plan = planFingering(onsets, instrument.tuning, semitoneSpan(instrument));
     return ok(undefined);
   }
 
@@ -126,7 +131,8 @@ export class DemoPerformer {
         this.fretting = chordFretting(tg.chord, tuning, capo, instrument.chordShapes);
       } else {
         this.chord = '';
-        this.held = holdNotes(this.held, (this.plan[tg.index] ?? []).map((n) => ({ string: n.string, fret: n.fret })));
+        // A saz's 17-an-octave frets: each semitone on the fret that sounds it.
+        this.held = holdNotes(this.held, (this.plan[tg.index] ?? []).map((n) => ({ string: n.string, fret: fretForSemitones(instrument, n.fret) })));
         this.fretting = noteFretting(this.held, strings, capo);
       }
     }

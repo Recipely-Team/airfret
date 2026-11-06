@@ -221,6 +221,7 @@ F/B rows (id — note):
 | S18 | On the piano, choose a chord song (*Canon in D*) | A bass at each bar and the chord on every beat | |
 | S19 | `/darbuka`, `/congas`, `/tabla`, `/handpan` → *Watch it play* | Each plays its own rhythms (maqsum, tumbao, teentaal, a handpan groove); each stroke ripples where it lands — the centre, or the rim on the striking hand's side; the list offers the drum's other rhythms (9/8 karşılama, çiftetelli…) | |
 | S20 | `/drums` → *Watch it play* | A crash, then the rock beat (eleven grooves in the list: funk, shuffle, bossa nova, jazz swing…); each pad lights as it is hit; it ends on a crash | |
+| S21 | `/ukulele`, `/mandolin`, `/saz`, `/balalaika`, `/bouzouki`, `/greek-bouzouki` → *Watch it play* | Each plays a melody (moved up or down by octaves into its range), the hand on the right frets (on the saz, its 17-an-octave frets); the list offers every melody, and on the ukulele the chord songs too | |
 | S11 | iPhone with the silent switch on | The playing is heard | |
 | S12 | Phone width and 1280 px | The top bar stays tidy: the list fills the second row on a phone; one line at 1280 px | |
 
