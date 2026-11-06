@@ -19,10 +19,10 @@ interface Stop {
  * on the upper six; on a bass the outline, fingered one finger per fret from the lowest. Frets are counted
  * from the nut, so a capo shifts them; `tuning` already includes the capo.
  */
-export function chordFretting(chord: string, tuning: readonly number[], capo: number): Fretting {
+export function chordFretting(chord: string, tuning: readonly number[], capo: number, shapes?: Readonly<Record<string, readonly (number | null)[]>>): Fretting {
   const strings = tuning.length;
-  const notes = chord ? chordNotes(chord, tuning) : [];
-  const shapeFingers = isBassRange(tuning) ? undefined : CHORD_FINGERS[chord];
+  const notes = chord ? chordNotes(chord, tuning, shapes) : [];
+  const shapeFingers = isBassRange(tuning) || shapes ? undefined : CHORD_FINGERS[chord];
   const offset = strings - (shapeFingers?.length ?? strings);
   const stops = notes.flatMap((note, string) => (note === null || note <= (tuning[string] ?? 0) ? [] : [{ string, fret: note - (tuning[string] ?? 0) }]));
   const lowest = Math.min(...stops.map((s) => s.fret));

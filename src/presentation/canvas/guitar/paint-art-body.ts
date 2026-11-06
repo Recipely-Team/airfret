@@ -1,12 +1,16 @@
 import type { FretboardLayout } from '@domain/fretboard/fretboard-layout';
 import { strumStringYs } from '@domain/fretboard/neck-geometry';
-import { ACOUSTIC_BOUTS, CLASSICAL_BOUTS, SAZ_BOUTS, SOLID_BOUTS, traceBody } from '@presentation/canvas/guitar/body-shape';
+import { ACOUSTIC_BOUTS, CLASSICAL_BOUTS, SAZ_BOUTS, SOLID_BOUTS, traceBody, traceTriangle } from '@presentation/canvas/guitar/body-shape';
 import type { BodyGeometry } from '@presentation/canvas/guitar/body-geometry';
 import type { GuitarLook } from '@presentation/canvas/guitar/guitar-look';
 import { paintBanjoPot } from '@presentation/canvas/guitar/paint-banjo-pot';
 import { paintWood } from '@presentation/canvas/guitar/wood';
 
 const SHADOW = { color: 'rgba(0,0,0,0.55)', blur: 50, offsetY: 22 } as const;
+/** Body outline per style: figure-eight guitars and ukulele, the pear of a saz, mandolin and bouzouki. */
+const BOUTS: Partial<Record<GuitarLook['style'], typeof SOLID_BOUTS | typeof SAZ_BOUTS | typeof ACOUSTIC_BOUTS | typeof CLASSICAL_BOUTS>> = {
+  acoustic: ACOUSTIC_BOUTS, classical: CLASSICAL_BOUTS, ukulele: CLASSICAL_BOUTS, saz: SAZ_BOUTS, mandolin: SAZ_BOUTS, bouzouki: SAZ_BOUTS,
+};
 
 /** Body: shadow, wood top with edge burst, binding, then hole/pickups, pickguard and bridge. */
 export function paintArtBody(ctx: CanvasRenderingContext2D, l: FretboardLayout, g: BodyGeometry, look: GuitarLook): void {
@@ -14,8 +18,9 @@ export function paintArtBody(ctx: CanvasRenderingContext2D, l: FretboardLayout, 
     paintBanjoPot(ctx, l, g, look);
     return;
   }
-  const bouts = look.style === 'acoustic' ? ACOUSTIC_BOUTS : look.style === 'classical' ? CLASSICAL_BOUTS : look.style === 'saz' ? SAZ_BOUTS : SOLID_BOUTS;
-  const outline = () => traceBody(ctx, g.x0, g.cy, g.length, g.width, bouts.upper, bouts.lower);
+  const bouts = BOUTS[look.style] ?? SOLID_BOUTS;
+  // A balalaika is a triangle; every other body is two bouts merged.
+  const outline = () => (look.style === 'balalaika' ? traceTriangle(ctx, g.x0, g.cy, g.length, g.width) : traceBody(ctx, g.x0, g.cy, g.length, g.width, bouts.upper, bouts.lower));
   const box = { x: g.x0, y: g.cy - g.width / 2, w: g.length, h: g.width };
 
   ctx.save();
@@ -50,7 +55,7 @@ export function paintArtBody(ctx: CanvasRenderingContext2D, l: FretboardLayout, 
   ctx.strokeStyle = look.style === 'electric' || look.style === 'bass' ? 'rgba(255,255,255,0.12)' : look.binding;
   ctx.stroke();
 
-  if (look.style === 'acoustic' || look.style === 'classical' || look.style === 'saz') paintSoundhole(ctx, g, look);
+  if (look.style !== 'electric' && look.style !== 'bass') paintSoundhole(ctx, g, look);
   else paintPickups(ctx, l, g, look);
   paintBridge(ctx, l, g, look);
 }

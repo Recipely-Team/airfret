@@ -3,7 +3,7 @@ import { INSTRUMENTS, instrumentById } from '@domain/instruments/instrument-cata
 import { voicesFor, withVoice } from '@domain/instruments/voice-catalog';
 
 /** Instruments shipped with the synth only, waiting for freely licensed recordings (docs/roadmap.md). */
-const AWAITING_RECORDINGS = new Set(['saz']);
+const AWAITING_RECORDINGS = new Set(['saz', 'ukulele', 'mandolin', 'balalaika', 'bouzouki', 'greekBouzouki']);
 
 describe('Instrument voices', () => {
   it('plays the best-ranked voice when the player has not chosen one', () => {

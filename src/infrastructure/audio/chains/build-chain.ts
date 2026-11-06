@@ -25,6 +25,18 @@ export function buildChain(ctx: BaseAudioContext, kind: ChainKind): AudioChain {
       ], 0.16);
     case ChainKind.bass:
       return chain([filter(ctx, 'highpass', 32), peaking(ctx, 80, 4), peaking(ctx, 700, 2), gain(ctx, 1.6), shaper(ctx, 1.5), filter(ctx, 'lowpass', 2600, 0.8), compressor(ctx), gain(ctx, 1.3)], 0.04);
+    case ChainKind.ukulele:
+      // A small nylon-strung box: no deep body, a warm mid, a soft top.
+      return chain([filter(ctx, 'highpass', 150), peaking(ctx, 450, 2.5, 1.1), peaking(ctx, 2400, 1.5), filter(ctx, 'lowpass', 6500), gain(ctx, 1.2)], 0.18);
+    case ChainKind.mandolin:
+      // Paired steel strings on a small arched top: bright and cutting.
+      return chain([filter(ctx, 'highpass', 180), peaking(ctx, 1200, 3, 1.1), shelf(ctx, 4000, 4), gain(ctx, 1.1)], 0.2);
+    case ChainKind.balalaika:
+      // A triangular spruce box: a quick, woody tone.
+      return chain([filter(ctx, 'highpass', 160), peaking(ctx, 900, 3, 1.2), shelf(ctx, 3500, 3), gain(ctx, 1.1)], 0.16);
+    case ChainKind.bouzouki:
+      // Long-scale steel courses on a round back: a full low end and a bright ring.
+      return chain([filter(ctx, 'highpass', 70), peaking(ctx, 200, 2), peaking(ctx, 1600, 3, 1.1), shelf(ctx, 4000, 3), gain(ctx, 1.05)], 0.22);
     case ChainKind.saz:
       // A thin top on a deep mulberry bowl: little low end, a nasal mid and the wire strings' bright edge.
       return chain([filter(ctx, 'highpass', 120), peaking(ctx, 300, -2), peaking(ctx, 1400, 4, 1.2), shelf(ctx, 4200, 3), gain(ctx, 1.1)], 0.2);

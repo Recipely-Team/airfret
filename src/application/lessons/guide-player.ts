@@ -89,7 +89,7 @@ export class GuidePlayer {
     }
     const isUp = tg.strum === StrumMark.up;
     const amp = this.accent(tg.beat, beatsPerBar, isUp);
-    const tones = chordNotes(tg.chord, tuning).map((midi, string) => ({ midi, string })).filter((n): n is { midi: number; string: number } => n.midi !== null);
+    const tones = chordNotes(tg.chord, tuning, instrument.chordShapes).map((midi, string) => ({ midi, string })).filter((n): n is { midi: number; string: number } => n.midi !== null);
     const strings = isUp ? tones.reverse().slice(0, UP_STRINGS) : tones;
     const stagger = STAGGER.soft + (STAGGER.hard - STAGGER.soft) * amp;
     const start = this.humanTime(when);

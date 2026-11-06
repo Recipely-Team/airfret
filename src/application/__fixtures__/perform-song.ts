@@ -26,7 +26,7 @@ export function performSong(songId: string, instrumentId: string, tempo = 1): Pe
   const song = SONGS.find((s) => s.id === songId);
   if (!song) throw new Error(`no song ${songId}`);
   const base = instrumentById(instrumentId);
-  const instrument = { ...base, tuning: effectiveTuning(base.tuning, song.tuning ?? 'standard', 0) };
+  const instrument = { ...base, tuning: effectiveTuning(base.tuning, song.tuning ?? 'standard', 0, base.tunings) };
   const sound = new FakeSoundOutput();
   const guide = new GuidePlayer(sound);
   const started = new StartLessonUseCase().execute(song, { tempo, shouldWait: false, isEasy: false, hasGuide: true, hasDrums: false, latency: 0 }, 0);

@@ -102,6 +102,15 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | C5.3 | Settings → Tuning | The duzens: Bozuk, Baglama, Misket, Abdal, Acem, Kutahya, Mustezat; Baglama lowers the top course to E | |
 | C5.4 | Free mode with the camera | Fingers on any fret, the in-between ones included, sound their microtonal notes | |
 
+## C6. Ukulele, mandolin, balalaika, bouzoukis
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| C6.1 | `/ukulele` → Chords → strum each chip | Each chord sounds as a ukulele plays it (G = G D G B); Settings → Tuning has Standard and Low G | |
+| C6.2 | `/mandolin` → Notes, strum | Four doubled courses in fifths (G D A E); bright and short | |
+| C6.3 | `/balalaika` | A triangular body; strings E E A; tunings include "Guitar" G B D, Domra E A D, Folk D F# A and C E G | |
+| C6.4 | `/bouzouki` and `/greek-bouzouki` | G D A D in four unison courses; the Greek one D A D, its low course with an octave string | |
+
 ## C2. Drums
 
 | # | Step | Expected | Result |

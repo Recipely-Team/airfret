@@ -66,16 +66,16 @@ song test before it ships. Grouped by how much of the existing code they reuse.
 - ~~5-string bass~~, ~~6-string bass~~ (shipped), fretless bass (continuous pitch), acoustic bass guitar
 - Chord shapes and tunings now follow the family (guitar or bass, by range), not the string count — what a
   6-string bass needed, and what a 4-string ukulele will need
-- Ukulele (soprano, concert, tenor, baritone), guitalele — blocked on recordings: no CC0 / freely licensed
-  ukulele multisample found (2026-11-05); also needs its own chord shapes and tunings keyed by family, not
-  string count (a 4-string ukulele would otherwise get the bass's)
-- Mandolin and mandola (paired courses, tremolo picking), Irish bouzouki
+- ~~Ukulele~~ (shipped 2026-11-06 with its own chord shapes and tunings, synth voice — still no freely licensed
+  ukulele recordings), tenor and baritone ukulele, guitalele
+- ~~Mandolin~~, ~~Irish bouzouki~~, ~~Greek bouzouki~~, ~~balalaika~~ (shipped 2026-11-06, synth voices); mandola,
+  tremolo picking
 - Banjo: ~~6-string guitar banjo~~ (shipped); 5-string with the short drone string (needs re-entrant tuning and
   its own chord shapes; the only free set found, FlameStudios Kay, is GPL-3.0), 4-string tenor; resonator guitar / dobro
 - ~~Bağlama / saz~~ (shipped 2026-11-06: 17 frets an octave at Yalçın Tura's ratios, three courses with octave
   strings, seven düzens; synth voice only — no freely licensed recordings found yet, the voice-catalog test lists it
   as awaiting them; self-play can't finger its in-between frets yet), cura, tanbur, cümbüş
-- Oud and fretless lutes (continuous pitch, maqam intonation), Renaissance lute, balalaika, sitar (sympathetic strings)
+- Oud and fretless lutes (continuous pitch, maqam intonation), Renaissance lute, sitar (sympathetic strings)
 - Lap steel and pedal steel (slide bar instead of frets)
 
 **Plucked or struck without a fretting hand**

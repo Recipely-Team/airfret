@@ -28,12 +28,21 @@ export function chordRoot(name: string): number {
  * MIDI notes per string for a chord on the given tuning (null = muted).
  *
  * @remarks
+ * - An instrument with its own shapes (`shapes`, a ukulele's) uses them.
  * - Guitars use the six-string shape table; a 7-string plays it on its upper six and keeps the low B quiet.
  * - A bass (by range, `isBassRange`) outlines the chord: root, fifth, octave, the third above it and, on a
  *   6-string's high C, the root two octaves up — starting on its E string: an extended bass's low B stays
  *   silent, as a player keeps it for the lowest notes.
  */
-export function chordNotes(name: string, tuning: readonly number[]): (number | null)[] {
+export function chordNotes(name: string, tuning: readonly number[], shapes?: Readonly<Record<string, readonly (number | null)[]>>): (number | null)[] {
+  if (shapes) {
+    // The instrument's own chord shapes (a ukulele): one fret per string, from its own tuning.
+    const own = shapes[name];
+    return tuning.map((open, i) => {
+      const fret = own?.[i];
+      return fret === null || fret === undefined ? null : open + fret;
+    });
+  }
   if (!isBassRange(tuning)) {
     const shape = CHORD_SHAPES[name];
     const extra = tuning.length - GUITAR_STRING_COUNT;
