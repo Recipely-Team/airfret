@@ -234,11 +234,6 @@ export class WebAudioEngine implements SoundOutputInterface {
 
   touch(string: number, when: number, voices: readonly Voice[]): void {
     for (const v of voices) this.dampVoice(v, string, when);
-    if (this.current) this.noises.touch(this.current.input, when);
-  }
-
-  fretNoise(when: number): void {
-    if (this.current && this.instrument?.chain !== ChainKind.nylon) this.noises.squeak(this.current.input, when);
   }
 
   damp(string: number, when: number): void {
