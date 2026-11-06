@@ -1,3 +1,4 @@
+import { KitPerformance } from '@presentation/app/stages/kit-performance';
 import { SONGS } from '@domain/lessons/catalog/song-catalog';
 import { launchFeature } from '@presentation/app/launch-feature';
 import '@presentation/styles/style.css';
@@ -69,7 +70,7 @@ function bootstrap(): void {
   const drums = new DrumPlayer(sound);
   const piano = new PianoPlayer(sound);
   /** Pages that aren't a fretted instrument, each with its own player and drawing. */
-  const stages = [new KeysStage(piano, sound), new HandDrumStage(new HandDrumPlayer(sound))];
+  const stages = [new KeysStage(piano, sound), new HandDrumStage(new HandDrumPlayer(sound), sound)];
   const pedalInput = new BrowserPedalInput();
 
   let app: AirfretApp | null = null;
@@ -98,7 +99,7 @@ function bootstrap(): void {
     replaceRoute: (route) => router.replace(route),
   };
   app = new AirfretApp(
-    { store, sound, tracker, player, drums, stages, renderer: new StageRenderer(canvas, ctx, video), backing: new BackingTrack(sound), guide: new GuidePlayer(sound), startLesson: new StartLessonUseCase() },
+    { store, sound, tracker, player, drums, stages, kit: new KitPerformance(drums, sound), renderer: new StageRenderer(canvas, ctx, video), backing: new BackingTrack(sound), guide: new GuidePlayer(sound), startLesson: new StartLessonUseCase() },
     ui,
   );
   const running = app;

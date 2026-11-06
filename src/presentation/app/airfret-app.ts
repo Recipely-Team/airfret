@@ -45,6 +45,7 @@ interface Services {
   readonly player: Player;
   readonly drums: DrumPlayer;
   readonly stages: readonly InstrumentStage[];
+  readonly kit: NonNullable<InstrumentStage['performance']>; // the drum kit playing by itself (it isn't a stage)
   readonly renderer: StageRenderer;
   readonly backing: BackingTrack;
   readonly guide: GuidePlayer;
@@ -82,7 +83,7 @@ export class AirfretApp {
     this.demo = new DemoController({
       player: s.player, sound: s.sound, startAudio: () => this.startAudio(), instrumentId: () => s.store.value.instrument, instrument: () => this.instrument(),
       songs: () => songLibrary(s.store.value), prepare: (song) => s.store.update({ tuning: song.tuning ?? 'standard' }), onChange: showStart,
-      performance: () => s.stages.find((x) => x.handles(s.store.value.instrument))?.performance,
+      performance: () => (this.isDrums ? s.kit : s.stages.find((x) => x.handles(s.store.value.instrument))?.performance),
     });
     // When tracking stops, the last tracked hands leave the stage.
     this.camera = new CameraController(s.tracker, () => this.ui.toast.show(t('app.cameraError'), ERROR_TOAST_MS), () => s.player.updateHands([], performance.now() / MS_PER_SECOND, s.sound.now, false));
