@@ -12,6 +12,7 @@ export const ChainKind = {
   mandolin: 'mandolin',
   balalaika: 'balalaika',
   bouzouki: 'bouzouki',
+  harpsichord: 'harpsichord',
 } as const;
 
 export type ChainKind = (typeof ChainKind)[keyof typeof ChainKind];

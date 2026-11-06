@@ -42,6 +42,7 @@ export const EN: Readonly<Record<string, string>> = {
   'inst.balalaika': "Balalaika",
   'inst.bouzouki': "Irish bouzouki",
   'inst.greekBouzouki': "Greek bouzouki",
+  'inst.harpsichord': "Harpsichord",
   'inst.banjo': 'Banjo',
 
   'mode.chord': 'Chords',
@@ -428,6 +429,7 @@ export const EN: Readonly<Record<string, string>> = {
   'home.about.balalaika': "Russia’s triangular three-string: two strings on E, one on A, a quick bright tone.",
   'home.about.bouzouki': "G D A D in four doubled courses: the drone-rich accompaniment of Irish music.",
   'home.about.greek-bouzouki': "The Greek trichordo: three courses, D A D, the lowest with an octave string.",
+  'home.about.harpsichord': "The baroque keyboard: strings plucked by quills, bright and even, dark naturals — Bach and Scarlatti’s instrument.",
   'home.about.banjo': "Six strings over a drum head: bright, snappy, tuned like a guitar.",
   'home.about.drums': "Sticks in your hands, pedals under your feet.",
   'home.tourText': "Learn the basics in two minutes.",

@@ -3,7 +3,7 @@ import { launchFeature } from '@presentation/app/launch-feature';
 import '@presentation/styles/style.css';
 import { DrumPlayer } from '@application/drums/drum-player';
 import { PianoPlayer } from '@application/keys/piano-player';
-import { PIANO_ID } from '@domain/keys/piano-id';
+import { isKeyboard } from '@domain/keys/keyboard-instruments';
 import { PedalRouter } from '@application/drums/pedal-router';
 import { BackingTrack } from '@application/lessons/backing-track';
 import { GuidePlayer } from '@application/lessons/guide-player';
@@ -82,7 +82,7 @@ function bootstrap(): void {
     }),
     hud: new LessonHud(store, () => app?.stopLesson()),
     result: new ResultDialog(() => { const s = ui.intro.current; if (s) app?.beginLesson(s); }, () => router.navigate({ kind: 'lessons' })),
-    pointer: new PointerInput(canvas, player, sound, drums, () => app?.isDrums ?? false, piano, () => store.value.instrument === PIANO_ID),
+    pointer: new PointerInput(canvas, player, sound, drums, () => app?.isDrums ?? false, piano, () => isKeyboard(store.value.instrument)),
     tourBar: new TourBar(() => app?.tours.skip(), () => app?.endTour()),
     pedals: new PedalPanel(store, pedalInput),
     explore: new ExploreGuide((id) => tryFeature(id), () => app?.closeOverlay()),

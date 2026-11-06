@@ -12,7 +12,7 @@ const C = 0;
 const OCTAVE = 12;
 
 /**
- * The piano keyboard: the case and its red felt strip, ivory and ebony keys with a little relief, pressed
+ * The keyboard: the case and its red felt strip, ivory and ebony keys (swapped on a harpsichord), pressed
  * keys sunk and lit in the accent colour as they sound, every C labelled with its octave (C4 = middle C).
  */
 export function paintKeyboard(ctx: CanvasRenderingContext2D, piano: PianoPlayer): void {
@@ -28,25 +28,28 @@ export function paintKeyboard(ctx: CanvasRenderingContext2D, piano: PianoPlayer)
   ctx.fillStyle = COLOURS.felt;
   ctx.fillRect(x0, l.top - CASE_PAD * 0.8, x1 - x0, CASE_PAD * 0.6);
   const down = new Set(piano.pressed);
-  for (const k of keys.filter((x) => !x.isBlack)) paintKey(ctx, k, down.has(k.midi), piano.glow.get(k.midi) ?? 0, keyLength);
-  for (const k of keys.filter((x) => x.isBlack)) paintKey(ctx, k, down.has(k.midi), piano.glow.get(k.midi) ?? 0, keyLength);
+  const isReversed = piano.keyboard?.isReversedColours ?? false;
+  for (const k of keys.filter((x) => !x.isBlack)) paintKey(ctx, k, down.has(k.midi), piano.glow.get(k.midi) ?? 0, keyLength, isReversed);
+  for (const k of keys.filter((x) => x.isBlack)) paintKey(ctx, k, down.has(k.midi), piano.glow.get(k.midi) ?? 0, keyLength, isReversed);
   ctx.font = `500 ${Math.max(9, Math.min(13, (x1 - x0) / keys.length))}px ${FONT}`;
   ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(40, 32, 24, 0.55)';
+  ctx.fillStyle = isReversed ? 'rgba(236, 228, 210, 0.6)' : 'rgba(40, 32, 24, 0.55)';
   for (const k of keys) {
     if (k.isBlack || k.midi % OCTAVE !== C) continue;
     ctx.fillText(`C${Math.floor(k.midi / OCTAVE) - 1}`, (k.x0 + k.x1) / 2, k.y1 - 12);
   }
 }
 
-function paintKey(ctx: CanvasRenderingContext2D, k: PianoKey, isDown: boolean, glow: number, keyLength: number): void {
+function paintKey(ctx: CanvasRenderingContext2D, k: PianoKey, isDown: boolean, glow: number, keyLength: number, isReversed: boolean): void {
+  // A harpsichord's naturals are dark and its sharps light: the key's colour, not its shape, swaps.
+  const isDark = k.isBlack !== isReversed;
   const sink = isDown ? keyLength * PRESS_DEPTH : 0;
   const w = k.x1 - k.x0;
   const gap = k.isBlack ? 0 : 1;
   const y0 = k.y0 + sink;
   const h = k.y1 - k.y0;
   const grad = ctx.createLinearGradient(0, y0, 0, y0 + h);
-  if (k.isBlack) {
+  if (isDark) {
     grad.addColorStop(0, COLOURS.ebonyTop);
     grad.addColorStop(0.85, COLOURS.ebony);
     grad.addColorStop(1, '#000');
@@ -59,7 +62,7 @@ function paintKey(ctx: CanvasRenderingContext2D, k: PianoKey, isDown: boolean, g
   roundRect(ctx, k.x0 + gap / 2, y0, w - gap, h, k.isBlack ? RADIUS * 0.6 : RADIUS);
   ctx.fill();
   if (!k.isBlack) {
-    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.35)';
     ctx.lineWidth = 1;
     ctx.stroke();
   }

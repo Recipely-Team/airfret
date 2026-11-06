@@ -91,7 +91,8 @@ song test before it ships. Grouped by how much of the existing code they reuse.
   Glissando by sliding a pressed finger (no key skipped) and an octave shift to all 88 keys shipped next.
   Open: self-play and lessons on the piano (the self-playing hand is a
   guitarist's), a real-song test, the pedal inputs as sustain, more than one dynamic layer.
-- Electric piano, organ, accordion, synthesizer
+- ~~Harpsichord~~ (shipped 2026-11-06: plucked by the string synth, F1–F6, no dynamics, French dark naturals)
+- Electric piano, organ, accordion, synthesizer (need a sustained or struck-tine voice the string synth can't give)
 
 **Percussion (reuse the drum kit's stick and pad code)**
 - Darbuka, def / bendir, cajón, congas and bongos, tabla, djembe, handpan, timpani
