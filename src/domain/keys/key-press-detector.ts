@@ -16,6 +16,9 @@ const DEFAULTS = {
   dropout: 0.2,
 } as const;
 
+/** A glissando's keys sound a little softer than the stroke that started it. */
+const GLISS_LEVEL = 0.85;
+
 /**
  * **KeyPressDetector** — one fingertip on the keyboard: presses a key when it comes down through a press
  * line over it, holds it while the finger stays down, lets it go when the finger lifts.
@@ -25,30 +28,36 @@ const DEFAULTS = {
  *   presses), and below the black keys' ends (the white key under it).
  * - Velocity from the downward speed: 1 − e^(−v/v_full), never below `floor`.
  * - A held key isn't pressed again until the finger has lifted: a resting finger doesn't repeat.
+ * - Sliding a held finger sideways is a glissando: it plays every key it passes on the row it pressed (white keys
+ *   from a white, black from a black), each one even when the hand jumps several keys between two frames.
  */
 export class KeyPressDetector {
   private prev: Point | null = null;
   private prevT = 0;
-  private held: { midi: number; line: number } | null = null;
+  private held: { midi: number; line: number; isBlack: boolean; velocity: number } | null = null;
 
   /** The key this fingertip holds down, if any. */
   get holding(): number | null {
     return this.held?.midi ?? null;
   }
 
-  update(tip: Point | null, t: number, l: KeyboardLayout): { press: KeyPress | null; release: number | null } {
-    const none = { press: null, release: null };
+  /** What one new sample of the fingertip did: keys pressed (in order) and keys let go. */
+  update(tip: Point | null, t: number, l: KeyboardLayout): { presses: KeyPress[]; releases: number[] } {
+    const none = { presses: [], releases: [] };
     if (!tip) {
       if (!this.prev || t - this.prevT <= DEFAULTS.dropout) return none;
       this.prev = null;
-      return { press: null, release: this.let() };
+      return this.lift();
     }
     const prev = this.prev;
     const dt = Math.max(1e-3, t - this.prevT);
     this.prev = tip;
     this.prevT = t;
     const keyLength = l.bottom - l.top;
-    if (this.held) return tip.y < this.held.line - keyLength * DEFAULTS.lift ? { press: null, release: this.let() } : none;
+    if (this.held) {
+      if (tip.y < this.held.line - keyLength * DEFAULTS.lift) return this.lift();
+      return prev ? this.slide(prev, tip, l) : none;
+    }
     if (!prev) return none;
     const dy = tip.y - prev.y;
     const speed = dy / dt / l.h;
@@ -59,16 +68,34 @@ export class KeyPressDetector {
       const at = { x: prev.x + (tip.x - prev.x) * frac, y: line };
       const key = keyAt(l, at);
       if (!key || key.isBlack !== isBlackLine) continue;
-      this.held = { midi: key.midi, line };
       const velocity = Math.max(DEFAULTS.floor, 1 - Math.exp(-speed / DEFAULTS.fullSpeed));
-      return { press: { midi: key.midi, velocity, frac }, release: null };
+      this.held = { midi: key.midi, line, isBlack: key.isBlack, velocity };
+      return { presses: [{ midi: key.midi, velocity, frac }], releases: [] };
     }
     return none;
   }
 
-  private let(): number | null {
-    const midi = this.held?.midi ?? null;
+  /** A held finger moved: every key of its row between where it was and where it is now, in order. */
+  private slide(prev: Point, tip: Point, l: KeyboardLayout): { presses: KeyPress[]; releases: number[] } {
+    const held = this.held;
+    if (!held) return { presses: [], releases: [] };
+    const row = l.keys.filter((k) => k.isBlack === held.isBlack);
+    const under = row.find((k) => tip.x >= k.x0 && tip.x < k.x1);
+    if (!under || under.midi === held.midi) return { presses: [], releases: [] };
+    const isGoingUp = under.midi > held.midi;
+    const passed = row
+      .filter((k) => (isGoingUp ? k.midi > held.midi && k.midi <= under.midi : k.midi < held.midi && k.midi >= under.midi))
+      .sort((a, b) => (isGoingUp ? a.midi - b.midi : b.midi - a.midi));
+    const span = Math.max(1, Math.abs(tip.x - prev.x));
+    const presses = passed.map((k) => ({ midi: k.midi, velocity: held.velocity * GLISS_LEVEL, frac: Math.min(1, Math.abs((k.x0 + k.x1) / 2 - prev.x) / span) }));
+    const releases = [held.midi, ...passed.slice(0, -1).map((k) => k.midi)];
+    this.held = { ...held, midi: under.midi };
+    return { presses, releases };
+  }
+
+  private lift(): { presses: KeyPress[]; releases: number[] } {
+    const midi = this.held?.midi;
     this.held = null;
-    return midi;
+    return { presses: [], releases: midi === undefined ? [] : [midi] };
   }
 }

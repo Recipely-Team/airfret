@@ -14,6 +14,8 @@ const TIPS = [HandLandmark.thumbTip, HandLandmark.indexTip, HandLandmark.middleT
 const LEAD = 0.004;
 /** The hammer strikes about an eighth of the way along the string. */
 const STRIKE_POINT = 0.12;
+/** Keys a fast glissando passes within one frame are spread this far apart, seconds. */
+const GLISS_STEP = 0.012;
 /** A clicked or tapped key plays at this strength. */
 const POINTER_VELOCITY = 0.7;
 /** How fast a key's glow fades on screen, per second. */
@@ -70,14 +72,25 @@ export class PianoPlayer {
     for (const id of this.detectors.keys()) if (!seen.has(id)) this.feed(id, null, t, audioNow, l);
   }
 
-  /** A pointer (mouse button or touch) down on, moving over, or lifted from the keyboard. Sliding plays each key it reaches. */
+  /**
+   * A pointer (mouse button or touch) down on, moving over, or lifted from the keyboard. Sliding is a glissando:
+   * it plays every key of the row it is on that it passed, even when the pointer jumps several between events.
+   */
   pointer(id: number, p: Point | null, audioNow: number): void {
     const source = `pointer${id}`;
     const key = p && this.layout ? keyAt(this.layout, p) : null;
     const current = this.held(source);
     if (key?.midi === current) return;
-    if (current !== null) this.release(source, current, audioNow + LEAD);
-    if (key) this.press(source, key.midi, POINTER_VELOCITY, audioNow + LEAD);
+    const passed = key && current !== null && this.layout ? between(this.layout, current, key.midi, key.isBlack) : [];
+    // Each key of the slide in turn: the one before is let go as the next sounds.
+    let previous = current;
+    [...passed, ...(key ? [key.midi] : [])].forEach((midi, i) => {
+      const when = audioNow + LEAD + i * GLISS_STEP;
+      if (previous !== null) this.release(source, previous, when);
+      this.press(source, midi, POINTER_VELOCITY, when);
+      previous = midi;
+    });
+    if (!key && current !== null) this.release(source, current, audioNow + LEAD);
   }
 
   setSustain(isDown: boolean, audioNow: number): void {
@@ -101,9 +114,10 @@ export class PianoPlayer {
       d = new KeyPressDetector();
       this.detectors.set(id, d);
     }
-    const { press, release } = d.update(tip, t, l);
-    if (release !== null) this.release(id, release, audioNow + LEAD);
-    if (press) this.press(id, press.midi, press.velocity, audioNow + LEAD);
+    const { presses, releases } = d.update(tip, t, l);
+    // Within a frame, a glissando's keys follow each other: let each go as the next sounds.
+    releases.forEach((midi, i) => this.release(id, midi, audioNow + LEAD + i * GLISS_STEP));
+    presses.forEach((p, i) => this.press(id, p.midi, p.velocity, audioNow + LEAD + i * GLISS_STEP));
   }
 
   private held(source: string): number | null {
@@ -135,4 +149,12 @@ export class PianoPlayer {
     this.ringing.delete(midi);
     this.sound.damp(midi - PIANO_LOWEST_MIDI, when);
   }
+}
+
+/** Keys of one row strictly between two keys, in the direction travelled. */
+function between(l: KeyboardLayout, from: number, to: number, isBlack: boolean): number[] {
+  const lo = Math.min(from, to);
+  const hi = Math.max(from, to);
+  const keys = l.keys.filter((k) => k.isBlack === isBlack && k.midi > lo && k.midi < hi).map((k) => k.midi);
+  return to > from ? keys.sort((a, b) => a - b) : keys.sort((a, b) => b - a);
 }

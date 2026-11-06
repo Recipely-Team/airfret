@@ -33,6 +33,8 @@ export const TR: Readonly<Record<string, string>> = {
   'inst.twelve': "12 telli",
   'inst.guitar7': "7 telli",
   'inst.bass6': "6 telli bas",
+  'piano.lower': 'Bir oktav pes',
+  'piano.higher': 'Bir oktav tiz',
   'inst.piano': "Piyano",
   'inst.banjo': 'Banjo',
 
