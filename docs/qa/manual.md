@@ -93,6 +93,8 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | C4.8 | Mouse or touch: press and drag fast across the keyboard | Every key on the way plays, none skipped | |
 | C4.9 | ◀ ▶ in the top bar, or ← → | The keyboard slides an octave; the range shows between the arrows; A0 and C8 are the ends | |
 | C4.10 | `/harpsichord` | Dark naturals, light sharps; F1 to F6 with ◀ ▶; every key equally loud however it is struck; a key stops when it rises | |
+| C4.11 | `/marimba`, `/xylophone`, `/glockenspiel` → Start | Wooden (rosewood) or steel bars, no black-and-white keys; press a bar and lift the finger: the note rings on (recorded, not synthesised); the arrows stop at A2–C7, F4–C8, G5–C8 | |
+| C4.12 | `/clarinet`, `/flute`, `/trumpet` → Start | Hold a key: the recorded note sustains (up to 6 s) and stops the moment the finger lifts; a faster press is louder; the arrows stop at D3–G6, C4–C7, F3–C6 | |
 
 ## C5. Saz (baglama)
 

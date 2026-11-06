@@ -120,7 +120,7 @@ export class PianoPlayer {
 
   setSustain(isDown: boolean, audioNow: number): void {
     this.isSustained = isDown;
-    if (isDown) return;
+    if (isDown || this.keyboard?.isDamped === false) return;
     for (const midi of [...this.ringing]) if (!this.holders.has(midi)) this.stop(midi, audioNow + LEAD);
   }
 
@@ -168,7 +168,8 @@ export class PianoPlayer {
     set?.delete(source);
     if (set?.size) return;
     this.holders.delete(midi);
-    if (!this.isSustained) this.stop(midi, when);
+    // A struck bar (marimba, glockenspiel) rings on; only a damped instrument stops when its key rises.
+    if (!this.isSustained && this.keyboard?.isDamped !== false) this.stop(midi, when);
   }
 
   private stop(midi: number, when: number): void {

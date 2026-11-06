@@ -18,4 +18,10 @@ export const SAMPLE_SET_BY_INSTRUMENT: Readonly<Record<string, string>> = {
   guitar7: 'electric',
   banjo: 'banjo',
   piano: 'piano',
+  marimba: 'marimba',
+  xylophone: 'xylophone',
+  glockenspiel: 'glockenspiel',
+  clarinet: 'clarinet',
+  flute: 'flute',
+  trumpet: 'trumpet',
 };
