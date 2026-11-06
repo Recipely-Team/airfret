@@ -3,7 +3,9 @@ import { launchFeature } from '@presentation/app/launch-feature';
 import '@presentation/styles/style.css';
 import { DrumPlayer } from '@application/drums/drum-player';
 import { PianoPlayer } from '@application/keys/piano-player';
-import { isKeyboard } from '@domain/keys/keyboard-instruments';
+import { KeysStage } from '@presentation/app/stages/keys-stage';
+import { DarbukaStage } from '@presentation/app/stages/darbuka-stage';
+import { DarbukaPlayer } from '@application/drums/darbuka-player';
 import { PedalRouter } from '@application/drums/pedal-router';
 import { BackingTrack } from '@application/lessons/backing-track';
 import { GuidePlayer } from '@application/lessons/guide-player';
@@ -66,6 +68,8 @@ function bootstrap(): void {
   const player = new Player(sound);
   const drums = new DrumPlayer(sound);
   const piano = new PianoPlayer(sound);
+  /** Pages that aren't a fretted instrument, each with its own player and drawing. */
+  const stages = [new KeysStage(piano), new DarbukaStage(new DarbukaPlayer(sound))];
   const pedalInput = new BrowserPedalInput();
 
   let app: AirfretApp | null = null;
@@ -82,7 +86,7 @@ function bootstrap(): void {
     }),
     hud: new LessonHud(store, () => app?.stopLesson()),
     result: new ResultDialog(() => { const s = ui.intro.current; if (s) app?.beginLesson(s); }, () => router.navigate({ kind: 'lessons' })),
-    pointer: new PointerInput(canvas, player, sound, drums, () => app?.isDrums ?? false, piano, () => isKeyboard(store.value.instrument)),
+    pointer: new PointerInput(canvas, player, sound, drums, () => app?.isDrums ?? false, () => stages.find((x) => x.handles(store.value.instrument))),
     tourBar: new TourBar(() => app?.tours.skip(), () => app?.endTour()),
     pedals: new PedalPanel(store, pedalInput),
     explore: new ExploreGuide((id) => tryFeature(id), () => app?.closeOverlay()),
@@ -94,7 +98,7 @@ function bootstrap(): void {
     replaceRoute: (route) => router.replace(route),
   };
   app = new AirfretApp(
-    { store, sound, tracker, player, drums, piano, renderer: new StageRenderer(canvas, ctx, video), backing: new BackingTrack(sound), guide: new GuidePlayer(sound), startLesson: new StartLessonUseCase() },
+    { store, sound, tracker, player, drums, stages, renderer: new StageRenderer(canvas, ctx, video), backing: new BackingTrack(sound), guide: new GuidePlayer(sound), startLesson: new StartLessonUseCase() },
     ui,
   );
   const running = app;

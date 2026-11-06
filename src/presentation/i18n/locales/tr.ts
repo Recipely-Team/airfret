@@ -21,6 +21,10 @@ export const TR: Readonly<Record<string, string>> = {
   'app.camera': 'Kamera izni ver…',
   'app.cameraError': 'Kameraya erişilemedi. Tarayıcı izinlerini kontrol et — fare ve rakam tuşlarıyla yine de çalabilirsin.',
   'app.mouseHintPiano': "Kamera yok mu? Tuşlara tıkla ya da dokun — birkaç parmak akor çalar; pedal için Boşluk tuşunu basılı tut.",
+  'darbuka.doum': "düm",
+  'darbuka.tek': "tek",
+  'darbuka.ka': "ka",
+  'app.mouseHintDarbuka': "Kamera yok mu? Deriye tıkla ya da dokun: ortası düm, sağ kenarı tek, sol kenarı ka.",
   'app.noHands': 'İki elini de kameraya göster',
   'app.mouseHint': 'Kamera yok mu? Fareyi tellerin üzerinden sürükle, 1–8 tuşları akor seçer.',
 
@@ -43,6 +47,7 @@ export const TR: Readonly<Record<string, string>> = {
   'inst.bouzouki': "İrlanda buzukisi",
   'inst.greekBouzouki': "Yunan buzukisi",
   'inst.harpsichord': "Klavsen",
+  'inst.darbuka': "Darbuka",
   'inst.banjo': 'Banjo',
 
   'mode.chord': 'Akor',
@@ -430,6 +435,7 @@ export const TR: Readonly<Record<string, string>> = {
   'home.about.bouzouki': "Dört çift telde G D A D: İrlanda müziğinin tınlayan eşliği.",
   'home.about.greek-bouzouki': "Yunan trichordo’su: üç çift tel, D A D; en kalını oktav telli.",
   'home.about.harpsichord': "Barok klavyesi: tüylerle çekilen teller, parlak ve eşit ses, koyu beyaz tuşlar — Bach ile Scarlatti’nin çalgısı.",
+  'home.about.darbuka': "Türkiye’nin ve Orta Doğu’nun kadeh davulu: ortada düm, kenarda tek ve ka; parmaklarla çalınır.",
   'home.about.banjo': "Davul derisi üstünde altı tel: parlak, keskin, gitar gibi akortlu.",
   'home.about.drums': "Ellerinde baget, ayaklarının altında pedal.",
   'home.tourText': "Temelleri iki dakikada öğren.",
