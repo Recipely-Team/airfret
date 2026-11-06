@@ -11,6 +11,6 @@ export const HOME_GROUPS: readonly { readonly label: string; readonly ids: reado
   { label: 'home.group.folk', ids: ['saz', 'mandolin', 'balalaika', 'bouzouki', 'greekBouzouki', 'banjo'] },
   { label: 'home.group.bass', ids: ['bass', 'bass5', 'bass6'] },
   { label: 'home.group.keys', ids: [PIANO_ID, 'harpsichord', 'marimba', 'xylophone', 'glockenspiel'] },
-  { label: 'home.group.winds', ids: ['clarinet', 'flute', 'trumpet'] },
+  { label: 'home.group.winds', ids: ['flute', 'clarinet', 'oboe', 'bassoon', 'trumpet', 'horn', 'trombone', 'tuba'] },
   { label: 'home.group.drums', ids: [DRUMS_ID, ...HAND_DRUMS.map((d) => d.id)] },
 ];

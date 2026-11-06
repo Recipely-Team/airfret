@@ -24,4 +24,9 @@ export const SAMPLE_SET_BY_INSTRUMENT: Readonly<Record<string, string>> = {
   clarinet: 'clarinet',
   flute: 'flute',
   trumpet: 'trumpet',
+  oboe: 'oboe',
+  bassoon: 'bassoon',
+  horn: 'horn',
+  trombone: 'trombone',
+  tuba: 'tuba',
 };

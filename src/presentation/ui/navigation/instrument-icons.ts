@@ -36,5 +36,10 @@ export const INSTRUMENT_ICONS: Readonly<Record<string, string>> = {
   clarinet: `${OPEN}<path d="M8 22h12M20 18h70l4 2v4l-4 2H20zM94 20l10-6v20l-10-6"/><circle cx="36" cy="22" r="1.6"/><circle cx="48" cy="22" r="1.6"/><circle cx="60" cy="22" r="1.6"/><circle cx="72" cy="22" r="1.6"/></svg>`,
   flute: `${OPEN}<path d="M8 20h104v6H8z"/><path d="M22 23h6"/><circle cx="46" cy="23" r="1.6"/><circle cx="56" cy="23" r="1.6"/><circle cx="66" cy="23" r="1.6"/><circle cx="82" cy="23" r="1.6"/><circle cx="92" cy="23" r="1.6"/></svg>`,
   trumpet: `${OPEN}<path d="M8 22h4M12 19h62v6H12zM74 19l26-10v30L74 25"/><path d="M34 19v-8h6v8M44 19v-8h6v8M54 19v-8h6v8M30 25c0 10 34 10 34 0"/></svg>`,
+  oboe: `${OPEN}<path d="M6 23h10M16 21h80l10-3v10l-10-3H16z"/><circle cx="34" cy="23" r="1.6"/><circle cx="46" cy="23" r="1.6"/><circle cx="58" cy="23" r="1.6"/><circle cx="72" cy="23" r="1.6"/></svg>`,
+  bassoon: `${OPEN}<path d="M40 44V10h8v34zM48 40h10V14h-10M44 10l-10-6h-8"/><circle cx="44" cy="22" r="1.4"/><circle cx="44" cy="30" r="1.4"/></svg>`,
+  horn: `${OPEN}<circle cx="52" cy="24" r="16"/><circle cx="52" cy="24" r="8"/><path d="M68 24c10 0 18-8 32-14v28c-14-6-22-14-32-14M36 24h-26"/></svg>`,
+  trombone: `${OPEN}<path d="M8 16h76M8 30h76M84 16c8 0 8 14 0 14M20 16v14M100 10l12-4v28l-12-4M84 23h16"/></svg>`,
+  tuba: `${OPEN}<path d="M44 44h28V24c0-8-4-12-14-12s-14 4-14 12zM50 12l-4-8h24l-4 8M72 30h10M78 26v8"/><circle cx="58" cy="30" r="6"/></svg>`,
   drums: `${OPEN}<ellipse cx="60" cy="32" rx="13" ry="13"/><ellipse cx="38" cy="30" rx="11" ry="4"/><path d="M27 30v8M49 30v8M27 38c0 2 22 2 22 0"/><ellipse cx="84" cy="33" rx="12" ry="4.5"/><path d="M72 33v8M96 33v8M72 41c0 2 24 2 24 0"/><ellipse cx="52" cy="15" rx="7" ry="2.6"/><ellipse cx="70" cy="15" rx="7" ry="2.6"/><path d="M14 10h20M24 10v34M88 8h22M99 8v36"/></svg>`,
 };

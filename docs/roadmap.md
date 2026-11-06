@@ -99,7 +99,7 @@ song test before it ships. Grouped by how much of the existing code they reuse.
   heads and strokes — for one player and one voice); the darbuka (Commons, CC BY-SA) and congas (VSCO 2 CE, CC0) play
   real recordings, the rest are synthesised until recordings are found; timpani (pitched, pedal)
 - ~~Mallets: marimba, xylophone, glockenspiel~~ (shipped 2026-11-06: VSCO-2-CE recordings, bars ring on after the key rises). Vibraphone still open (no free recordings found yet)
-- ~~Winds from the keys: clarinet, flute, trumpet~~ (shipped 2026-11-06: VSCO-2-CE sustained recordings, a note held while the key is down). Next: oboe, bassoon, horn, trombone, tuba (same library); a breath control (hand height or the microphone) for swells; notes longer than the 6 s takes
+- ~~Winds from the keys: clarinet, flute, trumpet~~ (shipped 2026-11-06: VSCO-2-CE sustained recordings, a note held while the key is down). Oboe, bassoon, horn, trombone and tuba followed the same day. Next: a breath control (hand height or the microphone) for swells; notes longer than the 6 s takes
 
 **Air-only**
 - Theremin (pitch from one hand's height, volume from the other) — the most natural webcam instrument
