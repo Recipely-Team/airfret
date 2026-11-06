@@ -4,7 +4,9 @@ import { PianoPlayer } from '@application/keys/piano-player';
 import { computeKeyboardLayout, shiftLimits } from '@domain/keys/compute-keyboard-layout';
 import { isKeyboard, keyboardFor } from '@domain/keys/keyboard-instruments';
 
-const RANGES = { clarinet: [50, 91], flute: [60, 96], trumpet: [52, 84] } as const;
+const RANGES = {
+  clarinet: [50, 91], flute: [60, 96], trumpet: [52, 84], oboe: [57, 89], bassoon: [33, 76], horn: [36, 77], trombone: [33, 65], tuba: [29, 62],
+} as const;
 
 describe('The wind instruments', () => {
   it('reach every note of their range on any screen, and no further', () => {

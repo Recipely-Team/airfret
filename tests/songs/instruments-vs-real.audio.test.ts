@@ -129,8 +129,12 @@ describe('Every instrument against recordings of the real instrument', () => {
       const highest = Math.max(...refs.map((r) => r.hi));
       // Past the recordings by a whole tone (drop tunings, the top frets) — but a piano has nothing beyond its 88 keys.
       const isFixedRange = inst.frets === 0;
-      const low = isFixedRange ? Math.max(lowest - 2, inst.tuning[0] ?? lowest) : lowest - 2;
-      const high = isFixedRange ? Math.min(highest + 2, inst.tuning[inst.tuning.length - 1] ?? highest) : highest + 2;
+      // A keyboard instrument stops at its own keys (the horn's A1, not the piano's A0).
+      const keys = KEYBOARDS[inst.id];
+      const bottom = keys?.low ?? inst.tuning[0] ?? lowest;
+      const top = keys?.high ?? inst.tuning[inst.tuning.length - 1] ?? highest;
+      const low = isFixedRange ? Math.max(lowest - 2, bottom) : lowest - 2;
+      const high = isFixedRange ? Math.min(highest + 2, top) : highest + 2;
       const stretched = [{ midi: low, string: 0 }, { midi: high, string: inst.tuning.length - 1 }];
       const off = [...refs, ...stretched].map((r) => ({ midi: r.midi, c: cents(fundamental(play(inst, stringFor(inst, r), r.midi, true), nominal(r.midi)), r.midi) }));
       const limit = (midi: number) => (inst.frets === 0 && midi < PIANO_BASS.belowMidi ? PIANO_BASS.cents : IN_TUNE_CENTS);
