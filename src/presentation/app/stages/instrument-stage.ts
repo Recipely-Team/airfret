@@ -1,6 +1,7 @@
 import type { Point } from '@domain/fretboard/point';
 import type { Settings } from '@domain/settings/settings';
 import type { CameraView } from '@presentation/canvas/camera-view';
+import type { StagePerformance } from '@presentation/app/stages/stage-performance';
 import type { StageRenderer } from '@presentation/canvas/stage-renderer';
 
 /**
@@ -17,4 +18,6 @@ export interface InstrumentStage {
   pointer(id: number, p: Point | null, audioNow: number): void;
   /** Space held or let go (the piano's sustain pedal). */
   sustain(isDown: boolean, audioNow: number): void;
+  /** Playing by itself, where the instrument can. */
+  readonly performance?: StagePerformance;
 }
