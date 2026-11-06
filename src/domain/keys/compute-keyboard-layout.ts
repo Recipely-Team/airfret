@@ -4,7 +4,7 @@ import type { PianoKey } from '@domain/keys/piano-key';
 
 /** Pitch classes that are black keys: C#, D#, F#, G#, A#. */
 const BLACK_CLASSES = new Set([1, 3, 6, 8, 10]);
-/** The piano's own range, A0 to C8: the keyboard can be slid along it but never past it. */
+/** The piano's own range, A0 to C8: the keyboard can be slid along it but never past it. Others pass theirs. */
 const PIANO_RANGE = { low: 21, high: 108 } as const;
 /** How many white keys fit: wide screens get three octaves, tablets two, upright phones a bit over one. */
 const RANGES = [
@@ -22,17 +22,24 @@ const BLACK = { width: 0.58, height: 0.62 } as const;
 const LINES = { black: 0.5, white: 0.76 } as const;
 const OCTAVE = 12;
 
+/** A keyboard's lowest and highest key. */
+interface KeyRange {
+  readonly low: number;
+  readonly high: number;
+}
+
 const isBlack = (midi: number) => BLACK_CLASSES.has(((midi % OCTAVE) + OCTAVE) % OCTAVE);
 const nextWhite = (midi: number) => (isBlack(midi + 1) ? midi + 2 : midi + 1);
+const whiteCount = (r: KeyRange) => Array.from({ length: r.high - r.low + 1 }, (_, i) => r.low + i).filter((m) => !isBlack(m)).length;
 
 /**
  * The keyboard for a screen: as many octaves as fit comfortably, centred, in the lower half — slid `shift`
  * octaves from its home (C3, or C4 on a phone), but always within the piano's 88 keys (A0 at the far left).
  */
-export function computeKeyboardLayout(w: number, h: number, shift = 0): KeyboardLayout {
-  const range = RANGES.find((r) => w >= r.minWidth) ?? RANGES[RANGES.length - 1];
-  const whites = range?.whites ?? 10;
-  const firstMidi = keyboardStart(range?.firstMidi ?? 60, whites, shift);
+export function computeKeyboardLayout(w: number, h: number, shift = 0, range: KeyRange = PIANO_RANGE): KeyboardLayout {
+  const fit = RANGES.find((r) => w >= r.minWidth) ?? RANGES[RANGES.length - 1];
+  const whites = Math.min(fit?.whites ?? 10, whiteCount(range));
+  const firstMidi = keyboardStart(fit?.firstMidi ?? 60, whites, shift, range);
   const span = w * SPAN_OF_WIDTH;
   const whiteW = span / whites;
   const left = (w - span) / 2;
@@ -59,23 +66,26 @@ export function computeKeyboardLayout(w: number, h: number, shift = 0): Keyboard
 }
 
 /** The first white key: the home start moved by whole octaves, kept inside A0–C8 with every white key on the piano. */
-function keyboardStart(home: number, whites: number, shift: number): number {
-  let lastStart = PIANO_RANGE.high;
+function keyboardStart(home: number, whites: number, shift: number, range: KeyRange): number {
+  let lastStart = range.high;
   for (let n = 1; n < whites; ) {
     lastStart -= isBlack(lastStart - 1) ? 2 : 1;
     n++;
   }
   const wanted = home + shift * OCTAVE;
-  return Math.max(PIANO_RANGE.low, Math.min(wanted, lastStart));
+  // The lowest key may be black (a harpsichord's F1 is white, a piano's A0 too): start on the first white.
+  const low = isBlack(range.low) ? range.low + 1 : range.low;
+  return Math.max(low, Math.min(wanted, lastStart));
 }
 
 /** How far the keyboard can slide each way from home, in octaves, so the player's buttons know when to stop. */
-export function shiftLimits(w: number): { down: number; up: number } {
-  const range = RANGES.find((r) => w >= r.minWidth) ?? RANGES[RANGES.length - 1];
-  const home = range?.firstMidi ?? 60;
-  const whites = range?.whites ?? 10;
-  const top = keyboardStart(home, whites, 99);
-  return { down: -Math.ceil((home - PIANO_RANGE.low) / OCTAVE), up: Math.ceil((top - home) / OCTAVE) };
+export function shiftLimits(w: number, range: KeyRange = PIANO_RANGE): { down: number; up: number } {
+  const fit = RANGES.find((r) => w >= r.minWidth) ?? RANGES[RANGES.length - 1];
+  const home = fit?.firstMidi ?? 60;
+  const whites = Math.min(fit?.whites ?? 10, whiteCount(range));
+  const top = keyboardStart(home, whites, 99, range);
+  const bottom = keyboardStart(home, whites, -99, range);
+  return { down: -Math.ceil((home - bottom) / OCTAVE), up: Math.ceil((top - home) / OCTAVE) };
 }
 
 /** The key under a point — a black key wins where it lies over a white — or null off the keyboard. */

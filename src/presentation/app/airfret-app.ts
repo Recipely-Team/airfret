@@ -1,7 +1,6 @@
 import type { DrumPlayer } from '@application/drums/drum-player';
 import type { PianoPlayer } from '@application/keys/piano-player';
-import { computeKeyboardLayout } from '@domain/keys/compute-keyboard-layout';
-import { PIANO_ID } from '@domain/keys/piano-id';
+import { isKeyboard } from '@domain/keys/keyboard-instruments';
 import type { BackingTrack } from '@application/lessons/backing-track';
 import { songLibrary } from '@application/lessons/song-library';
 import { voiceMix } from '@application/lessons/voice-mix';
@@ -190,7 +189,7 @@ export class AirfretApp {
     this.s.renderer.resize(w, h);
     const chords = this.tours.session ? TOUR_CHORDS : this.lesson?.song.mode === PlayMode.chord ? this.lesson.chordSet : chordSetById(st.chordSet).chords.filter(knownChord);
     this.s.drums.configure(computeKitLayout(w, h, st.isLefty), w, h, st.hihatMode);
-    this.s.piano.configure(computeKeyboardLayout(w, h, st.pianoShift));
+    this.s.piano.fit(w, h, st.instrument, st.pianoShift);
     const layout = computeLayout(w, h, inst.tuning.length, st.isLefty, inst.maxFret, inst.fretCents);
     if (this.base.kind === 'instrument' && this.base.instrument !== st.instrument) {
       this.base = { kind: 'instrument', instrument: st.instrument };
@@ -265,7 +264,7 @@ export class AirfretApp {
     // The self-playing hand is drawn as a skeleton: it isn't in the camera picture.
     const camera = { brightness: st.brightness, isHidden: st.isCameraHidden || this.demo.isPlaying };
     if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, hint, camera);
-    else if (st.instrument === PIANO_ID) this.s.renderer.piano(this.s.piano, now, hint, camera);
+    else if (isKeyboard(st.instrument)) this.s.renderer.piano(this.s.piano, now, hint, camera);
     else {
       this.demo.tick(now);
       this.s.renderer.draw(this.s.player, this.lesson, this.tours.session, audioNow, now, hint, camera);
@@ -281,7 +280,7 @@ export class AirfretApp {
     const frame = this.s.tracker.frameSize();
     const px = hands.map((hand) => hand.landmarks.map((p) => videoToScreen(p, frame, window.innerWidth, window.innerHeight)));
     if (this.isDrums) this.s.drums.updateHands(px, now, audioNow, now);
-    else if (this.s.store.value.instrument === PIANO_ID) this.s.piano.updateHands(px, now, audioNow);
+    else if (isKeyboard(this.s.store.value.instrument)) this.s.piano.updateHands(px, now, audioNow);
     else if (this.demo.isPlaying) this.s.player.strikeAlong(px, now, audioNow, !this.ui.pointer.isDown);
     else this.s.player.updateHands(px, now, audioNow, !this.ui.pointer.isDown);
   }

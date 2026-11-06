@@ -2,8 +2,11 @@ import type { SoundOutputInterface } from '@domain/audio/sound-output-interface'
 import { Voice } from '@domain/audio/voice';
 import type { Point } from '@domain/fretboard/point';
 import { StrikeSurface } from '@domain/gesture/strike-surface';
-import { keyAt } from '@domain/keys/compute-keyboard-layout';
+import { computeKeyboardLayout, keyAt } from '@domain/keys/compute-keyboard-layout';
+import { KEYBOARDS, keyboardFor } from '@domain/keys/keyboard-instruments';
+import { PIANO_ID } from '@domain/keys/piano-id';
 import { KeyPressDetector } from '@domain/keys/key-press-detector';
+import type { KeyboardInstrument } from '@domain/keys/keyboard-instrument';
 import type { KeyboardLayout } from '@domain/keys/keyboard-layout';
 import { PIANO_LOWEST_MIDI } from '@domain/keys/piano';
 import { HandLandmark } from '@domain/tracking/hand-landmark';
@@ -16,6 +19,8 @@ const LEAD = 0.004;
 const STRIKE_POINT = 0.12;
 /** Keys a fast glissando passes within one frame are spread this far apart, seconds. */
 const GLISS_STEP = 0.012;
+/** A keyboard without dynamics plays every key at this strength. */
+const FIXED_LEVEL = 0.7;
 /** A clicked or tapped key plays at this strength. */
 const POINTER_VELOCITY = 0.7;
 /** How fast a key's glow fades on screen, per second. */
@@ -44,8 +49,18 @@ export class PianoPlayer {
 
   constructor(private readonly sound: SoundOutputInterface) {}
 
-  configure(layout: KeyboardLayout): void {
+  /** The keyboard instrument being played: whether it is touch-sensitive, how its keys look. */
+  keyboard: KeyboardInstrument | null = null;
+
+  /** Sets the keys up for a screen and the selected keyboard instrument (the piano's when it isn't one), slid `shift` octaves. */
+  fit(w: number, h: number, instrumentId: string, shift: number): void {
+    const keyboard = keyboardFor(instrumentId) ?? KEYBOARDS[PIANO_ID];
+    this.configure(computeKeyboardLayout(w, h, shift, keyboard), keyboard);
+  }
+
+  configure(layout: KeyboardLayout, keyboard?: KeyboardInstrument): void {
     this.layout = layout;
+    this.keyboard = keyboard ?? null;
   }
 
   /** Keys held down right now. */
@@ -132,7 +147,8 @@ export class PianoPlayer {
     this.ringing.add(midi);
     this.glow.set(midi, Math.max(this.glow.get(midi) ?? 0, velocity));
     this.sound.pluck({
-      string: midi - PIANO_LOWEST_MIDI, midi, amp: velocity, when, isMuted: false, position: STRIKE_POINT,
+      // A harpsichord's quill plucks the same however hard the key is struck.
+      string: midi - PIANO_LOWEST_MIDI, midi, amp: this.keyboard?.isTouchSensitive === false ? FIXED_LEVEL : velocity, when, isMuted: false, position: STRIKE_POINT,
       voice: Voice.player, attack: StrikeSurface.pad, isPalmMuted: false,
     });
   }

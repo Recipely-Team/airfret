@@ -14,6 +14,7 @@ const ACOUSTIC: GuitarLook = {
 const LOOKS: Readonly<Record<ChainKind, GuitarLook>> = {
   acoustic: ACOUSTIC,
   piano: ACOUSTIC,
+  harpsichord: ACOUSTIC,
   ukulele: {
     // Koa top and sides, rosewood board, nylon strings.
     style: 'ukulele', top: '#b9793f', topGrain: '#93592a', burst: '#4a2612', board: '#2a1a12', boardGrain: '#180e09',

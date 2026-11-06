@@ -42,6 +42,7 @@ export const TR: Readonly<Record<string, string>> = {
   'inst.balalaika': "Balalayka",
   'inst.bouzouki': "İrlanda buzukisi",
   'inst.greekBouzouki': "Yunan buzukisi",
+  'inst.harpsichord': "Klavsen",
   'inst.banjo': 'Banjo',
 
   'mode.chord': 'Akor',
@@ -428,6 +429,7 @@ export const TR: Readonly<Record<string, string>> = {
   'home.about.balalaika': "Rusya’nın üç telli üçgen çalgısı: iki tel Mi, biri La; kısa, parlak bir ses.",
   'home.about.bouzouki': "Dört çift telde G D A D: İrlanda müziğinin tınlayan eşliği.",
   'home.about.greek-bouzouki': "Yunan trichordo’su: üç çift tel, D A D; en kalını oktav telli.",
+  'home.about.harpsichord': "Barok klavyesi: tüylerle çekilen teller, parlak ve eşit ses, koyu beyaz tuşlar — Bach ile Scarlatti’nin çalgısı.",
   'home.about.banjo': "Davul derisi üstünde altı tel: parlak, keskin, gitar gibi akortlu.",
   'home.about.drums': "Ellerinde baget, ayaklarının altında pedal.",
   'home.tourText': "Temelleri iki dakikada öğren.",
