@@ -25,6 +25,7 @@ import { PedalPanel } from '@presentation/ui/drums/pedal-panel';
 import { ExploreGuide } from '@presentation/ui/explore/explore-guide';
 import { SettingsPanel } from '@presentation/ui/controls/settings-panel';
 import { LanguageSwitch } from '@presentation/ui/controls/language-switch';
+import { OctaveShift } from '@presentation/ui/controls/octave-shift';
 import { Toolbar } from '@presentation/ui/controls/toolbar';
 import { pathFor } from '@presentation/routing/route-paths';
 import { Router } from '@presentation/routing/router';
@@ -118,6 +119,7 @@ function bootstrap(): void {
   });
   const settingsPanel = new SettingsPanel(store);
   const languageSwitch = new LanguageSwitch(store);
+  const octaveShift = new OctaveShift(store);
   const compositor = new StageCompositor(canvas, video, () => ({ brightness: store.value.brightness, isCameraHidden: store.value.isCameraHidden }));
   const recorder = new BrowserClipRecorder(compositor, () => sound.recordingStream());
   const recordButton = new RecordButton({
@@ -148,6 +150,7 @@ function bootstrap(): void {
     document.documentElement.classList.toggle('cam-hidden', s.isCameraHidden);
     toolbar.render();
     recordButton.render();
+    octaveShift.render(running.isOnStage);
     running.demo.render();
     settingsPanel.render();
     drawer.render();

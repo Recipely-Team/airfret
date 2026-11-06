@@ -21,6 +21,7 @@ export const DEFAULT_SETTINGS: Settings = {
   brightness: 0.55,
   isCameraHidden: false,
   isCameraOff: false,
+  pianoShift: 0,
   latencyMs: 70,
   lessonTempo: 0.8,
   lessonMode: LessonMode.shadow,

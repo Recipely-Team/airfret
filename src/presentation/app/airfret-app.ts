@@ -190,7 +190,7 @@ export class AirfretApp {
     this.s.renderer.resize(w, h);
     const chords = this.tours.session ? TOUR_CHORDS : this.lesson?.song.mode === PlayMode.chord ? this.lesson.chordSet : chordSetById(st.chordSet).chords.filter(knownChord);
     this.s.drums.configure(computeKitLayout(w, h, st.isLefty), w, h, st.hihatMode);
-    this.s.piano.configure(computeKeyboardLayout(w, h));
+    this.s.piano.configure(computeKeyboardLayout(w, h, st.pianoShift));
     const layout = computeLayout(w, h, inst.tuning.length, st.isLefty, inst.maxFret);
     if (this.base.kind === 'instrument' && this.base.instrument !== st.instrument) {
       this.base = { kind: 'instrument', instrument: st.instrument };
