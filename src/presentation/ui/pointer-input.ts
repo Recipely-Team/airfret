@@ -1,5 +1,5 @@
 import type { DrumPlayer } from '@application/drums/drum-player';
-import type { PianoPlayer } from '@application/keys/piano-player';
+import type { InstrumentStage } from '@presentation/app/stages/instrument-stage';
 import type { Player } from '@application/play/player';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
 import { PlayMode } from '@domain/instruments/play-mode';
@@ -14,14 +14,15 @@ const ZERO_SLOT = 9;
  * @remarks
  * - While the pointer is down it is the strumming hand; camera strumming pauses.
  * - A held pointer is fed every frame, not only when it moves, so a finger resting on a string stops it.
- * - On the piano every pointer is its own finger (several touches play a chord); Space held is the sustain pedal.
+ * - On a stage of its own (keyboards, darbuka) every pointer is its own finger, handed to the stage; Space held
+ *   is the stage's sustain (the piano's pedal).
  */
 export class PointerInput {
   private down = false;
   private last: { x: number; y: number } | null = null;
   private frame = 0;
 
-  constructor(canvas: HTMLCanvasElement, player: Player, sound: SoundOutputInterface, drums: DrumPlayer, isDrums: () => boolean, piano: PianoPlayer, isPiano: () => boolean) {
+  constructor(canvas: HTMLCanvasElement, player: Player, sound: SoundOutputInterface, drums: DrumPlayer, isDrums: () => boolean, stage: () => InstrumentStage | undefined) {
     const keysDown = new Set<number>();
     const now = () => performance.now() / 1000;
     const at = (e: PointerEvent) => ({ x: e.clientX, y: e.clientY });
@@ -31,10 +32,11 @@ export class PointerInput {
         drums.click(at(e), sound.now, now());
         return;
       }
-      if (isPiano()) {
+      const own = stage();
+      if (own) {
         keysDown.add(e.pointerId);
         canvas.setPointerCapture(e.pointerId);
-        piano.pointer(e.pointerId, at(e), sound.now);
+        own.pointer(e.pointerId, at(e), sound.now);
         return;
       }
       this.down = true;
@@ -50,8 +52,9 @@ export class PointerInput {
     });
     canvas.addEventListener('pointermove', (e) => {
       if (isDrums()) return;
-      if (isPiano()) {
-        if (keysDown.has(e.pointerId)) piano.pointer(e.pointerId, at(e), sound.now);
+      const own = stage();
+      if (own) {
+        if (keysDown.has(e.pointerId)) own.pointer(e.pointerId, at(e), sound.now);
         return;
       }
       if (!this.down) return;
@@ -59,7 +62,7 @@ export class PointerInput {
       player.pointer(this.last, now(), sound.now);
     });
     const up = (e: PointerEvent) => {
-      if (keysDown.delete(e.pointerId)) piano.pointer(e.pointerId, null, sound.now);
+      if (keysDown.delete(e.pointerId)) stage()?.pointer(e.pointerId, null, sound.now);
       if (!this.down) return;
       this.down = false;
       this.last = null;
@@ -69,9 +72,10 @@ export class PointerInput {
     canvas.addEventListener('pointerup', up);
     canvas.addEventListener('pointercancel', up);
     const sustain = (e: KeyboardEvent, isDown: boolean) => {
-      if (e.code !== 'Space' || !isPiano() || e.target instanceof HTMLInputElement) return;
+      const own = stage();
+      if (e.code !== 'Space' || !own || e.target instanceof HTMLInputElement) return;
       e.preventDefault();
-      if (!e.repeat) piano.setSustain(isDown, sound.now);
+      if (!e.repeat) own.sustain(isDown, sound.now);
     };
     window.addEventListener('keyup', (e) => sustain(e, false));
     window.addEventListener('keydown', (e) => {

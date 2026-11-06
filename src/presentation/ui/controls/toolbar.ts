@@ -1,7 +1,6 @@
 import type { SettingsStore } from '@application/settings/settings-store';
 import { PlayMode } from '@domain/instruments/play-mode';
 import { DRUMS_ID } from '@domain/drums/drums-id';
-import { isKeyboard } from '@domain/keys/keyboard-instruments';
 import { instrumentById } from '@domain/instruments/instrument-catalog';
 import { CHORD_SETS } from '@domain/lessons/catalog/chord-set-catalog';
 import { t } from '@presentation/i18n/translator';
@@ -39,7 +38,8 @@ export class Toolbar {
     const isDrums = s.instrument === DRUMS_ID;
     byId('barContext').hidden = !this.isOnStage();
     // Keyboards have no strumming modes or chord sets: every key is just a note.
-    const hasModes = !isDrums && !isKeyboard(s.instrument);
+    // Only fretted instruments (in the catalogue) have strumming modes; the drums, keyboards and darbuka don't.
+    const hasModes = instrumentById(s.instrument).id === s.instrument;
     byId('modes').hidden = !hasModes;
     byId('pedalsBtn').hidden = !isDrums;
     const cam = byId('camBtn');

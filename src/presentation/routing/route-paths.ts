@@ -1,4 +1,5 @@
 import { DRUMS_ID } from '@domain/drums/drums-id';
+import { DARBUKA_ID } from '@domain/drums/hand/darbuka-id';
 import { PIANO_ID } from '@domain/keys/piano-id';
 import type { Route } from '@presentation/routing/route';
 
@@ -23,6 +24,7 @@ export const INSTRUMENT_SLUGS: readonly (readonly [slug: string, instrument: str
   ['piano', PIANO_ID],
   ['harpsichord', 'harpsichord'],
   ['drums', DRUMS_ID],
+  ['darbuka', DARBUKA_ID],
 ];
 
 const LESSONS = 'lessons';

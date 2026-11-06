@@ -16,7 +16,8 @@ export function watchableSongs(songs: readonly Song[], instrumentId: string): So
   // The self-playing hand is a guitarist's; the drums and keyboards don't play by themselves yet.
   // …and plays guitar or bass songs: not a ukulele's, a mandolin's or a saz's (fewer strings, other ranges).
   const inst = instrumentById(instrumentId);
-  if (instrumentId === DRUMS_ID || isKeyboard(instrumentId) || (!isBass(instrumentId) && inst.tuning.length < GUITAR_STRING_COUNT)) return [];
+  // Only fretted instruments in the catalogue (an unknown id falls back to the acoustic guitar).
+  if (inst.id !== instrumentId || instrumentId === DRUMS_ID || isKeyboard(instrumentId) || (!isBass(instrumentId) && inst.tuning.length < GUITAR_STRING_COUNT)) return [];
   const fits = songs.filter((s) => s.instrument !== DRUMS_ID && isBass(s.instrument) === isBass(instrumentId));
   const own = DEMO_SONG_BY_INSTRUMENT[instrumentId];
   return [...fits.filter((s) => s.id === own), ...fits.filter((s) => s.id !== own)];

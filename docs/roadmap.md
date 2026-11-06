@@ -95,7 +95,8 @@ song test before it ships. Grouped by how much of the existing code they reuse.
 - Electric piano, organ, accordion, synthesizer (need a sustained or struck-tine voice the string synth can't give)
 
 **Percussion (reuse the drum kit's stick and pad code)**
-- Darbuka, def / bendir, cajón, congas and bongos, tabla, djembe, handpan, timpani
+- ~~Darbuka~~ (shipped 2026-11-06: düm, tek, ka by where the fingertips land and which hand, synthesised), def /
+  bendir, cajón, congas and bongos, tabla, djembe, handpan, timpani — the darbuka's stage and hit detection carry over
 - Mallets: marimba, xylophone, vibraphone, glockenspiel
 
 **Air-only**

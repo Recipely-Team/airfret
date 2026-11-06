@@ -21,5 +21,6 @@ export const INSTRUMENT_ICONS: Readonly<Record<string, string>> = {
   banjo: `${OPEN}${NECK}<circle cx="84" cy="24" r="20"/><circle cx="84" cy="24" r="16.5"/><path d="M60 24h38"/><path d="M92 19v10"/></svg>`,
   piano: `<svg viewBox="0 0 120 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="12" y="10" width="96" height="30" rx="2"/><path d="M24 10v30M36 10v30M48 10v30M60 10v30M72 10v30M84 10v30M96 10v30"/><path fill="currentColor" d="M21 10h6v17h-6zM33 10h6v17h-6zM57 10h6v17h-6zM69 10h6v17h-6zM81 10h6v17h-6z"/></svg>`,
   harpsichord: `${OPEN}<path d="M10 12h92l8 26H10z"/><path d="M22 12v26M34 12v26M46 12v26M58 12v26M70 12v26M82 12v26M94 12v26"/><path d="M18 12h8v14h-8zM30 12h8v14h-8zM54 12h8v14h-8zM66 12h8v14h-8zM78 12h8v14h-8z"/></svg>`,
+  darbuka: `${OPEN}<ellipse cx="60" cy="14" rx="22" ry="7"/><path d="M38 14c0 12 14 13 15 22h14c1-9 15-10 15-22"/><path d="M53 36l-3 8h20l-3-8"/></svg>`,
   drums: `${OPEN}<ellipse cx="60" cy="32" rx="13" ry="13"/><ellipse cx="38" cy="30" rx="11" ry="4"/><path d="M27 30v8M49 30v8M27 38c0 2 22 2 22 0"/><ellipse cx="84" cy="33" rx="12" ry="4.5"/><path d="M72 33v8M96 33v8M72 41c0 2 24 2 24 0"/><ellipse cx="52" cy="15" rx="7" ry="2.6"/><ellipse cx="70" cy="15" rx="7" ry="2.6"/><path d="M14 10h20M24 10v34M88 8h22M99 8v36"/></svg>`,
 };
