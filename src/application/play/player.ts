@@ -128,8 +128,8 @@ export class Player {
     return (note === null || note === undefined ? 0 : note - (this.instrument.tuning[string] ?? 0)) + this.capo;
   }
 
-  /** Free mode works in absolute frets; the tuning already includes the capo. */
-  private soundingFret = (fret: number): number => (fret > this.capo ? fret - this.capo : 0);
+  /** A fret's pitch above the capo, in semitones (a saz's frets fall between them); the tuning includes the capo. */
+  private soundingSemis = (fret: number): number => this.layout.fretSemis[Math.max(0, fret - this.capo)] ?? Math.max(0, fret - this.capo);
 
   configure(setup: PlayerSetup): void {
     if (this.stringCount !== setup.layout.strings) this.strum.reset();
@@ -198,7 +198,7 @@ export class Player {
     if (this.isMuted) return;
     if (this.mode === PlayMode.free) {
       this.fretting = mapFretting(this.layout, hand, this.fretting);
-      this.legato.update(this.fretting, this.instrument.tuning, this.soundingFret, this.energy, audioNow);
+      this.legato.update(this.fretting, this.instrument.tuning, this.soundingSemis, this.energy, audioNow);
       return;
     }
     const before = this.mode === PlayMode.chord ? this.slot : this.fret;
@@ -278,9 +278,9 @@ export class Player {
     const open = tuning[string] ?? 0;
     if (this.mode === PlayMode.free || this.isPerforming) {
       const fret = this.fretting?.frets[string] ?? 0;
-      return open + this.soundingFret(fret) + (this.fretting?.bends[string] ?? 0);
+      return open + this.soundingSemis(fret) + (this.fretting?.bends[string] ?? 0);
     }
-    if (this.mode === PlayMode.note) return open + this.fret;
+    if (this.mode === PlayMode.note) return open + (this.layout.fretSemis[this.fret] ?? this.fret);
     return this.chord ? chordNotes(this.chord, tuning)[string] ?? null : open;
   }
 

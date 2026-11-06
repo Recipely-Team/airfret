@@ -53,3 +53,9 @@ export const SOLID_BOUTS = {
   upper: { t: 0.3, radius: 0.32, halfWidth: 0.42 },
   lower: { t: 0.66, radius: 0.34, halfWidth: 0.5 },
 } as const;
+
+/** A saz's bowl seen from the front: a pear — narrow where the neck joins, wide and round at the bottom. */
+export const SAZ_BOUTS = {
+  upper: { t: 0.22, radius: 0.3, halfWidth: 0.2 },
+  lower: { t: 0.64, radius: 0.37, halfWidth: 0.5 },
+} as const;

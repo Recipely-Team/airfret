@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { INSTRUMENTS, instrumentById } from '@domain/instruments/instrument-catalog';
 import { voicesFor, withVoice } from '@domain/instruments/voice-catalog';
 
+/** Instruments shipped with the synth only, waiting for freely licensed recordings (docs/roadmap.md). */
+const AWAITING_RECORDINGS = new Set(['saz']);
+
 describe('Instrument voices', () => {
   it('plays the best-ranked voice when the player has not chosen one', () => {
     for (const inst of INSTRUMENTS) expect(withVoice(inst, undefined).voice, inst.id).toBe(voicesFor(inst.id)[0]?.id);
@@ -10,6 +13,11 @@ describe('Instrument voices', () => {
   it('offers every instrument at least a second option, and the recorded one first', () => {
     for (const inst of INSTRUMENTS) {
       const voices = voicesFor(inst.id);
+      if (AWAITING_RECORDINGS.has(inst.id)) {
+        // Only a synth until recordings are found; when they are, this fails and the instrument leaves the list.
+        expect(voices.map((v) => v.isRecorded), inst.id).toEqual([false]);
+        continue;
+      }
       expect(voices.length, inst.id).toBeGreaterThanOrEqual(2);
       expect(voices[0]?.isRecorded, inst.id).toBe(true);
       expect(new Set(voices.map((v) => v.id)).size, `${inst.id}: voice ids unique`).toBe(voices.length);

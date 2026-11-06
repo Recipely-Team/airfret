@@ -72,7 +72,9 @@ song test before it ships. Grouped by how much of the existing code they reuse.
 - Mandolin and mandola (paired courses, tremolo picking), Irish bouzouki
 - Banjo: ~~6-string guitar banjo~~ (shipped); 5-string with the short drone string (needs re-entrant tuning and
   its own chord shapes; the only free set found, FlameStudios Kay, is GPL-3.0), 4-string tenor; resonator guitar / dobro
-- Bağlama / saz (kısa and uzun sap, microtonal frets — 17+ per octave), cura, tanbur, cümbüş
+- ~~Bağlama / saz~~ (shipped 2026-11-06: 17 frets an octave at Yalçın Tura's ratios, three courses with octave
+  strings, seven düzens; synth voice only — no freely licensed recordings found yet, the voice-catalog test lists it
+  as awaiting them; self-play can't finger its in-between frets yet), cura, tanbur, cümbüş
 - Oud and fretless lutes (continuous pitch, maqam intonation), Renaissance lute, balalaika, sitar (sympathetic strings)
 - Lap steel and pedal steel (slide bar instead of frets)
 

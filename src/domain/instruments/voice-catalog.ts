@@ -25,6 +25,8 @@ export const VOICES: Readonly<Record<string, readonly InstrumentVoice[]>> = {
   twelve: [RECORDED, FITTED],
   guitar7: [RECORDED, FITTED],
   banjo: [RECORDED, FITTED],
+  // No freely licensed saz recordings yet (roadmap): the synth is its only voice.
+  saz: [FITTED],
 };
 
 /** The instrument's voices, best first; empty for instruments without a choice (the drum kit). */

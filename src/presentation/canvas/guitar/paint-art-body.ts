@@ -1,6 +1,6 @@
 import type { FretboardLayout } from '@domain/fretboard/fretboard-layout';
 import { strumStringYs } from '@domain/fretboard/neck-geometry';
-import { ACOUSTIC_BOUTS, CLASSICAL_BOUTS, SOLID_BOUTS, traceBody } from '@presentation/canvas/guitar/body-shape';
+import { ACOUSTIC_BOUTS, CLASSICAL_BOUTS, SAZ_BOUTS, SOLID_BOUTS, traceBody } from '@presentation/canvas/guitar/body-shape';
 import type { BodyGeometry } from '@presentation/canvas/guitar/body-geometry';
 import type { GuitarLook } from '@presentation/canvas/guitar/guitar-look';
 import { paintBanjoPot } from '@presentation/canvas/guitar/paint-banjo-pot';
@@ -14,7 +14,7 @@ export function paintArtBody(ctx: CanvasRenderingContext2D, l: FretboardLayout, 
     paintBanjoPot(ctx, l, g, look);
     return;
   }
-  const bouts = look.style === 'acoustic' ? ACOUSTIC_BOUTS : look.style === 'classical' ? CLASSICAL_BOUTS : SOLID_BOUTS;
+  const bouts = look.style === 'acoustic' ? ACOUSTIC_BOUTS : look.style === 'classical' ? CLASSICAL_BOUTS : look.style === 'saz' ? SAZ_BOUTS : SOLID_BOUTS;
   const outline = () => traceBody(ctx, g.x0, g.cy, g.length, g.width, bouts.upper, bouts.lower);
   const box = { x: g.x0, y: g.cy - g.width / 2, w: g.length, h: g.width };
 
@@ -50,7 +50,7 @@ export function paintArtBody(ctx: CanvasRenderingContext2D, l: FretboardLayout, 
   ctx.strokeStyle = look.style === 'electric' || look.style === 'bass' ? 'rgba(255,255,255,0.12)' : look.binding;
   ctx.stroke();
 
-  if (look.style === 'acoustic' || look.style === 'classical') paintSoundhole(ctx, g, look);
+  if (look.style === 'acoustic' || look.style === 'classical' || look.style === 'saz') paintSoundhole(ctx, g, look);
   else paintPickups(ctx, l, g, look);
   paintBridge(ctx, l, g, look);
 }

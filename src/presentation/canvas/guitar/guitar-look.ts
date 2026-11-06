@@ -1,6 +1,6 @@
 /** Materials of one instrument family, in CSS colours. */
 export interface GuitarLook {
-  readonly style: 'acoustic' | 'classical' | 'electric' | 'bass' | 'banjo';
+  readonly style: 'acoustic' | 'classical' | 'electric' | 'bass' | 'banjo' | 'saz';
   /** Top / body finish: base colour, grain line colour, and the darker edge burst. */
   readonly top: string;
   readonly topGrain: string;
