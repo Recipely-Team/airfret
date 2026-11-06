@@ -1,32 +1,33 @@
-import type { DarbukaPlayer } from '@application/drums/darbuka-player';
+import type { HandDrumPlayer } from '@application/drums/hand-drum-player';
+import { handDrumFor } from '@domain/drums/hand/hand-drum-catalog';
 import type { Point } from '@domain/fretboard/point';
-import { DARBUKA_ID } from '@domain/drums/hand/darbuka-id';
+import type { Settings } from '@domain/settings/settings';
 import type { InstrumentStage } from '@presentation/app/stages/instrument-stage';
 import type { CameraView } from '@presentation/canvas/camera-view';
 import type { StageRenderer } from '@presentation/canvas/stage-renderer';
 
 const MS = 1000;
 
-/** The darbuka's page: `DarbukaPlayer`; a click or tap strikes where it lands (once per press). */
-export class DarbukaStage implements InstrumentStage {
+/** Every hand drum's page (darbuka, congas, handpan…): `HandDrumPlayer`; a click or tap strikes once per press. */
+export class HandDrumStage implements InstrumentStage {
   private readonly down = new Set<number>();
 
-  constructor(private readonly darbuka: DarbukaPlayer) {}
+  constructor(private readonly drums: HandDrumPlayer) {}
 
   handles(instrumentId: string): boolean {
-    return instrumentId === DARBUKA_ID;
+    return handDrumFor(instrumentId) !== undefined;
   }
 
-  fit(w: number, h: number): void {
-    this.darbuka.configure(w, h);
+  fit(w: number, h: number, st: Settings): void {
+    this.drums.configure(st.instrument, w, h);
   }
 
   track(hands: readonly (readonly Point[])[], now: number, audioNow: number): void {
-    this.darbuka.updateHands(hands, now, audioNow);
+    this.drums.updateHands(hands, now, audioNow);
   }
 
   draw(renderer: StageRenderer, now: number, hint: string | null, camera: CameraView): void {
-    renderer.darbuka(this.darbuka, now, hint, camera);
+    renderer.handDrum(this.drums, now, hint, camera);
   }
 
   pointer(id: number, p: Point | null, audioNow: number): void {
@@ -36,7 +37,7 @@ export class DarbukaStage implements InstrumentStage {
     }
     if (this.down.has(id)) return;
     this.down.add(id);
-    this.darbuka.tap(p, audioNow, performance.now() / MS);
+    this.drums.tap(p, audioNow, performance.now() / MS);
   }
 
   sustain(): void {

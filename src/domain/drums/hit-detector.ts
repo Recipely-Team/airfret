@@ -1,5 +1,3 @@
-import type { DrumHit } from '@domain/drums/drum-hit';
-import type { DrumPad } from '@domain/drums/drum-pad';
 import type { Point } from '@domain/fretboard/point';
 
 const DEFAULTS = {
@@ -29,7 +27,11 @@ export class HitDetector {
   private prevT = 0;
   private readonly armed = new Map<string, boolean>();
 
-  update(tip: Point | null, t: number, pads: readonly DrumPad[], h: number): DrumHit[] {
+  /**
+   * One new sample of the tip; returns the hits it made. Works on any ellipse targets named by `piece` — the
+   * kit's pads, a hand drum's heads.
+   */
+  update<K extends string>(tip: Point | null, t: number, pads: readonly { readonly piece: K; readonly cx: number; readonly cy: number; readonly rx: number; readonly ry: number }[], h: number): { piece: K; velocity: number; radius: number; frac: number }[] {
     if (!tip) {
       if (this.prev && t - this.prevT > DEFAULTS.dropout) this.prev = null;
       return [];
@@ -45,7 +47,7 @@ export class HitDetector {
     const dy = tip.y - prev.y;
     const speed = dy / dt / h;
     if (speed < DEFAULTS.minSpeed) return [];
-    const hits: DrumHit[] = [];
+    const hits: { piece: K; velocity: number; radius: number; frac: number }[] = [];
     for (const pad of [...pads].sort((a, b) => a.cy - b.cy)) {
       if (this.armed.get(pad.piece) === false) continue;
       if (!(prev.y < pad.cy && tip.y >= pad.cy)) continue;

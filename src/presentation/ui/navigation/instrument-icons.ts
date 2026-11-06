@@ -22,5 +22,13 @@ export const INSTRUMENT_ICONS: Readonly<Record<string, string>> = {
   piano: `<svg viewBox="0 0 120 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="12" y="10" width="96" height="30" rx="2"/><path d="M24 10v30M36 10v30M48 10v30M60 10v30M72 10v30M84 10v30M96 10v30"/><path fill="currentColor" d="M21 10h6v17h-6zM33 10h6v17h-6zM57 10h6v17h-6zM69 10h6v17h-6zM81 10h6v17h-6z"/></svg>`,
   harpsichord: `${OPEN}<path d="M10 12h92l8 26H10z"/><path d="M22 12v26M34 12v26M46 12v26M58 12v26M70 12v26M82 12v26M94 12v26"/><path d="M18 12h8v14h-8zM30 12h8v14h-8zM54 12h8v14h-8zM66 12h8v14h-8zM78 12h8v14h-8z"/></svg>`,
   darbuka: `${OPEN}<ellipse cx="60" cy="14" rx="22" ry="7"/><path d="M38 14c0 12 14 13 15 22h14c1-9 15-10 15-22"/><path d="M53 36l-3 8h20l-3-8"/></svg>`,
+  def: `${OPEN}<circle cx="60" cy="24" r="18"/><circle cx="60" cy="24" r="14"/><ellipse cx="44" cy="15" rx="3" ry="2"/><ellipse cx="76" cy="15" rx="3" ry="2"/><ellipse cx="44" cy="33" rx="3" ry="2"/><ellipse cx="76" cy="33" rx="3" ry="2"/></svg>`,
+  bendir: `${OPEN}<circle cx="60" cy="24" r="19"/><circle cx="60" cy="24" r="15"/><path d="M48 14l24 20"/></svg>`,
+  cajon: `${OPEN}<rect x="44" y="6" width="32" height="38" rx="2"/><path d="M44 12h32"/></svg>`,
+  congas: `${OPEN}<ellipse cx="46" cy="12" rx="12" ry="4"/><path d="M34 12l3 30h18l3-30"/><ellipse cx="74" cy="14" rx="13" ry="4.5"/><path d="M61 14l3 28h20l3-28"/></svg>`,
+  bongos: `${OPEN}<ellipse cx="48" cy="20" rx="10" ry="4"/><path d="M38 20l2 14h16l2-14"/><ellipse cx="74" cy="20" rx="12" ry="4.5"/><path d="M62 20l2 14h20l2-14"/><path d="M58 27h4"/></svg>`,
+  djembe: `${OPEN}<ellipse cx="60" cy="12" rx="18" ry="5"/><path d="M42 12c0 10 12 12 13 18l-4 14h18l-4-14c1-6 13-8 13-18"/></svg>`,
+  tabla: `${OPEN}<ellipse cx="44" cy="18" rx="15" ry="5.5"/><path d="M29 18c0 14 6 22 15 22s15-8 15-22"/><ellipse cx="78" cy="16" rx="10" ry="4"/><path d="M68 16l1 24h18l1-24"/><circle cx="78" cy="16" r="2.5"/></svg>`,
+  handpan: `${OPEN}<ellipse cx="60" cy="24" rx="40" ry="18"/><ellipse cx="60" cy="24" rx="7" ry="4"/><ellipse cx="38" cy="20" rx="5" ry="3"/><ellipse cx="82" cy="20" rx="5" ry="3"/><ellipse cx="44" cy="32" rx="5" ry="3"/><ellipse cx="76" cy="32" rx="5" ry="3"/></svg>`,
   drums: `${OPEN}<ellipse cx="60" cy="32" rx="13" ry="13"/><ellipse cx="38" cy="30" rx="11" ry="4"/><path d="M27 30v8M49 30v8M27 38c0 2 22 2 22 0"/><ellipse cx="84" cy="33" rx="12" ry="4.5"/><path d="M72 33v8M96 33v8M72 41c0 2 24 2 24 0"/><ellipse cx="52" cy="15" rx="7" ry="2.6"/><ellipse cx="70" cy="15" rx="7" ry="2.6"/><path d="M14 10h20M24 10v34M88 8h22M99 8v36"/></svg>`,
 };

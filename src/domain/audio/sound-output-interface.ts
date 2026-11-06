@@ -2,6 +2,7 @@ import type { Failure } from '@core/failure/failure';
 import type { Result } from '@core/result/result';
 import type { DrumHitRequest } from '@domain/audio/drum-hit-request';
 import type { DrumKind } from '@domain/audio/drum-kind';
+import type { HandStroke } from '@domain/drums/hand/hand-stroke';
 import type { PluckRequest } from '@domain/audio/pluck-request';
 import type { RetuneRequest } from '@domain/audio/retune-request';
 import type { Voice } from '@domain/audio/voice';
@@ -32,6 +33,8 @@ export interface SoundOutputInterface {
   fretNoise(when: number): void;
   /** A drum-kit stroke or pedal. */
   hitDrum(request: DrumHitRequest): void;
+  /** A stroke on a hand drum (darbuka, congas, handpan…), voiced from its description. */
+  hitHandDrum(stroke: HandStroke, velocity: number, when: number): void;
   /** Stops a ringing open hi-hat (the cymbals close). */
   chokeHiHat(when: number): void;
   click(when: number, isAccent: boolean): void;

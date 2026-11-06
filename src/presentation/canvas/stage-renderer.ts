@@ -1,6 +1,6 @@
-import type { DarbukaPlayer } from '@application/drums/darbuka-player';
+import type { HandDrumPlayer } from '@application/drums/hand-drum-player';
 import type { DrumPlayer } from '@application/drums/drum-player';
-import { paintDarbuka } from '@presentation/canvas/drums/paint-darbuka';
+import { paintHandDrum } from '@presentation/canvas/drums/paint-hand-drum';
 import type { PianoPlayer } from '@application/keys/piano-player';
 import { paintKeyboard } from '@presentation/canvas/keys/paint-keyboard';
 import type { Player } from '@application/play/player';
@@ -79,13 +79,13 @@ export class StageRenderer {
     this.hint(hint, w, h * 0.16);
   }
 
-  /** Darbuka frame: the drum with its strokes' ripples, the real hands (or their skeleton) over it. */
-  darbuka(darbuka: DarbukaPlayer, now: number, hint: string | null, camera: CameraView): void {
+  /** Hand drum frame: its heads with their strokes' ripples, the real hands (or their skeleton) over them. */
+  handDrum(drums: HandDrumPlayer, now: number, hint: string | null, camera: CameraView): void {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
     this.ctx.clearRect(0, 0, w, h);
-    paintDarbuka(this.ctx, darbuka, now);
-    this.paintHands(darbuka.hands, w, h, camera);
+    paintHandDrum(this.ctx, drums, w, h, now);
+    this.paintHands(drums.hands, w, h, camera);
     this.hint(hint, w, h * 0.16);
   }
 

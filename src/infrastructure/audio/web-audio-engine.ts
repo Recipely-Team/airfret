@@ -4,6 +4,7 @@ import type { Result } from '@core/result/result';
 import { fail, ok } from '@core/result/result-factories';
 import type { DrumHitRequest } from '@domain/audio/drum-hit-request';
 import type { DrumKind } from '@domain/audio/drum-kind';
+import type { HandStroke } from '@domain/drums/hand/hand-stroke';
 import type { PluckRequest } from '@domain/audio/pluck-request';
 import type { RetuneRequest } from '@domain/audio/retune-request';
 import { StrikeSurface } from '@domain/gesture/strike-surface';
@@ -18,7 +19,7 @@ import { impulseResponse } from '@infrastructure/audio/chains/impulse-response';
 import { outputStage } from '@infrastructure/audio/chains/output-stage';
 import { DrumKit } from '@infrastructure/audio/drum-kit';
 import { AcousticKit } from '@infrastructure/audio/drums/acoustic-kit';
-import { GobletDrum } from '@infrastructure/audio/drums/goblet-drum';
+import { HandDrumVoice } from '@infrastructure/audio/drums/hand-drum-voice';
 import { loadSampleSet } from '@infrastructure/audio/samples/load-sample-set';
 import { SamplePlayer } from '@infrastructure/audio/samples/sample-player';
 import type { SampleSet } from '@infrastructure/audio/samples/sample-set';
@@ -54,7 +55,7 @@ export class WebAudioEngine implements SoundOutputInterface {
   private readonly noises: StringNoises;
   private readonly drums: DrumKit;
   private readonly kit: AcousticKit;
-  private readonly goblet: GobletDrum;
+  private readonly handDrum: HandDrumVoice;
   private readonly chains = new Map<ChainKind, AudioChain>();
   private readonly banks = new Map<Voice, AudioWorkletNode>();
   private readonly voiceGains = new Map<Voice, GainNode>();
@@ -96,7 +97,7 @@ export class WebAudioEngine implements SoundOutputInterface {
     kitRoom.gain.value = KIT.room;
     kitBus.connect(kitRoom).connect(this.reverbIn);
     this.kit = new AcousticKit(ctx, kitBus, this.noise);
-    this.goblet = new GobletDrum(ctx, kitBus, this.noise);
+    this.handDrum = new HandDrumVoice(ctx, kitBus, this.noise);
     this.sampleBus = ctx.createGain();
     this.sampleBus.gain.value = Level.samples;
     this.sampleBus.connect(this.chainOut);
@@ -257,8 +258,11 @@ export class WebAudioEngine implements SoundOutputInterface {
   }
 
   hitDrum(r: DrumHitRequest): void {
-    if (GobletDrum.plays(r.piece)) this.goblet.hit(r);
-    else this.kit.hit(r);
+    this.kit.hit(r);
+  }
+
+  hitHandDrum(stroke: HandStroke, velocity: number, when: number): void {
+    this.handDrum.hit(stroke, velocity, when);
   }
 
   chokeHiHat(when: number): void {
