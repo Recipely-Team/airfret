@@ -176,7 +176,7 @@ Layers and rules: `CLAUDE.md`, `architecture.md`.
 ## src/domain/keys/
 
 - `compute-keyboard-layout.ts` — Pitch classes that are black keys: C#, D#, F#, G#, A#.
-- `key-press-detector.ts` — Slower than this (screen heights per second) a fingertip is drifting, not pressing.
+- `key-press-detector.ts` — A press: the fingertip dips this far (share of the hand's size) below where that finger rests.
 - `key-press.ts` — A key going down: which, how hard (0–1), and where within the frame it happened (0–1).
 - `keyboard-instrument.ts` — An instrument played from a keyboard: its sound, the keys it has, and how its keys respond and look.
 - `keyboard-instruments.ts` — A harpsichord: strings plucked by quills, so the string synth voices it truly — bright, nasal (plucked near

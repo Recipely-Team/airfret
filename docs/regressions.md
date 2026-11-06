@@ -72,6 +72,13 @@ resting finger stops the string in both voices. Tests `tap-detector.test.ts`, `t
 that opens with rests before its pickup (Auld Lang Syne: 2.1 s) began in silence. *Fix:* self-play starts at the
 first note. Test `demo-performer.test.ts` ("starts at the first note even when the song opens with rests").
 
+**The air piano played as soon as it saw a hand, and keys stayed lit.** A key played when a fingertip crossed a
+fixed line on the screen, so a hand coming into view or moving over the keyboard played notes, and a hand resting
+over the keys (its fingertips below the line) held them down. *Fix:* a press is a finger dipping below its own
+knuckle by more than it usually rests there (a slowly following baseline): moving or resting the hand plays and
+holds nothing. Tests `keyboard.test.ts` ("plays nothing when a hand moves into view", "holds no key down while a
+hand rests over the keys"); QA C4.2.
+
 ## Drums
 
 **Drumsticks vanished and reappeared, or jumped to the other hand.**
