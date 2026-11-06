@@ -21,6 +21,10 @@ export const EN: Readonly<Record<string, string>> = {
   'app.camera': 'Allow camera access…',
   'app.cameraError': 'Camera unavailable. Check browser permissions — you can still play with the mouse and number keys.',
   'app.mouseHintPiano': "No camera? Click or touch the keys — several fingers play a chord; hold Space for the sustain pedal.",
+  'darbuka.doum': "düm",
+  'darbuka.tek': "tek",
+  'darbuka.ka': "ka",
+  'app.mouseHintDarbuka': "No camera? Click or tap the head: the middle is düm, the right edge tek, the left edge ka.",
   'app.noHands': 'Show both hands to the camera',
   'app.mouseHint': 'No camera? Drag the mouse across the strings, keys 1–8 pick a chord.',
 
@@ -43,6 +47,7 @@ export const EN: Readonly<Record<string, string>> = {
   'inst.bouzouki': "Irish bouzouki",
   'inst.greekBouzouki': "Greek bouzouki",
   'inst.harpsichord': "Harpsichord",
+  'inst.darbuka': "Darbuka",
   'inst.banjo': 'Banjo',
 
   'mode.chord': 'Chords',
@@ -430,6 +435,7 @@ export const EN: Readonly<Record<string, string>> = {
   'home.about.bouzouki': "G D A D in four doubled courses: the drone-rich accompaniment of Irish music.",
   'home.about.greek-bouzouki': "The Greek trichordo: three courses, D A D, the lowest with an octave string.",
   'home.about.harpsichord': "The baroque keyboard: strings plucked by quills, bright and even, dark naturals — Bach and Scarlatti’s instrument.",
+  'home.about.darbuka': "The goblet drum of Turkey and the Middle East: düm in the middle, tek and ka on the edge, played with the fingers.",
   'home.about.banjo': "Six strings over a drum head: bright, snappy, tuned like a guitar.",
   'home.about.drums': "Sticks in your hands, pedals under your feet.",
   'home.tourText': "Learn the basics in two minutes.",

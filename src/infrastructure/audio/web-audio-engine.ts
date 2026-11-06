@@ -18,6 +18,7 @@ import { impulseResponse } from '@infrastructure/audio/chains/impulse-response';
 import { outputStage } from '@infrastructure/audio/chains/output-stage';
 import { DrumKit } from '@infrastructure/audio/drum-kit';
 import { AcousticKit } from '@infrastructure/audio/drums/acoustic-kit';
+import { GobletDrum } from '@infrastructure/audio/drums/goblet-drum';
 import { loadSampleSet } from '@infrastructure/audio/samples/load-sample-set';
 import { SamplePlayer } from '@infrastructure/audio/samples/sample-player';
 import type { SampleSet } from '@infrastructure/audio/samples/sample-set';
@@ -53,6 +54,7 @@ export class WebAudioEngine implements SoundOutputInterface {
   private readonly noises: StringNoises;
   private readonly drums: DrumKit;
   private readonly kit: AcousticKit;
+  private readonly goblet: GobletDrum;
   private readonly chains = new Map<ChainKind, AudioChain>();
   private readonly banks = new Map<Voice, AudioWorkletNode>();
   private readonly voiceGains = new Map<Voice, GainNode>();
@@ -94,6 +96,7 @@ export class WebAudioEngine implements SoundOutputInterface {
     kitRoom.gain.value = KIT.room;
     kitBus.connect(kitRoom).connect(this.reverbIn);
     this.kit = new AcousticKit(ctx, kitBus, this.noise);
+    this.goblet = new GobletDrum(ctx, kitBus, this.noise);
     this.sampleBus = ctx.createGain();
     this.sampleBus.gain.value = Level.samples;
     this.sampleBus.connect(this.chainOut);
@@ -254,7 +257,8 @@ export class WebAudioEngine implements SoundOutputInterface {
   }
 
   hitDrum(r: DrumHitRequest): void {
-    this.kit.hit(r);
+    if (GobletDrum.plays(r.piece)) this.goblet.hit(r);
+    else this.kit.hit(r);
   }
 
   chokeHiHat(when: number): void {

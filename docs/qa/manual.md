@@ -112,6 +112,15 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | C6.3 | `/balalaika` | A triangular body; strings E E A; tunings include "Guitar" G B D, Domra E A D, Folk D F# A and C E G | |
 | C6.4 | `/bouzouki` and `/greek-bouzouki` | G D A D in four unison courses; the Greek one D A D, its low course with an octave string | |
 
+## C7. Darbuka
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| C7.1 | `/darbuka` → Start | A goblet drum seen from the seat: copper body, pale head, chrome rim; düm in the middle, ka left, tek right; no modes in the top bar | |
+| C7.2 | Fingertips (index, middle, ring) striking the middle of the head | A deep düm, louder the faster the stroke; a resting finger doesn't repeat | |
+| C7.3 | Right hand on the edge, then left hand on the edge | Tek (sharp, ringing), then ka (lower, drier) | |
+| C7.4 | No camera: click the middle, the left edge, the right edge | Düm, ka, tek, each with a ripple | |
+
 ## C2. Drums
 
 | # | Step | Expected | Result |

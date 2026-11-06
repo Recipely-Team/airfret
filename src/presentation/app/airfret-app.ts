@@ -1,6 +1,4 @@
 import type { DrumPlayer } from '@application/drums/drum-player';
-import type { PianoPlayer } from '@application/keys/piano-player';
-import { isKeyboard } from '@domain/keys/keyboard-instruments';
 import type { BackingTrack } from '@application/lessons/backing-track';
 import { songLibrary } from '@application/lessons/song-library';
 import { voiceMix } from '@application/lessons/voice-mix';
@@ -26,6 +24,7 @@ import { knownChord } from '@domain/music/chords/chord-voicing';
 import type { HandTrackerInterface } from '@domain/tracking/hand-tracker-interface';
 import type { AppUi } from '@presentation/app/app-ui';
 import { CameraController } from '@application/camera/camera-controller';
+import type { InstrumentStage } from '@presentation/app/stages/instrument-stage';
 import { DemoController } from '@presentation/app/demo-controller';
 import { lessonOptions } from '@presentation/app/lesson-options';
 import { stageHint } from '@presentation/app/stage-hint';
@@ -45,7 +44,7 @@ interface Services {
   readonly tracker: HandTrackerInterface;
   readonly player: Player;
   readonly drums: DrumPlayer;
-  readonly piano: PianoPlayer;
+  readonly stages: readonly InstrumentStage[];
   readonly renderer: StageRenderer;
   readonly backing: BackingTrack;
   readonly guide: GuidePlayer;
@@ -189,7 +188,7 @@ export class AirfretApp {
     this.s.renderer.resize(w, h);
     const chords = this.tours.session ? TOUR_CHORDS : this.lesson?.song.mode === PlayMode.chord ? this.lesson.chordSet : chordSetById(st.chordSet).chords.filter(knownChord);
     this.s.drums.configure(computeKitLayout(w, h, st.isLefty), w, h, st.hihatMode);
-    this.s.piano.fit(w, h, st.instrument, st.pianoShift);
+    for (const stage of this.s.stages) stage.fit(w, h, st);
     const layout = computeLayout(w, h, inst.tuning.length, st.isLefty, inst.maxFret, inst.fretCents);
     if (this.base.kind === 'instrument' && this.base.instrument !== st.instrument) {
       this.base = { kind: 'instrument', instrument: st.instrument };
@@ -260,11 +259,12 @@ export class AirfretApp {
       requestAnimationFrame(this.frame);
       return;
     }
+    const stage = this.s.stages.find((x) => x.handles(st.instrument));
     const hint = this.demo.isPlaying ? null : stageHint({ isStarted: this.isStarted, hasCamera: this.camera.isOn, instrument: st.instrument, secondsWithoutHands: now - this.lastHandsAt });
     // The self-playing hand is drawn as a skeleton: it isn't in the camera picture.
     const camera = { brightness: st.brightness, isHidden: st.isCameraHidden || this.demo.isPlaying };
     if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, hint, camera);
-    else if (isKeyboard(st.instrument)) this.s.renderer.piano(this.s.piano, now, hint, camera);
+    else if (stage) stage.draw(this.s.renderer, now, hint, camera);
     else {
       this.demo.tick(now);
       this.s.renderer.draw(this.s.player, this.lesson, this.tours.session, audioNow, now, hint, camera);
@@ -279,8 +279,9 @@ export class AirfretApp {
     if (hands.length) this.lastHandsAt = now;
     const frame = this.s.tracker.frameSize();
     const px = hands.map((hand) => hand.landmarks.map((p) => videoToScreen(p, frame, window.innerWidth, window.innerHeight)));
+    const stage = this.s.stages.find((x) => x.handles(this.s.store.value.instrument));
     if (this.isDrums) this.s.drums.updateHands(px, now, audioNow, now);
-    else if (isKeyboard(this.s.store.value.instrument)) this.s.piano.updateHands(px, now, audioNow);
+    else if (stage) stage.track(px, now, audioNow);
     else if (this.demo.isPlaying) this.s.player.strikeAlong(px, now, audioNow, !this.ui.pointer.isDown);
     else this.s.player.updateHands(px, now, audioNow, !this.ui.pointer.isDown);
   }

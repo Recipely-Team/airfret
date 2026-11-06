@@ -1,9 +1,10 @@
 import { DRUMS_ID } from '@domain/drums/drums-id';
+import { DARBUKA_ID } from '@domain/drums/hand/darbuka-id';
 import { isKeyboard } from '@domain/keys/keyboard-instruments';
 import { t } from '@presentation/i18n/translator';
 
 /** How to play each instrument without a camera, where it differs from the guitar's strumming. */
-const MOUSE_HINTS: Readonly<Record<string, string>> = { [DRUMS_ID]: 'app.mouseHintDrums' };
+const MOUSE_HINTS: Readonly<Record<string, string>> = { [DRUMS_ID]: 'app.mouseHintDrums', [DARBUKA_ID]: 'app.mouseHintDarbuka' };
 /** Seconds without a visible hand before asking the player to show them. */
 const NO_HANDS_HINT_AFTER = 2.5;
 
