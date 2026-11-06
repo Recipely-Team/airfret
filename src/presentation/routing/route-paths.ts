@@ -29,6 +29,11 @@ export const INSTRUMENT_SLUGS: readonly (readonly [slug: string, instrument: str
   ['clarinet', 'clarinet'],
   ['flute', 'flute'],
   ['trumpet', 'trumpet'],
+  ['oboe', 'oboe'],
+  ['bassoon', 'bassoon'],
+  ['horn', 'horn'],
+  ['trombone', 'trombone'],
+  ['tuba', 'tuba'],
   ['drums', DRUMS_ID],
   ...HAND_DRUMS.map((d) => [d.id, d.id] as const),
 ];
