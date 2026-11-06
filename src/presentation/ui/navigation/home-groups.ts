@@ -1,5 +1,5 @@
 import { DRUMS_ID } from '@domain/drums/drums-id';
-import { DARBUKA_ID } from '@domain/drums/hand/darbuka-id';
+import { HAND_DRUMS } from '@domain/drums/hand/hand-drum-catalog';
 import { PIANO_ID } from '@domain/keys/piano-id';
 
 /**
@@ -11,5 +11,5 @@ export const HOME_GROUPS: readonly { readonly label: string; readonly ids: reado
   { label: 'home.group.folk', ids: ['saz', 'mandolin', 'balalaika', 'bouzouki', 'greekBouzouki', 'banjo'] },
   { label: 'home.group.bass', ids: ['bass', 'bass5', 'bass6'] },
   { label: 'home.group.keys', ids: [PIANO_ID, 'harpsichord'] },
-  { label: 'home.group.drums', ids: [DRUMS_ID, DARBUKA_ID] },
+  { label: 'home.group.drums', ids: [DRUMS_ID, ...HAND_DRUMS.map((d) => d.id)] },
 ];

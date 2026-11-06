@@ -112,14 +112,14 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | C6.3 | `/balalaika` | A triangular body; strings E E A; tunings include "Guitar" G B D, Domra E A D, Folk D F# A and C E G | |
 | C6.4 | `/bouzouki` and `/greek-bouzouki` | G D A D in four unison courses; the Greek one D A D, its low course with an octave string | |
 
-## C7. Darbuka
+## C7. Hand drums (darbuka, def, bendir, cajón, congas, bongos, djembe, tabla, handpan)
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| C7.1 | `/darbuka` → Start | A goblet drum seen from the seat: copper body, pale head, chrome rim; düm in the middle, ka left, tek right; no modes in the top bar | |
-| C7.2 | Fingertips (index, middle, ring) striking the middle of the head | A deep düm, louder the faster the stroke; a resting finger doesn't repeat | |
-| C7.3 | Right hand on the edge, then left hand on the edge | Tek (sharp, ringing), then ka (lower, drier) | |
-| C7.4 | No camera: click the middle, the left edge, the right edge | Düm, ka, tek, each with a ripple | |
+| C7.1 | Each page from Home → Drums & percussion | The drum drawn by its kind (copper goblet, frame with jingles, wooden box, barrels, steel dome); stroke names where they are played; no modes in the top bar | |
+| C7.2 | Fingertips (index, middle, ring) striking the middle of a head | Its centre stroke (düm, bass, ge, tin, or the handpan field's note), louder the faster; a resting finger doesn't repeat | |
+| C7.3 | Right hand on an edge, then left hand on the edge | The right-hand edge stroke (tek, open, tone, na), then the left (ka, slap) | |
+| C7.4 | No camera: click the middle and each edge of each head | Each stroke sounds with a ripple; on the handpan each field plays its note of D Kurd | |
 
 ## C2. Drums
 

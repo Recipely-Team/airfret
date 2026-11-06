@@ -2,6 +2,7 @@ import type { Result } from '@core/result/result';
 import { ok } from '@core/result/result-factories';
 import type { DrumHitRequest } from '@domain/audio/drum-hit-request';
 import type { DrumKind } from '@domain/audio/drum-kind';
+import type { HandStroke } from '@domain/drums/hand/hand-stroke';
 import type { PluckRequest } from '@domain/audio/pluck-request';
 import type { RetuneRequest } from '@domain/audio/retune-request';
 import type { Voice } from '@domain/audio/voice';
@@ -63,6 +64,12 @@ export class FakeSoundOutput implements SoundOutputInterface {
 
   readonly drumHits: DrumHitRequest[] = [];
   chokes = 0;
+
+  readonly handStrokes: { stroke: HandStroke; velocity: number; when: number }[] = [];
+
+  hitHandDrum(stroke: HandStroke, velocity: number, when: number): void {
+    this.handStrokes.push({ stroke, velocity, when });
+  }
 
   hitDrum(request: DrumHitRequest): void {
     this.drumHits.push(request);
