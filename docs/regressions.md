@@ -72,6 +72,12 @@ resting finger stops the string in both voices. Tests `tap-detector.test.ts`, `t
 that opens with rests before its pickup (Auld Lang Syne: 2.1 s) began in silence. *Fix:* self-play starts at the
 first note. Test `demo-performer.test.ts` ("starts at the first note even when the song opens with rests").
 
+**Changing note or chord squeaked, and resting a finger on a string scraped.** The player fired a synthetic
+"fingers on wound strings" squeak on every fret or chord-box change, and `touch()` added a noise burst; at playing
+speed that is a hiss between every pair of notes (reported 2026-11-04; the first fix, PR #17, went stale unmerged).
+*Guard:* `player-hands.test.ts` ("moving the fretting hand to another chord makes no sound of its own"); the
+`fretNoise` method is gone from `SoundOutputInterface`, so nothing can schedule it again.
+
 **Some recorded takes came out empty.** Cutting the leading silence before applying the instrument's gain treated
 quiet recordings (the conga taps, the softest tumba hit, peaking under −45 dB) as silence from start to end: 258-byte
 files that decoded to nothing, so those strokes fell back to the synth. *Fix:* gain first, then trim. Guard: the

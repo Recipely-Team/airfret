@@ -2,15 +2,11 @@
 const CHUCK = { guitarHz: 2200, bassHz: 700, q: 1.2, attack: 0.003, length: 0.06, level: 0.35 } as const;
 /** Pick hitting the string: a 3 ms bright tick, louder for harder strokes. */
 const PICK = { highpassHz: 3000, q: 0.7, level: 0.09, length: 0.004 } as const;
-/** Fingertip landing on a string. */
-const TOUCH = { bandHz: 3200, q: 1, level: 0.025, length: 0.03 } as const;
-/** Fingers sliding over wound strings: a short rising squeak. */
-const SQUEAK = { fromHz: 1400, toHz: 3200, q: 6, level: 0.05, length: 0.12 } as const;
 const SILENT = 0.0001;
 
 /**
- * **StringNoises** — the small sounds around a played string, beside the notes themselves: the pick's tick, a
- * fingertip landing, fingers squeaking along wound strings on a chord change, the chuck of muted strings.
+ * **StringNoises** — the small sounds a stroke makes beside its notes: the pick's tick and the chuck of muted
+ * strings. Nothing sounds between notes (no squeak on a chord change, no scrape when a finger rests on a string).
  * Each is a burst of the shared noise buffer, shaped and sent into the instrument's chain (`into`).
  */
 export class StringNoises {
@@ -21,24 +17,6 @@ export class StringNoises {
 
   pick(into: AudioNode, when: number, amp: number): void {
     this.burst(into, 'highpass', PICK.highpassHz, PICK.q, when, PICK.level * Math.min(1, amp), PICK.length);
-  }
-
-  touch(into: AudioNode, when: number): void {
-    this.burst(into, 'bandpass', TOUCH.bandHz, TOUCH.q, when, TOUCH.level, TOUCH.length);
-  }
-
-  squeak(into: AudioNode, when: number): void {
-    const t = Math.max(when, this.ctx.currentTime);
-    const bp = this.ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.Q.value = SQUEAK.q;
-    bp.frequency.setValueAtTime(SQUEAK.fromHz, t);
-    bp.frequency.exponentialRampToValueAtTime(SQUEAK.toHz, t + SQUEAK.length);
-    const g = this.ctx.createGain();
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(SQUEAK.level, t + SQUEAK.length * 0.3);
-    g.gain.linearRampToValueAtTime(0, t + SQUEAK.length);
-    this.play(bp, g, into, t, SQUEAK.length + 0.02, Math.random() * 0.5);
   }
 
   chuck(into: AudioNode, when: number, amp: number, isBass: boolean): void {

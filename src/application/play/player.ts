@@ -58,7 +58,7 @@ interface PlayerSetup {
  * **Player** — turns tracked hands into sound.
  *
  * @remarks
- * - The fretting hand selects a chord (chord mode) or a fret (note mode); a fist mutes; changing chord squeaks the wound strings.
+ * - The fretting hand selects a chord (chord mode) or a fret (note mode), silently; a fist mutes.
  * - The strumming fingertip bends each string it presses and plucks it when it slips off; where along the string it plucks sets the tone.
  * - Re-strumming lets strings ring on; only a fingertip *resting* on a string (≥ 0.15 s) stops it. A tap plucks one.
  */
@@ -201,10 +201,9 @@ export class Player {
       this.legato.update(this.fretting, this.instrument.tuning, this.soundingSemis, this.energy, audioNow);
       return;
     }
-    const before = this.mode === PlayMode.chord ? this.slot : this.fret;
+    // Changing chord or fret makes no sound of its own: a squeak between every pair of notes was annoying.
     if (this.mode === PlayMode.chord) this.slot = chordSlotSelection(this.layout, this.chords.length, p, this.slot);
     else this.fret = fretAt(this.layout, p);
-    if ((this.mode === PlayMode.chord ? this.slot : this.fret) !== before) this.sound.fretNoise(audioNow);
   }
 
   private strumTip(hand: readonly Point[] | null, t: number): Point | null {
