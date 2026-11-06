@@ -36,7 +36,12 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      # A static ffmpeg from GitHub: the runner's apt mirror has hung this step for 25 minutes at a time.
+      - name: Install ffmpeg
+        timeout-minutes: 5
+        run: |
+          curl -sSfL https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz | tar -xJ
+          echo "$PWD/ffmpeg-master-latest-linux64-gpl/bin" >> "$GITHUB_PATH"
       - uses: actions/cache@v4
         with:
           path: tools/songs/.cache
