@@ -4,8 +4,8 @@ import '@presentation/styles/style.css';
 import { DrumPlayer } from '@application/drums/drum-player';
 import { PianoPlayer } from '@application/keys/piano-player';
 import { KeysStage } from '@presentation/app/stages/keys-stage';
-import { DarbukaStage } from '@presentation/app/stages/darbuka-stage';
-import { DarbukaPlayer } from '@application/drums/darbuka-player';
+import { HandDrumStage } from '@presentation/app/stages/hand-drum-stage';
+import { HandDrumPlayer } from '@application/drums/hand-drum-player';
 import { PedalRouter } from '@application/drums/pedal-router';
 import { BackingTrack } from '@application/lessons/backing-track';
 import { GuidePlayer } from '@application/lessons/guide-player';
@@ -69,7 +69,7 @@ function bootstrap(): void {
   const drums = new DrumPlayer(sound);
   const piano = new PianoPlayer(sound);
   /** Pages that aren't a fretted instrument, each with its own player and drawing. */
-  const stages = [new KeysStage(piano), new DarbukaStage(new DarbukaPlayer(sound))];
+  const stages = [new KeysStage(piano), new HandDrumStage(new HandDrumPlayer(sound))];
   const pedalInput = new BrowserPedalInput();
 
   let app: AirfretApp | null = null;
