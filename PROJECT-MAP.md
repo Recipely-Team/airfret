@@ -113,11 +113,11 @@ Layers and rules: `CLAUDE.md`, `architecture.md`.
 
 ## src/domain/drums/hand/
 
-- `hand-drum-catalog.ts` — Every hand drum, as data the one synth (`HandDrumVoice`) and the one stage play. Pitches and decays are set by
+- `hand-drum-catalog.ts` — Every hand drum, as data the one voice (`HandDrumVoice`) and the one stage play. The darbuka and the congas
 - `hand-drum-head.ts` — One head of a hand drum: where it sits on screen, how it looks, and what each kind of stroke sounds like.
 - `hand-drum-pads.ts` — A head's radius is `size` of the width, but never more than this times `size` of the height.
 - `hand-drum.ts` — A drum played with the hands — darbuka, congas, handpan…: its id (and page), name, and heads.
-- `hand-stroke.ts` — One way of striking a hand drum, as the synth should voice it: the drum's resonant modes (a membrane's pitch
+- `hand-stroke.ts` — One way of striking a hand drum: real recordings when there are some, else as the synth should voice it: the d
 
 ## src/domain/fretboard/
 
