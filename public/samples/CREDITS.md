@@ -7,6 +7,7 @@ Prepared with `tools/samples/prepare.mjs`. Only freely redistributable sources m
 | `bass/` | FreePats — *Finger Bass YR* (Yamaha RBX, recorded by Andrea Biasior), 2019-09-30 | CC0 1.0 | Verified (LICENSE.txt in the release) |
 | `electric/` | FreePats — *Clean Electric Guitar* | CC0 1.0 | Per FreePats; re-check the release's LICENSE.txt |
 | `banjo/` | sfzinstruments — *ganjo* (SX 6-string guitar banjo, recorded by itsclipping), github.com/sfzinstruments/ganjo @ `ccff5cd` | CC0 1.0 | Verified (LICENSE.md in the repo). 25 of 58 regions kept (first take per note); G2 and G3 left out with `--skip-untrusted` (≥ 60 c sharp) |
+| `piano/` | FreePats — *Upright Piano KW* (small, 2019-07-03; a Kawai upright recorded by Gonzalo and Roberto), freepats.zenvoid.org/Piano/acoustic-grand-piano.html, archive SHA-256 `e346ef19…7047f` | CC0 1.0 | Verified (cc0.txt and readme.txt in the archive). 26 recordings, a minor third apart, C1–B7 |
 | `steel/` | Meta Open Sound guitars (`INSGuitar…` files) | Freely redistributable | Confirmed by the owner, 2026-11-04; record the licence name and link here |
 | `nylon/` | Meta Open Sound guitars (`INSGuitar…` files) | Freely redistributable | Confirmed by the owner, 2026-11-04; record the licence name and link here |
 

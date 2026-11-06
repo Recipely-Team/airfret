@@ -2,6 +2,8 @@ import { SONGS } from '@domain/lessons/catalog/song-catalog';
 import { launchFeature } from '@presentation/app/launch-feature';
 import '@presentation/styles/style.css';
 import { DrumPlayer } from '@application/drums/drum-player';
+import { PianoPlayer } from '@application/keys/piano-player';
+import { PIANO_ID } from '@domain/keys/piano-id';
 import { PedalRouter } from '@application/drums/pedal-router';
 import { BackingTrack } from '@application/lessons/backing-track';
 import { GuidePlayer } from '@application/lessons/guide-player';
@@ -62,11 +64,12 @@ function bootstrap(): void {
   const tracker = new MediaPipeHandTracker(video);
   const player = new Player(sound);
   const drums = new DrumPlayer(sound);
+  const piano = new PianoPlayer(sound);
   const pedalInput = new BrowserPedalInput();
 
   let app: AirfretApp | null = null;
   const router = new Router((route) => app?.show(route));
-  const drawer = new LessonsDrawer(store, (song) => app?.openIntro(song), () => app?.tourFromAnywhere(), () => app?.closeOverlay(), () => ui.customSong.open());
+  const drawer = new LessonsDrawer(store, (song) => router.navigate({ kind: 'lesson', songId: song.id }), () => app?.tourFromAnywhere(), () => app?.closeOverlay(), () => ui.customSong.open());
   const ui: AppUi = {
     start: new StartScreen(() => app?.start() ?? Promise.resolve()),
     toast: new Toast(),
@@ -78,19 +81,19 @@ function bootstrap(): void {
     }),
     hud: new LessonHud(store, () => app?.stopLesson()),
     result: new ResultDialog(() => { const s = ui.intro.current; if (s) app?.beginLesson(s); }, () => router.navigate({ kind: 'lessons' })),
-    pointer: new PointerInput(canvas, player, sound, drums, () => app?.isDrums ?? false),
-    tourBar: new TourBar(() => app?.skipTourStep(), () => app?.endTour()),
+    pointer: new PointerInput(canvas, player, sound, drums, () => app?.isDrums ?? false, piano, () => store.value.instrument === PIANO_ID),
+    tourBar: new TourBar(() => app?.tours.skip(), () => app?.endTour()),
     pedals: new PedalPanel(store, pedalInput),
     explore: new ExploreGuide((id) => tryFeature(id), () => app?.closeOverlay()),
     openSettings: () => openPopover('settings'),
     home: new HomeView(() => app?.tourFromAnywhere()),
-    customSong: new CustomSongForm(store, (song) => app?.openIntro(song)),
+    customSong: new CustomSongForm(store, (song) => router.navigate({ kind: 'lesson', songId: song.id })),
     nav: new NavMenu(),
     navigate: (route) => router.navigate(route),
     replaceRoute: (route) => router.replace(route),
   };
   app = new AirfretApp(
-    { store, sound, tracker, player, drums, renderer: new StageRenderer(canvas, ctx, video), backing: new BackingTrack(sound), guide: new GuidePlayer(sound), startLesson: new StartLessonUseCase() },
+    { store, sound, tracker, player, drums, piano, renderer: new StageRenderer(canvas, ctx, video), backing: new BackingTrack(sound), guide: new GuidePlayer(sound), startLesson: new StartLessonUseCase() },
     ui,
   );
   const running = app;

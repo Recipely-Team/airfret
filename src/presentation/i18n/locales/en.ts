@@ -20,6 +20,7 @@ export const EN: Readonly<Record<string, string>> = {
   'app.loadingModel': 'Loading hand tracking…',
   'app.camera': 'Allow camera access…',
   'app.cameraError': 'Camera unavailable. Check browser permissions — you can still play with the mouse and number keys.',
+  'app.mouseHintPiano': "No camera? Click or touch the keys — several fingers play a chord; hold Space for the sustain pedal.",
   'app.noHands': 'Show both hands to the camera',
   'app.mouseHint': 'No camera? Drag the mouse across the strings, keys 1–8 pick a chord.',
 
@@ -32,6 +33,7 @@ export const EN: Readonly<Record<string, string>> = {
   'inst.twelve': "12-string",
   'inst.guitar7': "7-string",
   'inst.bass6': "6-string bass",
+  'inst.piano': "Piano",
   'inst.banjo': 'Banjo',
 
   'mode.chord': 'Chords',
@@ -385,6 +387,7 @@ export const EN: Readonly<Record<string, string>> = {
   'home.tourCta': "Take the 2-minute tour",
   'home.group.guitars': "Guitars",
   'home.group.bass': "Bass",
+  'home.group.keys': "Keys",
   'home.group.drums': "Drums",
   'home.learn': "Learn",
   'home.about.acoustic': "Steel strings, bright and full. The best place to start.",
@@ -396,6 +399,7 @@ export const EN: Readonly<Record<string, string>> = {
   'home.about.12-string': "Every string doubled — octaves below, unisons on top: the big shimmering strum of folk rock.",
   'home.about.7-string': "An electric with a low B under the six: deeper riffs, wider chords, 24 frets.",
   'home.about.bass-6': "Low B to high C: room for chords and melodies on a bass.",
+  'home.about.piano': "Every finger plays: press keys in the air, louder the faster you go. Hold Space for the pedal.",
   'home.about.banjo': "Six strings over a drum head: bright, snappy, tuned like a guitar.",
   'home.about.drums': "Sticks in your hands, pedals under your feet.",
   'home.tourText': "Learn the basics in two minutes.",

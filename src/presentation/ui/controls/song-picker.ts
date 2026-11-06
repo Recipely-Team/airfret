@@ -1,10 +1,9 @@
 import { searchSongs } from '@application/lessons/search-songs';
-import { DRUMS_ID } from '@domain/drums/drums-id';
-import { instrumentById } from '@domain/instruments/instrument-catalog';
 import type { Song } from '@domain/lessons/catalog/song';
 import { t } from '@presentation/i18n/translator';
 import { byId } from '@presentation/ui/dom';
 import { songSearchText } from '@presentation/ui/lessons/song-search-text';
+import { instrumentName } from '@presentation/ui/navigation/instrument-name';
 
 /** The panel is never wider than this, and keeps this margin from the screen's edge. */
 const PANEL = { maxWidth: 380, margin: 12, gap: 6 } as const;
@@ -91,7 +90,7 @@ export class SongPicker {
       const title = document.createElement('strong');
       title.textContent = song.title;
       const meta = document.createElement('small');
-      const instrument = t(song.instrument === DRUMS_ID ? 'inst.drums' : instrumentById(song.instrument).name);
+      const instrument = instrumentName(song.instrument);
       meta.textContent = `${t(song.credit)} · ${instrument} · ${song.bpm} BPM`;
       b.append(title, meta);
       b.onclick = () => this.pick(song);

@@ -20,6 +20,7 @@ export const TR: Readonly<Record<string, string>> = {
   'app.loadingModel': 'El takibi yükleniyor…',
   'app.camera': 'Kamera izni ver…',
   'app.cameraError': 'Kameraya erişilemedi. Tarayıcı izinlerini kontrol et — fare ve rakam tuşlarıyla yine de çalabilirsin.',
+  'app.mouseHintPiano': "Kamera yok mu? Tuşlara tıkla ya da dokun — birkaç parmak akor çalar; pedal için Boşluk tuşunu basılı tut.",
   'app.noHands': 'İki elini de kameraya göster',
   'app.mouseHint': 'Kamera yok mu? Fareyi tellerin üzerinden sürükle, 1–8 tuşları akor seçer.',
 
@@ -32,6 +33,7 @@ export const TR: Readonly<Record<string, string>> = {
   'inst.twelve': "12 telli",
   'inst.guitar7': "7 telli",
   'inst.bass6': "6 telli bas",
+  'inst.piano': "Piyano",
   'inst.banjo': 'Banjo',
 
   'mode.chord': 'Akor',
@@ -385,6 +387,7 @@ export const TR: Readonly<Record<string, string>> = {
   'home.tourCta': "2 dakikalık turu başlat",
   'home.group.guitars': "Gitarlar",
   'home.group.bass': "Bas",
+  'home.group.keys': "Tuşlular",
   'home.group.drums': "Davul",
   'home.learn': "Öğren",
   'home.about.acoustic': "Çelik teller, parlak ve dolgun. Başlamak için en iyisi.",
@@ -396,6 +399,7 @@ export const TR: Readonly<Record<string, string>> = {
   'home.about.12-string': "Her tel çift — altta oktav, üstte aynı ses: folk rock’ın parıldayan geniş vuruşu.",
   'home.about.7-string': "Altı telin altında kalın bir Si olan elektro: daha derin riff’ler, geniş akorlar, 24 perde.",
   'home.about.bass-6': "Kalın Si’den ince Do’ya: basta akora ve ezgiye yer.",
+  'home.about.piano': "Her parmak çalar: tuşlara havada bas, ne kadar hızlı o kadar güçlü. Pedal için Boşluk tuşunu basılı tut.",
   'home.about.banjo': "Davul derisi üstünde altı tel: parlak, keskin, gitar gibi akortlu.",
   'home.about.drums': "Ellerinde baget, ayaklarının altında pedal.",
   'home.tourText': "Temelleri iki dakikada öğren.",
