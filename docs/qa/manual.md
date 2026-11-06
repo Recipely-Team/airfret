@@ -84,7 +84,7 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | # | Step | Expected | Result |
 |---|---|---|---|
 | C4.1 | `/piano` → Start | A keyboard with ivory and ebony keys, every C labelled (C4 = middle C); no modes or chord sets in the top bar | |
-| C4.2 | Hands over the keys, bring one fingertip down onto a white key, then a black key | Each key sounds once, sinks and lights while the finger stays down, stops when it lifts | |
+| C4.2 | Hands over the keys, still, then moving around | Nothing plays and no key stays lit; then press one finger down (below the others) on a white key, then a black key: each sounds once, stays lit while the finger is down, stops when it comes up | |
 | C4.3 | Three fingers at once, both hands | A chord; a fast stroke is louder than a slow one | |
 | C4.4 | No camera: click a key, drag across several, touch with two fingers | Each plays; dragging plays each key it reaches; two touches play two notes | |
 | C4.5 | Hold Space, play, release a key, then release Space | Notes ring on while Space is held and stop when it's let go | |
