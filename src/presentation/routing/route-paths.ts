@@ -4,11 +4,14 @@ import type { Route } from '@presentation/routing/route';
 /** URL slug per instrument id, in menu order. */
 export const INSTRUMENT_SLUGS: readonly (readonly [slug: string, instrument: string])[] = [
   ['acoustic', 'acoustic'],
+  ['12-string', 'twelve'],
   ['classical', 'nylon'],
   ['electric', 'clean'],
+  ['7-string', 'guitar7'],
   ['overdrive', 'drive'],
   ['bass', 'bass'],
   ['bass-5', 'bass5'],
+  ['bass-6', 'bass6'],
   ['banjo', 'banjo'],
   ['drums', DRUMS_ID],
 ];

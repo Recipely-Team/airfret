@@ -99,7 +99,7 @@ export class DemoPerformer {
       this.stop();
       return null;
     }
-    this.advanceHand(session, l.strings, capo, audioNow);
+    this.advanceHand(session, instrument.tuning, capo, audioNow);
     this.plucks.sort((a, b) => a.when - b.when);
     const hits: { string: number; amp: number }[] = [];
     while (this.shown < this.plucks.length && (this.plucks[this.shown]?.when ?? Infinity) <= audioNow) {
@@ -108,12 +108,13 @@ export class DemoPerformer {
     }
     const pick = this.pickAt(l, audioNow);
     this.forget(audioNow);
-    const fretting = this.fretting ?? chordFretting('', l.strings, capo);
+    const fretting = this.fretting ?? chordFretting('', instrument.tuning, capo);
     return { fretting, hits, pick, fretHand: ghostFretHand(l, fretting, capo), strumHand: ghostStrumHand(l, pick), chord: this.chord };
   }
 
   /** Lands the fingers for every target that is about to sound. */
-  private advanceHand(session: LessonSession, strings: number, capo: number, audioNow: number): void {
+  private advanceHand(session: LessonSession, tuning: readonly number[], capo: number, audioNow: number): void {
+    const strings = tuning.length;
     const targets = session.chart.targets;
     while (this.nextTarget < targets.length) {
       const tg = targets[this.nextTarget];
@@ -121,7 +122,7 @@ export class DemoPerformer {
       this.nextTarget++;
       if (tg.chord !== undefined) {
         this.chord = tg.chord;
-        this.fretting = chordFretting(tg.chord, strings, capo);
+        this.fretting = chordFretting(tg.chord, tuning, capo);
       } else {
         this.chord = '';
         this.held = holdNotes(this.held, (this.plan[tg.index] ?? []).map((n) => ({ string: n.string, fret: n.fret })));

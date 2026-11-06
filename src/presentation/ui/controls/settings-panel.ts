@@ -47,7 +47,7 @@ export class SettingsPanel {
       return o;
     }));
     const tuning = byId<HTMLSelectElement>('tuning');
-    tuning.replaceChildren(...tuningsFor(instrumentById(s.instrument).tuning.length).map((tu) => {
+    tuning.replaceChildren(...tuningsFor(instrumentById(s.instrument).tuning).map((tu) => {
       const o = document.createElement('option');
       o.value = tu.id;
       o.textContent = t(tu.name);

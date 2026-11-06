@@ -22,7 +22,6 @@ import { StrumDirection } from '@domain/gesture/strum-direction';
 import { speedToAmp } from '@domain/gesture/strum-velocity';
 import type { Instrument } from '@domain/instruments/instrument';
 import { PlayMode } from '@domain/instruments/play-mode';
-import { CHORD_SHAPES } from '@domain/music/chords/chord-shapes';
 import { chordNotes } from '@domain/music/chords/chord-voicing';
 import { StrumFilter } from '@domain/settings/strum-filter';
 import { HandLandmark } from '@domain/tracking/hand-landmark';
@@ -125,8 +124,8 @@ export class Player {
   stringFret(string: number): number {
     if (this.mode === PlayMode.free || this.isPerforming) return this.fretting?.frets[string] ?? 0;
     if (this.mode === PlayMode.note) return this.fret;
-    const shapeFret = (this.chord ? CHORD_SHAPES[this.chord]?.[string] : 0) ?? 0;
-    return shapeFret > 0 ? shapeFret + this.capo : this.capo;
+    const note = this.chord ? chordNotes(this.chord, this.instrument.tuning)[string] : null;
+    return (note === null || note === undefined ? 0 : note - (this.instrument.tuning[string] ?? 0)) + this.capo;
   }
 
   /** Free mode works in absolute frets; the tuning already includes the capo. */

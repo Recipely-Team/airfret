@@ -27,4 +27,9 @@ export interface Instrument {
   /** Plays from recordings when they cover the note; false = the string synth only. */
   readonly isRecorded: boolean;
   readonly defaultMode: PlayMode;
+  /**
+   * A 12-string's courses: for each string, how many semitones above it its paired string is tuned (12 = an
+   * octave, 0 = unison). Both sound on every pluck. Absent on single-course instruments.
+   */
+  readonly courses?: readonly number[];
 }

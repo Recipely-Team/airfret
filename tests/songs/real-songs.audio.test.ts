@@ -19,8 +19,8 @@ const CASALS = {
   path: 'tools/songs/.cache/casals-bwv1007-prelude.ogg',
 } as const;
 const CASES = [
-  { song: 'bach-prelude', score: 'bach-prelude', instruments: ['acoustic', 'nylon', 'clean', 'drive', 'banjo'] },
-  { song: 'bach-prelude-bass', score: 'bach-prelude-bass', instruments: ['bass', 'bass5'] },
+  { song: 'bach-prelude', score: 'bach-prelude', instruments: ['acoustic', 'twelve', 'nylon', 'clean', 'guitar7', 'drive', 'banjo'] },
+  { song: 'bach-prelude-bass', score: 'bach-prelude-bass', instruments: ['bass', 'bass5', 'bass6'] },
   { song: 'claro-de-luna', score: 'claro-de-luna', instruments: ['nylon', 'acoustic', 'clean', 'banjo'] },
 ] as const;
 /**

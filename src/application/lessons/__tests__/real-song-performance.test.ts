@@ -15,8 +15,8 @@ interface Score {
  * Pablo Casals' 1938 recording (141.5 s, measured by `tests/songs`), for Claro de Luna its score's tempo.
  */
 const PIECES = [
-  { song: 'bach-prelude', score: 'bach-prelude', realSeconds: 141.5, instruments: ['acoustic', 'nylon', 'clean', 'drive', 'banjo'] },
-  { song: 'bach-prelude-bass', score: 'bach-prelude-bass', realSeconds: 141.5, instruments: ['bass', 'bass5'] },
+  { song: 'bach-prelude', score: 'bach-prelude', realSeconds: 141.5, instruments: ['acoustic', 'twelve', 'nylon', 'clean', 'guitar7', 'drive', 'banjo'] },
+  { song: 'bach-prelude-bass', score: 'bach-prelude-bass', realSeconds: 141.5, instruments: ['bass', 'bass5', 'bass6'] },
   { song: 'claro-de-luna', score: 'claro-de-luna', realSeconds: null, instruments: ['nylon', 'acoustic', 'clean', 'drive', 'banjo'] },
 ] as const;
 /** A played note is the score's note when it has the same pitch and lands this close (s). */

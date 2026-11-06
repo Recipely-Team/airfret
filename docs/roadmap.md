@@ -45,6 +45,9 @@ An instrument ships only when it can do what the real one does, proven by a real
 | Bass | 24 frets ✓ | Bach Prélude at cello pitch ✓, Casals ✓ | Samples cover only E1–A2: 550 of 656 notes are synthesised; needs a full-range set |
 | 5-string bass | 24 frets ✓, low B | Bach Prélude ✓ | Shares the 4-string recordings: B0–D#1 re-pitched or synthesised |
 | Banjo (6-string, guitar tuning) | 22 frets ✓ | Bach Prélude, Claro de Luna ✓ | 25 recordings, D2–C5 (CC0), one take each; synth tone colour furthest from the real one (32 dB); no 5-string drone banjo yet |
+| 12-string (steel) | 20 frets ✓, octave and unison courses | Bach Prélude ✓ | Courses share the steel recordings (each pair re-pitched from its partner's); the headstock still draws six pegs |
+| 7-string (electric) | 24 frets ✓, low B | Bach Prélude ✓ | Low B (B1) re-pitched from the electric set; one take per note |
+| 6-string bass | 24 frets ✓, low B and high C | Bach Prélude ✓ | Shares the bass recordings: the high C string is re-pitched or synthesised |
 | Drums | — | — | Groove charts and a real-song test (see Drum lessons) |
 
 The on-screen neck still shows 12 frets: the guide plays the whole neck, but an air player can't reach fret 13+
@@ -59,8 +62,10 @@ Each needs its own string/key model (or samples), a drawing, a gesture mapping a
 song test before it ships. Grouped by how much of the existing code they reuse.
 
 **Fretted, same hand model (tuning + frets + samples)**
-- 12-string guitar (octave courses), 7- and 8-string guitar, baritone guitar
-- ~~5-string bass~~ (shipped), 6-string bass, fretless bass (continuous pitch), acoustic bass guitar
+- ~~12-string guitar~~, ~~7-string guitar~~ (shipped 2026-11-06), 8-string guitar, baritone guitar
+- ~~5-string bass~~, ~~6-string bass~~ (shipped), fretless bass (continuous pitch), acoustic bass guitar
+- Chord shapes and tunings now follow the family (guitar or bass, by range), not the string count — what a
+  6-string bass needed, and what a 4-string ukulele will need
 - Ukulele (soprano, concert, tenor, baritone), guitalele — blocked on recordings: no CC0 / freely licensed
   ukulele multisample found (2026-11-05); also needs its own chord shapes and tunings keyed by family, not
   string count (a 4-string ukulele would otherwise get the bass's)

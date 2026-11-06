@@ -1,3 +1,4 @@
+import { isBassRange } from '@domain/music/tunings';
 import type { Tuning } from '@domain/music/tuning';
 
 export const GUITAR_TUNINGS: readonly Tuning[] = [
@@ -21,15 +22,34 @@ export const BASS5_TUNINGS: readonly Tuning[] = [
   { id: 'halfDown', name: 'tuning.halfDown', offsets: [-1, -1, -1, -1, -1] },
 ];
 
-const BY_STRING_COUNT: Readonly<Record<number, readonly Tuning[]>> = { 4: BASS_TUNINGS, 5: BASS5_TUNINGS, 6: GUITAR_TUNINGS };
+/** The 6-string bass: the five's tunings, with its high C following along. */
+export const BASS6_TUNINGS: readonly Tuning[] = [
+  { id: 'standard', name: 'tuning.standard', offsets: [0, 0, 0, 0, 0, 0] },
+  { id: 'dropA', name: 'tuning.dropA', offsets: [-2, 0, 0, 0, 0, 0] },
+  { id: 'halfDown', name: 'tuning.halfDown', offsets: [-1, -1, -1, -1, -1, -1] },
+];
 
-/** Tunings available for an instrument with this many strings (every tuning's offsets match its strings). */
-export function tuningsFor(strings: number): readonly Tuning[] {
-  return BY_STRING_COUNT[strings] ?? [GUITAR_TUNINGS[0] as Tuning];
+/** The 7-string guitar: drop A lowers its low B, the way drop D lowers a six-string's low E. */
+export const GUITAR7_TUNINGS: readonly Tuning[] = [
+  { id: 'standard', name: 'tuning.standard', offsets: [0, 0, 0, 0, 0, 0, 0] },
+  { id: 'dropA', name: 'tuning.dropA', offsets: [-2, 0, 0, 0, 0, 0, 0] },
+  { id: 'halfDown', name: 'tuning.halfDown', offsets: [-1, -1, -1, -1, -1, -1, -1] },
+];
+
+const BASSES: Readonly<Record<number, readonly Tuning[]>> = { 4: BASS_TUNINGS, 5: BASS5_TUNINGS, 6: BASS6_TUNINGS };
+const GUITARS: Readonly<Record<number, readonly Tuning[]>> = { 6: GUITAR_TUNINGS, 7: GUITAR7_TUNINGS };
+
+/**
+ * Tunings available for an instrument, by its family and string count (every tuning's offsets match its
+ * strings): a 6-string bass gets bass tunings, not a guitar's drop D.
+ */
+export function tuningsFor(base: readonly number[]): readonly Tuning[] {
+  const family = isBassRange(base) ? BASSES : GUITARS;
+  return family[base.length] ?? [{ id: 'standard', name: 'tuning.standard', offsets: base.map(() => 0) }];
 }
 
 /** Open-string pitches after the tuning and a capo: a capo raises every string by its fret. */
 export function effectiveTuning(base: readonly number[], tuningId: string, capo: number): number[] {
-  const offsets = tuningsFor(base.length).find((t) => t.id === tuningId)?.offsets;
+  const offsets = tuningsFor(base).find((t) => t.id === tuningId)?.offsets;
   return base.map((m, i) => m + (offsets?.[i] ?? 0) + capo);
 }

@@ -13,5 +13,8 @@ export const SAMPLE_SET_BY_INSTRUMENT: Readonly<Record<string, string>> = {
   drive: 'electric',
   bass: 'bass',
   bass5: 'bass',
+  bass6: 'bass',
+  twelve: 'steel',
+  guitar7: 'electric',
   banjo: 'banjo',
 };

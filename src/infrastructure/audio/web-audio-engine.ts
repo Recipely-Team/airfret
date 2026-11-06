@@ -24,9 +24,10 @@ import type { SampleSet } from '@infrastructure/audio/samples/sample-set';
 import { SAMPLE_SET_BY_INSTRUMENT } from '@infrastructure/audio/samples/sample-sets';
 import { ringSeconds, stringPan, stringPluck } from '@infrastructure/audio/strings/string-pluck';
 import { AssetPath } from '@infrastructure/constants/assets';
-import { CHUCK, PICK, SQUEAK, TOUCH } from '@infrastructure/audio/string-noises';
+import { StringNoises } from '@infrastructure/audio/string-noises';
+import { coursePair, courseStrings, pairInterval } from '@infrastructure/audio/strings/course-pair';
 
-const Level = { master: 0.8, click: 0.5, chuck: 0.35, samples: 0.9 } as const;
+const Level = { master: 0.8, click: 0.5, samples: 0.9 } as const;
 const Reverb = { seconds: 2.2, decay: 3.2 } as const;
 /** Drums sit in a small room: a little of the shared reverb (`room`). */
 const KIT = { level: 0.9, room: 0.6 } as const;
@@ -49,6 +50,7 @@ export class WebAudioEngine implements SoundOutputInterface {
   private readonly chainOut: GainNode;
   private readonly reverbIn: GainNode;
   private readonly noise: AudioBuffer;
+  private readonly noises: StringNoises;
   private readonly drums: DrumKit;
   private readonly kit: AcousticKit;
   private readonly chains = new Map<ChainKind, AudioChain>();
@@ -83,6 +85,7 @@ export class WebAudioEngine implements SoundOutputInterface {
     clickBus.connect(this.master);
     this.noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     this.noise.getChannelData(0).forEach((_, i, d) => (d[i] = Math.random() * 2 - 1));
+    this.noises = new StringNoises(ctx, this.noise);
     this.drums = new DrumKit(ctx, clickBus, this.noise);
     const kitBus = ctx.createGain();
     kitBus.gain.value = KIT.level;
@@ -184,6 +187,13 @@ export class WebAudioEngine implements SoundOutputInterface {
   }
 
   pluck(r: PluckRequest): void {
+    this.pluckString(r);
+    // A 12-string strikes both strings of the course.
+    const pair = coursePair(this.instrument, r);
+    if (pair) this.pluckString(pair);
+  }
+
+  private pluckString(r: PluckRequest): void {
     const inst = this.instrument;
     const bank = this.banks.get(r.voice);
     if (!bank || !inst) return;
@@ -195,10 +205,17 @@ export class WebAudioEngine implements SoundOutputInterface {
     }
     this.samples.damp(r.voice, r.string, r.when);
     bank.port.postMessage(stringPluck(inst, r));
-    if (inst.chain !== ChainKind.nylon && r.attack === StrikeSurface.nail) this.noiseBurst('highpass', PICK.highpassHz, 0.7, r.when, PICK.level * Math.min(1, r.amp), PICK.length);
+    if (this.current && inst.chain !== ChainKind.nylon && r.attack === StrikeSurface.nail) this.noises.pick(this.current.input, r.when, r.amp);
   }
 
   retune(r: RetuneRequest): void {
+    this.retuneString(r);
+    const interval = pairInterval(this.instrument, r.string);
+    const pair = courseStrings(this.instrument, r.string)[1];
+    if (interval !== null && pair !== undefined) this.retuneString({ ...r, string: pair, midi: r.midi + interval });
+  }
+
+  private retuneString(r: RetuneRequest): void {
     const inst = this.instrument;
     if (this.samples.isSounding(r.voice, r.string)) {
       this.samples.retune(r);
@@ -213,70 +230,27 @@ export class WebAudioEngine implements SoundOutputInterface {
 
   touch(string: number, when: number, voices: readonly Voice[]): void {
     for (const v of voices) this.dampVoice(v, string, when);
-    this.noiseBurst('bandpass', TOUCH.bandHz, 1, when, TOUCH.level, TOUCH.length);
+    if (this.current) this.noises.touch(this.current.input, when);
   }
 
   fretNoise(when: number): void {
-    if (!this.current || this.instrument?.chain === ChainKind.nylon) return;
-    const t = Math.max(when, this.ctx.currentTime);
-    const src = this.ctx.createBufferSource();
-    src.buffer = this.noise;
-    const bp = this.ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.Q.value = SQUEAK.q;
-    bp.frequency.setValueAtTime(SQUEAK.fromHz, t);
-    bp.frequency.exponentialRampToValueAtTime(SQUEAK.toHz, t + SQUEAK.length);
-    const g = this.ctx.createGain();
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(SQUEAK.level, t + SQUEAK.length * 0.3);
-    g.gain.linearRampToValueAtTime(0, t + SQUEAK.length);
-    src.connect(bp).connect(g).connect(this.current.input);
-    src.start(t, Math.random() * 0.5);
-    src.stop(t + SQUEAK.length + 0.02);
+    if (this.current && this.instrument?.chain !== ChainKind.nylon) this.noises.squeak(this.current.input, when);
   }
 
   damp(string: number, when: number): void {
     this.dampVoice(Voice.player, string, when);
   }
 
+  /** Stops a string in one voice — both strings of a 12-string's course. */
   private dampVoice(voice: Voice, string: number, when: number): void {
-    this.banks.get(voice)?.port.postMessage({ type: 'damp', when, string });
-    this.samples.damp(voice, string, when);
-  }
-
-  private noiseBurst(type: BiquadFilterType, freq: number, q: number, when: number, level: number, length: number): void {
-    if (!this.current) return;
-    const t = Math.max(when, this.ctx.currentTime);
-    const src = this.ctx.createBufferSource();
-    src.buffer = this.noise;
-    const f = this.ctx.createBiquadFilter();
-    f.type = type;
-    f.frequency.value = freq;
-    f.Q.value = q;
-    const g = this.ctx.createGain();
-    g.gain.setValueAtTime(level, t);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + length);
-    src.connect(f).connect(g).connect(this.current.input);
-    src.start(t, Math.random() * 0.5);
-    src.stop(t + length + 0.01);
+    for (const s of courseStrings(this.instrument, string)) {
+      this.banks.get(voice)?.port.postMessage({ type: 'damp', when, string: s });
+      this.samples.damp(voice, s, when);
+    }
   }
 
   chuck(amp: number, when: number): void {
-    if (!this.current) return;
-    const t = Math.max(when, this.ctx.currentTime);
-    const src = this.ctx.createBufferSource();
-    src.buffer = this.noise;
-    const bp = this.ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = this.instrument?.chain === ChainKind.bass ? CHUCK.bassHz : CHUCK.guitarHz;
-    bp.Q.value = CHUCK.q;
-    const g = this.ctx.createGain();
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(Level.chuck * amp, t + CHUCK.attack);
-    g.gain.exponentialRampToValueAtTime(0.001, t + CHUCK.length);
-    src.connect(bp).connect(g).connect(this.current.input);
-    src.start(t);
-    src.stop(t + CHUCK.length + 0.02);
+    if (this.current) this.noises.chuck(this.current.input, when, amp, this.instrument?.chain === ChainKind.bass);
   }
 
   hitDrum(r: DrumHitRequest): void {
