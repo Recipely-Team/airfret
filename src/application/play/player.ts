@@ -124,7 +124,7 @@ export class Player {
   stringFret(string: number): number {
     if (this.mode === PlayMode.free || this.isPerforming) return this.fretting?.frets[string] ?? 0;
     if (this.mode === PlayMode.note) return this.fret;
-    const note = this.chord ? chordNotes(this.chord, this.instrument.tuning)[string] : null;
+    const note = this.chord ? chordNotes(this.chord, this.instrument.tuning, this.instrument.chordShapes)[string] : null;
     return (note === null || note === undefined ? 0 : note - (this.instrument.tuning[string] ?? 0)) + this.capo;
   }
 
@@ -281,7 +281,7 @@ export class Player {
       return open + this.soundingSemis(fret) + (this.fretting?.bends[string] ?? 0);
     }
     if (this.mode === PlayMode.note) return open + (this.layout.fretSemis[this.fret] ?? this.fret);
-    return this.chord ? chordNotes(this.chord, tuning)[string] ?? null : open;
+    return this.chord ? chordNotes(this.chord, tuning, this.instrument.chordShapes)[string] ?? null : open;
   }
 
   private report(c: Crossing, when: number, amp: number, midi: number | null, isNewGesture: boolean): void {

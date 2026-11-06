@@ -21,6 +21,14 @@ export const GUITAR7_TUNING: readonly number[] = [35, 40, 45, 50, 55, 59, 64];
  */
 export const SAZ_TUNING: readonly number[] = [55, 50, 57];
 
+/** Ukulele G4 C4 E4 A4 (re-entrant: the G above the C), mandolin G3 D4 A4 E5, balalaika prima E4 E4 A4. */
+export const UKULELE_TUNING: readonly number[] = [67, 60, 64, 69];
+export const MANDOLIN_TUNING: readonly number[] = [55, 62, 69, 76];
+export const BALALAIKA_TUNING: readonly number[] = [64, 64, 69];
+/** Irish bouzouki G2 D3 A3 D4; Greek bouzouki (trichordo) D3 A3 D4. */
+export const IRISH_BOUZOUKI_TUNING: readonly number[] = [43, 50, 57, 62];
+export const GREEK_BOUZOUKI_TUNING: readonly number[] = [50, 57, 62];
+
 /** A lowest string below this (G#1) is a bass's; every guitar tuning, a 7-string in drop A included, stays above. */
 const BASS_BELOW_MIDI = 32;
 

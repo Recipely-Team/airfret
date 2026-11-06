@@ -14,6 +14,30 @@ const ACOUSTIC: GuitarLook = {
 const LOOKS: Readonly<Record<ChainKind, GuitarLook>> = {
   acoustic: ACOUSTIC,
   piano: ACOUSTIC,
+  ukulele: {
+    // Koa top and sides, rosewood board, nylon strings.
+    style: 'ukulele', top: '#b9793f', topGrain: '#93592a', burst: '#4a2612', board: '#2a1a12', boardGrain: '#180e09',
+    headstock: '#2a1a12', binding: '#efe4cc', inlay: '#e8e2d2', hardware: '#cfcabf', pickguard: 'transparent',
+    wound: '#e7e2d6', plain: '#ece7dc', woundCount: 0,
+  },
+  mandolin: {
+    // Sunburst spruce top, ebony board, steel strings, the lowest two wound.
+    style: 'mandolin', top: '#c89a5a', topGrain: '#a87a40', burst: '#2b140a', board: '#1c1410', boardGrain: '#0f0a07',
+    headstock: '#1c1410', binding: '#efe4cc', inlay: '#e8e2d2', hardware: '#cfcabf', pickguard: '#2a1a12',
+    wound: '#c9a46c', plain: '#dedbd5', woundCount: 2,
+  },
+  balalaika: {
+    // Pale spruce triangle with a darker edge, plain steel and gut-coloured strings.
+    style: 'balalaika', top: '#e2c995', topGrain: '#c6a96d', burst: '#6b3a1c', board: '#2a1a12', boardGrain: '#180e09',
+    headstock: '#2a1a12', binding: '#efe4cc', inlay: '#e8e2d2', hardware: '#cfcabf', pickguard: '#5a2a14',
+    wound: '#d4d2cd', plain: '#dedbd5', woundCount: 0,
+  },
+  bouzouki: {
+    // Spruce top over a round staved back, rosewood board, steel courses.
+    style: 'bouzouki', top: '#d4b27a', topGrain: '#b38c50', burst: '#3d1f10', board: '#2f1d14', boardGrain: '#1d110b',
+    headstock: '#2f1d14', binding: '#efe4cc', inlay: '#e8e2d2', hardware: '#cfcabf', pickguard: '#3a2015',
+    wound: '#c9a46c', plain: '#dedbd5', woundCount: 2,
+  },
   saz: {
     // Spruce top over a deep mulberry bowl (burst), a walnut neck, plain steel strings.
     style: 'saz', top: '#d6bd8b', topGrain: '#b79a63', burst: '#5b2a14', board: '#3a2617', boardGrain: '#24170d',

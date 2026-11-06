@@ -59,3 +59,20 @@ export const SAZ_BOUTS = {
   upper: { t: 0.22, radius: 0.3, halfWidth: 0.2 },
   lower: { t: 0.64, radius: 0.37, halfWidth: 0.5 },
 } as const;
+
+/**
+ * A balalaika's body: a triangle, narrow where the neck joins and widening straight to a flat base past the
+ * bridge, its corners a little rounded.
+ */
+export function traceTriangle(ctx: CanvasRenderingContext2D, x0: number, cy: number, length: number, width: number): void {
+  const tip = width * 0.07;
+  const corner = width * 0.06;
+  ctx.beginPath();
+  ctx.moveTo(x0, cy - tip);
+  ctx.lineTo(x0 + length - corner, cy - width / 2 + corner * 0.4);
+  ctx.quadraticCurveTo(x0 + length, cy - width / 2, x0 + length, cy - width / 2 + corner);
+  ctx.lineTo(x0 + length, cy + width / 2 - corner);
+  ctx.quadraticCurveTo(x0 + length, cy + width / 2, x0 + length - corner, cy + width / 2 - corner * 0.4);
+  ctx.lineTo(x0, cy + tip);
+  ctx.closePath();
+}
