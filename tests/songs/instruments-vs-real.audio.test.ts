@@ -37,6 +37,11 @@ const SYNTH_LIMITS: Record<string, { decayLog: number; profileDb: number }> = {
   bass: { decayLog: 0.8, profileDb: 18.5 },
   // The 5-string shares the bass recordings; measured 2026-11-05.
   bass5: { decayLog: 0.8, profileDb: 18.5 },
+  // Measured 2026-11-06 with the sets they share: the 12-string's steel recordings, the 7-string's electric,
+  // the 6-string bass's bass recordings (its high C re-pitched from the G).
+  twelve: { decayLog: 1.35, profileDb: 15.5 },
+  guitar7: { decayLog: 1.15, profileDb: 14.5 },
+  bass6: { decayLog: 0.8, profileDb: 18.5 },
   // Measured 2026-11-05: decay ×1.7, but the tone colour is the furthest of all — the banjo takes are
   // short (0.6–2 s) and their early harmonics swing ±20 dB note to note, so the profile metric is noisy here.
   banjo: { decayLog: 0.55, profileDb: 32 },

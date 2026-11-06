@@ -21,6 +21,9 @@ export const VOICES: Readonly<Record<string, readonly InstrumentVoice[]>> = {
   drive: [RECORDED, FITTED],
   bass: [RECORDED, FITTED],
   bass5: [RECORDED, FITTED],
+  bass6: [RECORDED, FITTED],
+  twelve: [RECORDED, FITTED],
+  guitar7: [RECORDED, FITTED],
   banjo: [RECORDED, FITTED],
 };
 

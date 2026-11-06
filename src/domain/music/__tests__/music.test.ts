@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { chordNotes, chordRoot } from '@domain/music/chords/chord-voicing';
 import { findPosition } from '@domain/music/find-position';
 import { midiToName, noteToMidi } from '@domain/music/pitch';
-import { BASS_TUNING, GUITAR_TUNING } from '@domain/music/tunings';
+import { BASS5_TUNING, BASS6_TUNING, BASS_TUNING, GUITAR7_TUNING, GUITAR_TUNING, isBassRange } from '@domain/music/tunings';
 
 describe('pitch', () => {
   it('reads note names with sharps, flats and octaves', () => {
@@ -24,6 +24,23 @@ describe('chord voicing', () => {
 
   it('outlines a minor chord on bass: root, fifth, octave, minor third', () => {
     expect(chordNotes('Am', BASS_TUNING)).toEqual([33, 40, 45, 48]);
+  });
+
+  it('voices chords by family, not string count: a 6-string bass outlines, a 7-string guitar uses the shapes', () => {
+    // The 6-string bass has as many strings as a guitar and used to get the guitar's shapes.
+    expect(chordNotes('Am', BASS6_TUNING)).toEqual([null, 33, 40, 45, 48, 57]);
+    expect(chordNotes('E', BASS6_TUNING)).toEqual([null, 28, 35, 40, 44, 52]);
+    expect(chordNotes('C', GUITAR7_TUNING)).toEqual([null, null, 48, 52, 55, 60, 64]);
+    expect(chordNotes('Am', BASS5_TUNING)).toEqual([null, 33, 40, 45, 48]);
+  });
+
+  it('offers tunings by family: bass tunings on a 6-string bass, drop A on a 7-string guitar', async () => {
+    const { tuningsFor, effectiveTuning } = await import('@domain/music/tuning-catalog');
+    expect(tuningsFor(BASS6_TUNING).map((t) => t.id)).not.toContain('dadgad');
+    expect(effectiveTuning(GUITAR7_TUNING, 'dropA', 0)).toEqual([33, 40, 45, 50, 55, 59, 64]);
+    expect(isBassRange(GUITAR7_TUNING)).toBe(false);
+    expect(isBassRange(effectiveTuning(GUITAR7_TUNING, 'dropA', 0))).toBe(false);
+    expect(isBassRange(effectiveTuning(BASS_TUNING, 'dropD', 0))).toBe(true);
   });
 
   it('finds the root of sharp and flat chords', () => {
@@ -48,7 +65,7 @@ describe('effectiveTuning', () => {
 describe('tunings for bass', () => {
   it('offers bass tunings for a 4-string instrument and ignores an unknown tuning id', async () => {
     const { effectiveTuning, tuningsFor } = await import('@domain/music/tuning-catalog');
-    expect(tuningsFor(4).map((t) => t.id)).toContain('dropD');
+    expect(tuningsFor(BASS_TUNING).map((t) => t.id)).toContain('dropD');
     expect(effectiveTuning(BASS_TUNING, 'nope', 0)).toEqual([...BASS_TUNING]);
   });
 });
@@ -57,8 +74,8 @@ describe('5-string bass', () => {
   it('offers tunings whose offsets fit five strings, so drop A lowers the low B and nothing else', async () => {
     const { effectiveTuning, tuningsFor } = await import('@domain/music/tuning-catalog');
     const { BASS5_TUNING } = await import('@domain/music/tunings');
-    for (const t of tuningsFor(5)) expect(t.offsets).toHaveLength(5);
-    expect(tuningsFor(5).map((t) => t.id)).not.toContain('dropD');
+    for (const t of tuningsFor(BASS5_TUNING)) expect(t.offsets).toHaveLength(5);
+    expect(tuningsFor(BASS5_TUNING).map((t) => t.id)).not.toContain('dropD');
     expect(effectiveTuning(BASS5_TUNING, 'dropA', 0)).toEqual([21, 28, 33, 38, 43]);
   });
 
@@ -68,9 +85,12 @@ describe('5-string bass', () => {
   });
 });
 
-describe('tunings for any other string count', () => {
+describe('tunings for any other instrument', () => {
   it('falls back to standard instead of handing out offsets for the wrong strings', async () => {
     const { tuningsFor } = await import('@domain/music/tuning-catalog');
-    expect(tuningsFor(7).map((t) => t.id)).toEqual(['standard']);
+    // A four-string instrument in guitar range (a ukulele, G4 C4 E4 A4): no bass tunings for it.
+    const fallback = tuningsFor([67, 60, 64, 69]);
+    expect(fallback.map((t) => t.id)).toEqual(['standard']);
+    expect(fallback[0]?.offsets).toEqual([0, 0, 0, 0]);
   });
 });

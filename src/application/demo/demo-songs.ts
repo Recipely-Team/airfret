@@ -12,4 +12,7 @@ export const DEMO_SONG_BY_INSTRUMENT: Readonly<Record<string, string>> = {
   banjo: 'susanna',
   bass: 'bass-boogie',
   bass5: 'bach-prelude-bass',
+  bass6: 'bach-prelude-bass',
+  twelve: 'canon-in-d',
+  guitar7: 'rising-sun',
 };

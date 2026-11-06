@@ -5,7 +5,7 @@ import { DRUMS_ID } from '@domain/drums/drums-id';
  * line or a beat. Every instrument appears once; ids match `INSTRUMENT_SLUGS`.
  */
 export const HOME_GROUPS: readonly { readonly label: string; readonly ids: readonly string[] }[] = [
-  { label: 'home.group.guitars', ids: ['acoustic', 'nylon', 'clean', 'drive', 'banjo'] },
-  { label: 'home.group.bass', ids: ['bass', 'bass5'] },
+  { label: 'home.group.guitars', ids: ['acoustic', 'twelve', 'nylon', 'clean', 'guitar7', 'drive', 'banjo'] },
+  { label: 'home.group.bass', ids: ['bass', 'bass5', 'bass6'] },
   { label: 'home.group.drums', ids: [DRUMS_ID] },
 ];

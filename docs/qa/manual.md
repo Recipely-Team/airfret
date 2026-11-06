@@ -70,6 +70,15 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | C3 | Bass (note mode): finger on fret 5, pluck each string | A, D, G, C | |
 | C4 | Keys 1–8 (chord mode), 0–9 (note mode) without a camera | Selection follows the keys | |
 
+## C3. More strings
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| C3.1 | `/12-string` → strum | Each course drawn as two strings; every stroke rings both — the low four an octave higher too: a wide, shimmering chord | |
+| C3.2 | `/7-string` → Chords → strum G | The low B stays silent; the chord sounds on the upper six. Settings → Tuning offers Standard, Drop A, Half step down | |
+| C3.3 | `/bass-6` → Chords → strum | A bass outline (root, fifth, octave, third, high root) from the E string; the low B silent. Tunings are bass tunings | |
+| C3.4 | Each of the three → *Watch it play* | Plays with sound: Canon in D, House of the Rising Sun, the Prélude on bass | |
+
 ## C2. Drums
 
 | # | Step | Expected | Result |

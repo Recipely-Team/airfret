@@ -1,6 +1,7 @@
 import type { Fretting } from '@domain/fretboard/fretting/fretting';
 import { CHORD_FINGERS } from '@domain/music/chords/chord-fingers';
-import { CHORD_SHAPES } from '@domain/music/chords/chord-shapes';
+import { chordNotes } from '@domain/music/chords/chord-voicing';
+import { isBassRange } from '@domain/music/tunings';
 
 /** A hand spans about four frets: held notes further than this from the new position are let go. */
 const HAND_SPAN_FRETS = 3;
@@ -13,21 +14,23 @@ interface Stop {
 }
 
 /**
- * The fretting hand for a chord: its standard shape and recommended fingers (finger 1 over several
- * strings on one fret is a barre). Frets are counted from the nut, so a capo shifts them.
+ * The fretting hand for a chord, exactly what sounds (`chordNotes`): on a guitar its standard shape and
+ * recommended fingers (finger 1 over several strings on one fret is a barre) — on a 7-string the shape sits
+ * on the upper six; on a bass the outline, fingered one finger per fret from the lowest. Frets are counted
+ * from the nut, so a capo shifts them; `tuning` already includes the capo.
  */
-export function chordFretting(chord: string, strings: number, capo: number): Fretting {
-  const shape = CHORD_SHAPES[chord];
-  const fingers = CHORD_FINGERS[chord];
+export function chordFretting(chord: string, tuning: readonly number[], capo: number): Fretting {
+  const strings = tuning.length;
+  const notes = chord ? chordNotes(chord, tuning) : [];
+  const shapeFingers = isBassRange(tuning) ? undefined : CHORD_FINGERS[chord];
+  const offset = strings - (shapeFingers?.length ?? strings);
+  const stops = notes.flatMap((note, string) => (note === null || note <= (tuning[string] ?? 0) ? [] : [{ string, fret: note - (tuning[string] ?? 0) }]));
+  const lowest = Math.min(...stops.map((s) => s.fret));
   const frets = new Array<number>(strings).fill(capo);
-  const presses: Fretting['presses'][number][] = [];
-  if (shape?.length === strings) {
-    shape.forEach((f, string) => {
-      if (f === null || f === 0) return;
-      frets[string] = f + capo;
-      presses.push({ string, fret: f + capo, finger: fingers?.[string] ?? 1 });
-    });
-  }
+  const presses = stops.map(({ string, fret }) => {
+    frets[string] = fret + capo;
+    return { string, fret: fret + capo, finger: shapeFingers?.[string - offset] ?? Math.min(FINGERS, fret - lowest + 1) };
+  });
   return { frets, bends: new Array<number>(strings).fill(0), presses, barre: 0 };
 }
 
