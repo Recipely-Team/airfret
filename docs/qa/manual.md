@@ -93,6 +93,15 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | C4.8 | Mouse or touch: press and drag fast across the keyboard | Every key on the way plays, none skipped | |
 | C4.9 | ◀ ▶ in the top bar, or ← → | The keyboard slides an octave; the range shows between the arrows; A0 and C8 are the ends | |
 
+## C5. Saz (baglama)
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| C5.1 | `/saz` → Start | A long neck with 17 frets an octave (some pairs close together: the in-between notes), three doubled courses, a pear-shaped bowl; modes are Notes and Free only | |
+| C5.2 | Notes → keys 1–9, strum | Each fret sounds its own pitch; fret 2 is a neutral second (between a semitone and a tone) | |
+| C5.3 | Settings → Tuning | The duzens: Bozuk, Baglama, Misket, Abdal, Acem, Kutahya, Mustezat; Baglama lowers the top course to E | |
+| C5.4 | Free mode with the camera | Fingers on any fret, the in-between ones included, sound their microtonal notes | |
+
 ## C2. Drums
 
 | # | Step | Expected | Result |

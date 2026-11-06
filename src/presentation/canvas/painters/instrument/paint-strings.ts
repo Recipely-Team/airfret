@@ -9,6 +9,8 @@ const GAUGES = {
   /** A 6-string set, B to C: a 5-string uses B to G, a 4-string E to G. */
   bass: [0.13, 0.105, 0.085, 0.065, 0.045, 0.03],
   banjo: [0.042, 0.032, 0.024, 0.018, 0.013, 0.01],
+  /** Top · middle · bottom course, plain steel. */
+  saz: [0.012, 0.014, 0.01],
 } as const;
 /** A 12-string's paired string: this far from its partner (share of the string gap), an octave string this much thinner. */
 const COURSE = { offsetOfGap: 0.28, octaveWidth: 0.5 } as const;

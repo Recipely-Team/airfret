@@ -191,7 +191,7 @@ export class AirfretApp {
     const chords = this.tours.session ? TOUR_CHORDS : this.lesson?.song.mode === PlayMode.chord ? this.lesson.chordSet : chordSetById(st.chordSet).chords.filter(knownChord);
     this.s.drums.configure(computeKitLayout(w, h, st.isLefty), w, h, st.hihatMode);
     this.s.piano.configure(computeKeyboardLayout(w, h, st.pianoShift));
-    const layout = computeLayout(w, h, inst.tuning.length, st.isLefty, inst.maxFret);
+    const layout = computeLayout(w, h, inst.tuning.length, st.isLefty, inst.maxFret, inst.fretCents);
     if (this.base.kind === 'instrument' && this.base.instrument !== st.instrument) {
       this.base = { kind: 'instrument', instrument: st.instrument };
       this.ui.replaceRoute(this.base);
@@ -203,7 +203,8 @@ export class AirfretApp {
   pickInstrument(id: string): void {
     this.demo.stop();
     const st = this.s.store.value;
-    const patch = this.hasLesson ? { instrument: id } : { instrument: id, mode: st.mode === PlayMode.free ? PlayMode.free : instrumentById(id).defaultMode, tuning: 'standard' };
+    const canKeepFree = st.mode === PlayMode.free && (instrumentById(id).modes ?? [PlayMode.free]).includes(PlayMode.free);
+    const patch = this.hasLesson ? { instrument: id } : { instrument: id, mode: canKeepFree ? PlayMode.free : instrumentById(id).defaultMode, tuning: 'standard' };
     this.s.store.update(id === 'drive' && st.chordSet === 'pop' && !this.hasLesson ? { ...patch, chordSet: 'rock' } : patch);
   }
 

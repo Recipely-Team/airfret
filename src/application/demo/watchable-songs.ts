@@ -13,7 +13,8 @@ const isBass = (instrumentId: string) => instrumentById(instrumentId).chain === 
  */
 export function watchableSongs(songs: readonly Song[], instrumentId: string): Song[] {
   // The self-playing hand is a guitarist's; the drums and the piano don't play by themselves yet.
-  if (instrumentId === DRUMS_ID || instrumentId === PIANO_ID) return [];
+  // …nor can it finger a saz's in-between frets yet.
+  if (instrumentId === DRUMS_ID || instrumentId === PIANO_ID || instrumentById(instrumentId).fretCents) return [];
   const fits = songs.filter((s) => s.instrument !== DRUMS_ID && isBass(s.instrument) === isBass(instrumentId));
   const own = DEMO_SONG_BY_INSTRUMENT[instrumentId];
   return [...fits.filter((s) => s.id === own), ...fits.filter((s) => s.id !== own)];

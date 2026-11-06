@@ -36,8 +36,23 @@ export const GUITAR7_TUNINGS: readonly Tuning[] = [
   { id: 'halfDown', name: 'tuning.halfDown', offsets: [-1, -1, -1, -1, -1, -1, -1] },
 ];
 
+/**
+ * The saz's duzens, each relative to Bozuk (G3 · D3 · A3, top · middle · bottom): the names Turkish folk music
+ * gives them (alt · orta · ust in La terms: Bozuk La-Re-Sol, Baglama La-Re-Mi, Misket La-Re-Fa#, Abdal La-La-Sol,
+ * Acem La-Re-Fa, Kutahya La-Re-Re, Mustezat La-Do-Sol). Sources: tr.wikipedia.org "Baglama", en "Baglama".
+ */
+export const SAZ_TUNINGS: readonly Tuning[] = [
+  { id: 'standard', name: 'tuning.bozuk', offsets: [0, 0, 0] },
+  { id: 'baglama', name: 'tuning.baglama', offsets: [-3, 0, 0] },
+  { id: 'misket', name: 'tuning.misket', offsets: [-1, 0, 0] },
+  { id: 'abdal', name: 'tuning.abdal', offsets: [0, 7, 0] },
+  { id: 'acem', name: 'tuning.acem', offsets: [-2, 0, 0] },
+  { id: 'kutahya', name: 'tuning.kutahya', offsets: [-5, 0, 0] },
+  { id: 'mustezat', name: 'tuning.mustezat', offsets: [0, -2, 0] },
+];
+
 const BASSES: Readonly<Record<number, readonly Tuning[]>> = { 4: BASS_TUNINGS, 5: BASS5_TUNINGS, 6: BASS6_TUNINGS };
-const GUITARS: Readonly<Record<number, readonly Tuning[]>> = { 6: GUITAR_TUNINGS, 7: GUITAR7_TUNINGS };
+const GUITARS: Readonly<Record<number, readonly Tuning[]>> = { 3: SAZ_TUNINGS, 6: GUITAR_TUNINGS, 7: GUITAR7_TUNINGS };
 
 /**
  * Tunings available for an instrument, by its family and string count (every tuning's offsets match its

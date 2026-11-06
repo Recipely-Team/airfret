@@ -7,6 +7,7 @@ export const ChainKind = {
   bass: 'bass',
   banjo: 'banjo',
   piano: 'piano',
+  saz: 'saz',
 } as const;
 
 export type ChainKind = (typeof ChainKind)[keyof typeof ChainKind];

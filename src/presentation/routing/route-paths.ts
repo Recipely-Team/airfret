@@ -13,6 +13,7 @@ export const INSTRUMENT_SLUGS: readonly (readonly [slug: string, instrument: str
   ['bass', 'bass'],
   ['bass-5', 'bass5'],
   ['bass-6', 'bass6'],
+  ['saz', 'saz'],
   ['banjo', 'banjo'],
   ['piano', PIANO_ID],
   ['drums', DRUMS_ID],
