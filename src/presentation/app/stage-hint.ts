@@ -1,11 +1,15 @@
+import { DRUMS_ID } from '@domain/drums/drums-id';
+import { PIANO_ID } from '@domain/keys/piano-id';
 import { t } from '@presentation/i18n/translator';
 
+/** How to play each instrument without a camera, where it differs from the guitar's strumming. */
+const MOUSE_HINTS: Readonly<Record<string, string>> = { [DRUMS_ID]: 'app.mouseHintDrums', [PIANO_ID]: 'app.mouseHintPiano' };
 /** Seconds without a visible hand before asking the player to show them. */
 const NO_HANDS_HINT_AFTER = 2.5;
 
 /** The one-line hint under the instrument: how to play without a camera, or a nudge to show both hands. */
-export function stageHint(s: { isStarted: boolean; hasCamera: boolean; isDrums: boolean; secondsWithoutHands: number }): string | null {
+export function stageHint(s: { isStarted: boolean; hasCamera: boolean; instrument: string; secondsWithoutHands: number }): string | null {
   if (!s.isStarted) return null;
-  if (!s.hasCamera) return t(s.isDrums ? 'app.mouseHintDrums' : 'app.mouseHint');
+  if (!s.hasCamera) return t(MOUSE_HINTS[s.instrument] ?? 'app.mouseHint');
   return s.secondsWithoutHands > NO_HANDS_HINT_AFTER ? t('app.noHands') : null;
 }

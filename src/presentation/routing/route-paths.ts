@@ -1,4 +1,5 @@
 import { DRUMS_ID } from '@domain/drums/drums-id';
+import { PIANO_ID } from '@domain/keys/piano-id';
 import type { Route } from '@presentation/routing/route';
 
 /** URL slug per instrument id, in menu order. */
@@ -13,6 +14,7 @@ export const INSTRUMENT_SLUGS: readonly (readonly [slug: string, instrument: str
   ['bass-5', 'bass5'],
   ['bass-6', 'bass6'],
   ['banjo', 'banjo'],
+  ['piano', PIANO_ID],
   ['drums', DRUMS_ID],
 ];
 

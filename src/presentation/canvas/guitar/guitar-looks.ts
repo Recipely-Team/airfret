@@ -1,13 +1,19 @@
 import { ChainKind } from '@domain/instruments/chain-kind';
 import type { GuitarLook } from '@presentation/canvas/guitar/guitar-look';
 
-/** Natural materials only — spruce, cedar, rosewood, maple, black lacquer, nickel, bone. */
+const ACOUSTIC: GuitarLook = {
+  style: 'acoustic', top: '#d9b882', topGrain: '#b48a52', burst: '#4a2c17', board: '#2f1d14', boardGrain: '#1d110b',
+  headstock: '#21140e', binding: '#efe4cc', inlay: '#e8e2d2', hardware: '#cfcabf', pickguard: '#3a2015',
+  wound: '#c9a46c', plain: '#dedbd5', woundCount: 4,
+};
+
+/**
+ * Natural materials only — spruce, cedar, rosewood, maple, black lacquer, nickel, bone. The piano has its own
+ * drawing (`paintKeyboard`); its entry here only completes the table.
+ */
 const LOOKS: Readonly<Record<ChainKind, GuitarLook>> = {
-  acoustic: {
-    style: 'acoustic', top: '#d9b882', topGrain: '#b48a52', burst: '#4a2c17', board: '#2f1d14', boardGrain: '#1d110b',
-    headstock: '#21140e', binding: '#efe4cc', inlay: '#e8e2d2', hardware: '#cfcabf', pickguard: '#3a2015',
-    wound: '#c9a46c', plain: '#dedbd5', woundCount: 4,
-  },
+  acoustic: ACOUSTIC,
+  piano: ACOUSTIC,
   nylon: {
     style: 'classical', top: '#b9804d', topGrain: '#8f5a31', burst: '#3b2112', board: '#2a1a12', boardGrain: '#180e09',
     headstock: '#2a1a12', binding: '#e9dcc0', inlay: '#2a1a12', hardware: '#c9b98f', pickguard: 'transparent',

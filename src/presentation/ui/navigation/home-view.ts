@@ -1,10 +1,9 @@
-import { DRUMS_ID } from '@domain/drums/drums-id';
-import { instrumentById } from '@domain/instruments/instrument-catalog';
 import { t } from '@presentation/i18n/translator';
 import { INSTRUMENT_SLUGS } from '@presentation/routing/route-paths';
 import { byId } from '@presentation/ui/dom';
 import { HOME_GROUPS } from '@presentation/ui/navigation/home-groups';
 import { INSTRUMENT_ICONS } from '@presentation/ui/navigation/instrument-icons';
+import { instrumentName } from '@presentation/ui/navigation/instrument-name';
 
 /** The home page: pick an instrument (each opens its own page) or start learning. */
 export class HomeView {
@@ -33,7 +32,7 @@ export class HomeView {
         a.href = `/${slug}`;
         a.dataset['link'] = '';
         a.innerHTML = `${INSTRUMENT_ICONS[id] ?? ''}<strong></strong><span></span>`;
-        (a.querySelector('strong') as HTMLElement).textContent = t(id === DRUMS_ID ? 'inst.drums' : instrumentById(id).name);
+        (a.querySelector('strong') as HTMLElement).textContent = instrumentName(id);
         (a.querySelector('span') as HTMLElement).textContent = t(`home.about.${slug}`);
         return a;
       }));

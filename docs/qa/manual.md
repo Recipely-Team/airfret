@@ -79,6 +79,17 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | C3.3 | `/bass-6` → Chords → strum | A bass outline (root, fifth, octave, third, high root) from the E string; the low B silent. Tunings are bass tunings | |
 | C3.4 | Each of the three → *Watch it play* | Plays with sound: Canon in D, House of the Rising Sun, the Prélude on bass | |
 
+## C4. Piano
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| C4.1 | `/piano` → Start | A keyboard with ivory and ebony keys, every C labelled (C4 = middle C); no modes or chord sets in the top bar | |
+| C4.2 | Hands over the keys, bring one fingertip down onto a white key, then a black key | Each key sounds once, sinks and lights while the finger stays down, stops when it lifts | |
+| C4.3 | Three fingers at once, both hands | A chord; a fast stroke is louder than a slow one | |
+| C4.4 | No camera: click a key, drag across several, touch with two fingers | Each plays; dragging plays each key it reaches; two touches play two notes | |
+| C4.5 | Hold Space, play, release a key, then release Space | Notes ring on while Space is held and stop when it's let go | |
+| C4.6 | Phone width | C4 to E5 fills the screen; the top bar fits | |
+
 ## C2. Drums
 
 | # | Step | Expected | Result |
