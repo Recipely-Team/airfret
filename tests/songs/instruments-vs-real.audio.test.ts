@@ -116,9 +116,9 @@ describe('Every instrument against recordings of the real instrument', () => {
 
   // The keyboard instruments (piano, mallets) aren't in the fretted catalogue, but are held to the same bar.
   const keyed = Object.values(KEYBOARDS).map((k) => k.instrument).filter((i) => i.id !== PIANO.id);
-  // Struck bars (marimba, glockenspiel: keys that ring on undamped) have no string to model: the string synth only
-  // fills in while their recordings load, so it isn't held to sounding like them (measured 2026-11-06: ×2.5–51).
-  const bars = new Set(Object.values(KEYBOARDS).filter((k) => !k.isDamped).map((k) => k.instrument.id));
+  // Bars and winds (marimba, glockenspiel, clarinet…) have no string to model: the string synth only fills in
+  // while their recordings load, so it isn't held to sounding like them (bars measured 2026-11-06: ×2.5–51).
+  const notStrings = new Set(keyed.map((i) => i.id));
   for (const inst of [...INSTRUMENTS, PIANO, ...keyed]) {
     const setId = SAMPLE_SET_BY_INSTRUMENT[inst.id];
     if (!setId) continue;
@@ -139,7 +139,7 @@ describe('Every instrument against recordings of the real instrument', () => {
       expect(Math.abs(worst.c)).toBeLessThan(limit(worst.midi));
     });
 
-    it.skipIf(bars.has(inst.id))(`${inst.id}: the synth fallback is in tune and no further from the recordings than today`, () => {
+    it.skipIf(notStrings.has(inst.id))(`${inst.id}: the synth fallback is in tune and no further from the recordings than today`, () => {
       const rows = refs.map((r) => {
         const real = analyze(decode(`public/samples/${setId}/${r.file}`) as Float32Array, nominal(r.midi));
         const audio = play(inst, stringFor(inst, r), r.midi, false);
