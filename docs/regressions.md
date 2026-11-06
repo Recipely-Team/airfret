@@ -72,6 +72,11 @@ resting finger stops the string in both voices. Tests `tap-detector.test.ts`, `t
 that opens with rests before its pickup (Auld Lang Syne: 2.1 s) began in silence. *Fix:* self-play starts at the
 first note. Test `demo-performer.test.ts` ("starts at the first note even when the song opens with rests").
 
+**Some recorded takes came out empty.** Cutting the leading silence before applying the instrument's gain treated
+quiet recordings (the conga taps, the softest tumba hit, peaking under −45 dB) as silence from start to end: 258-byte
+files that decoded to nothing, so those strokes fell back to the synth. *Fix:* gain first, then trim. Guard: the
+browser check counts synth oscillators per stroke (0 when every take is real); file sizes listed in the PR.
+
 ## Drums
 
 **Drumsticks vanished and reappeared, or jumped to the other hand.**
