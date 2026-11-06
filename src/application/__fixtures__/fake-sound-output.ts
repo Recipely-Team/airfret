@@ -62,6 +62,10 @@ export class FakeSoundOutput implements SoundOutputInterface {
 
   readonly handStrokes: { stroke: HandStroke; velocity: number; when: number }[] = [];
 
+  prepareHandStrokes(): void {
+    // Nothing to load: the fake keeps no recordings.
+  }
+
   hitHandDrum(stroke: HandStroke, velocity: number, when: number): void {
     this.handStrokes.push({ stroke, velocity, when });
   }

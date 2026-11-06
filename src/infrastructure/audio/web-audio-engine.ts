@@ -97,7 +97,7 @@ export class WebAudioEngine implements SoundOutputInterface {
     kitRoom.gain.value = KIT.room;
     kitBus.connect(kitRoom).connect(this.reverbIn);
     this.kit = new AcousticKit(ctx, kitBus, this.noise);
-    this.handDrum = new HandDrumVoice(ctx, kitBus, this.noise);
+    this.handDrum = new HandDrumVoice(ctx, kitBus, this.noise, `${import.meta.env.BASE_URL}${AssetPath.handDrumSamples}`);
     this.sampleBus = ctx.createGain();
     this.sampleBus.gain.value = Level.samples;
     this.sampleBus.connect(this.chainOut);
@@ -258,6 +258,10 @@ export class WebAudioEngine implements SoundOutputInterface {
 
   hitHandDrum(stroke: HandStroke, velocity: number, when: number): void {
     this.handDrum.hit(stroke, velocity, when);
+  }
+
+  prepareHandStrokes(strokes: readonly HandStroke[]): void {
+    this.handDrum.prepare(strokes);
   }
 
   chokeHiHat(when: number): void {

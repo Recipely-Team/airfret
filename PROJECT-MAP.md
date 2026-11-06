@@ -113,11 +113,11 @@ Layers and rules: `CLAUDE.md`, `architecture.md`.
 
 ## src/domain/drums/hand/
 
-- `hand-drum-catalog.ts` — Every hand drum, as data the one synth (`HandDrumVoice`) and the one stage play. Pitches and decays are set by
+- `hand-drum-catalog.ts` — Every hand drum, as data the one voice (`HandDrumVoice`) and the one stage play. The darbuka and the congas
 - `hand-drum-head.ts` — One head of a hand drum: where it sits on screen, how it looks, and what each kind of stroke sounds like.
 - `hand-drum-pads.ts` — A head's radius is `size` of the width, but never more than this times `size` of the height.
 - `hand-drum.ts` — A drum played with the hands — darbuka, congas, handpan…: its id (and page), name, and heads.
-- `hand-stroke.ts` — One way of striking a hand drum, as the synth should voice it: the drum's resonant modes (a membrane's pitch
+- `hand-stroke.ts` — One way of striking a hand drum: real recordings when there are some, else as the synth should voice it: the d
 
 ## src/domain/fretboard/
 
@@ -176,7 +176,7 @@ Layers and rules: `CLAUDE.md`, `architecture.md`.
 ## src/domain/keys/
 
 - `compute-keyboard-layout.ts` — Pitch classes that are black keys: C#, D#, F#, G#, A#.
-- `key-press-detector.ts` — Slower than this (screen heights per second) a fingertip is drifting, not pressing.
+- `key-press-detector.ts` — A press: the fingertip dips this far (share of the hand's size) below where that finger rests.
 - `key-press.ts` — A key going down: which, how hard (0–1), and where within the frame it happened (0–1).
 - `keyboard-instrument.ts` — An instrument played from a keyboard: its sound, the keys it has, and how its keys respond and look.
 - `keyboard-instruments.ts` — A harpsichord: strings plucked by quills, so the string synth voices it truly — bright, nasal (plucked near

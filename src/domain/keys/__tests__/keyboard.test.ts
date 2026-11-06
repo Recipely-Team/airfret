@@ -45,82 +45,82 @@ describe('The keyboard on screen', () => {
   });
 });
 
-/** A fingertip coming straight down at `x` from above the keys to `toY`, at `speed` screen heights per second. */
-function stroke(d: KeyPressDetector, x: number, toY: number, speed = 1.5, t0 = 0) {
-  const steps = 8;
-  const fromY = desk.top - 60;
-  const dt = (toY - fromY) / desk.h / speed / steps;
-  const out = [];
-  for (let i = 0; i <= steps; i++) out.push(d.update({ x, y: fromY + ((toY - fromY) * i) / steps }, t0 + i * dt, desk));
-  return out.filter((r) => r.presses.length || r.releases.length);
+/** The hand's size in px (wrist to middle knuckle), and how far a fingertip rests below its knuckle. */
+const HAND = 120;
+const REST = 0.5 * HAND;
+
+/**
+ * One finger over `x`: its knuckle at `knuckleY`, its tip `dip` below the knuckle (in hand sizes beyond its rest),
+ * fed for `frames` frames at 30 fps from `t0`.
+ */
+function finger(d: KeyPressDetector, x: number, knuckleY: number, dips: readonly number[], t0 = 0) {
+  return dips.map((dip, i) => d.update({ x, y: knuckleY + REST + dip * HAND }, { x, y: knuckleY }, HAND, t0 + i / 30, desk));
 }
+const events = (rs: { presses: { midi: number }[]; releases: number[] }[]) => rs.flatMap((r) => [...r.presses.map((p) => `+${p.midi}`), ...r.releases.map((m) => `-${m}`)]);
+const over = (midi: number) => {
+  const k = desk.keys.find((x) => x.midi === midi)!;
+  return { x: (k.x0 + k.x1) / 2, knuckleY: k.y0 + (k.isBlack ? 0.25 : 0.6) * (k.y1 - k.y0) - REST };
+};
 
-describe('Pressing keys with a fingertip', () => {
-  it('presses the white key a fingertip comes down on, past the black keys', () => {
-    const e = white(desk, 52)!;
-    const events = stroke(new KeyPressDetector(), (e.x0 + e.x1) / 2, desk.bottom - 5);
-    expect(events.map((r) => r.presses[0]?.midi)).toEqual([52]);
-  });
-
-  it('presses a black key from its middle, and does not press the white under it as well', () => {
-    const cs = black(desk, 49)!;
-    const events = stroke(new KeyPressDetector(), (cs.x0 + cs.x1) / 2, desk.bottom - 5);
-    expect(events.map((r) => r.presses[0]?.midi)).toEqual([49]);
-  });
-
-  it('plays a fast stroke louder than a gentle one', () => {
-    const g = white(desk, 55)!;
-    const x = (g.x0 + g.x1) / 2;
-    const hard = stroke(new KeyPressDetector(), x, desk.bottom - 5, 3)[0]?.presses[0]?.velocity ?? 0;
-    const soft = stroke(new KeyPressDetector(), x, desk.bottom - 5, 0.3)[0]?.presses[0]?.velocity ?? 0;
-    expect(hard).toBeGreaterThan(soft);
-    expect(soft).toBeGreaterThan(0);
-  });
-
-  it('holds the key while the finger rests on it, and lets it go when the finger lifts', () => {
+describe('Pressing keys with a finger', () => {
+  it('plays nothing when a hand moves into view and across the keys (it used to play as soon as it saw a hand)', () => {
     const d = new KeyPressDetector();
-    const a = white(desk, 57)!;
-    const x = (a.x0 + a.x1) / 2;
-    stroke(d, x, desk.bottom - 5);
-    for (let i = 0; i < 10; i++) expect(d.update({ x: x + (i % 2), y: desk.bottom - 5 + (i % 3) }, 1 + i / 30, desk)).toEqual({ presses: [], releases: [] });
-    expect(d.holding).toBe(57);
-    expect(d.update({ x, y: desk.top - 80 }, 2, desk).releases).toEqual([57]);
+    const out = [];
+    // The whole hand comes down from above the screen onto the keys and slides along them: tip and knuckle together.
+    for (let i = 0; i < 40; i++) {
+      const knuckleY = -200 + i * 25;
+      const x = 300 + i * 15;
+      out.push(d.update({ x, y: knuckleY + REST }, { x, y: knuckleY }, HAND, i / 30, desk));
+    }
+    expect(events(out)).toEqual([]);
+  });
+
+  it('holds no key down while a hand rests over the keys (keys used to stay lit)', () => {
+    const d = new KeyPressDetector();
+    const { x, knuckleY } = over(60);
+    // Two seconds of a resting hand, its fingertip trembling a little.
+    const out = finger(d, x, knuckleY, Array.from({ length: 60 }, (_, i) => (i % 3) * 0.01));
+    expect(events(out)).toEqual([]);
     expect(d.holding).toBeNull();
   });
 
-  it('does not play a finger drifting slowly down (camera jitter, a hand settling)', () => {
-    const f = white(desk, 53)!;
-    expect(stroke(new KeyPressDetector(), (f.x0 + f.x1) / 2, desk.bottom - 5, 0.05)).toEqual([]);
+  it('plays the key under a finger that dips below its knuckle, and lets it go when the finger comes up', () => {
+    const d = new KeyPressDetector();
+    const { x, knuckleY } = over(64);
+    const out = finger(d, x, knuckleY, [0, 0, 0, 0.12, 0.3, 0.32, 0.32, 0.15, 0.02, 0]);
+    expect(events(out)).toEqual(['+64', '-64']);
+  });
+
+  it('presses a black key the same way', () => {
+    const d = new KeyPressDetector();
+    const { x, knuckleY } = over(61);
+    expect(events(finger(d, x, knuckleY, [0, 0, 0.15, 0.32, 0.32]))).toEqual(['+61']);
+  });
+
+  it('plays a quick press louder than a slow one', () => {
+    const { x, knuckleY } = over(67);
+    const quick = finger(new KeyPressDetector(), x, knuckleY, [0, 0, 0.35]).flatMap((r) => r.presses)[0]?.velocity ?? 0;
+    const slow = finger(new KeyPressDetector(), x, knuckleY, [0, 0, 0.05, 0.1, 0.15, 0.2, 0.25]).flatMap((r) => r.presses)[0]?.velocity ?? 0;
+    expect(quick).toBeGreaterThan(slow);
+    expect(slow).toBeGreaterThan(0);
+  });
+
+  it('slides a pressed finger along the white keys as a glissando, every key once', () => {
+    const d = new KeyPressDetector();
+    const c = over(60);
+    finger(d, c.x, c.knuckleY, [0, 0, 0.35]);
+    const g = over(67);
+    const r = d.update({ x: g.x, y: c.knuckleY + REST + 0.35 * HAND }, { x: g.x, y: c.knuckleY }, HAND, 0.2, desk);
+    expect(r.presses.map((p) => p.midi)).toEqual([62, 64, 65, 67]);
+    expect(r.releases).toEqual([60, 62, 64, 65]);
   });
 
   it('lets the key go when tracking loses the finger for a moment', () => {
     const d = new KeyPressDetector();
-    const c = white(desk, 60)!;
-    stroke(d, (c.x0 + c.x1) / 2, desk.bottom - 5);
-    expect(d.update(null, 2, desk).releases).toEqual([60]);
-  });
-
-  it('slides a pressed finger along the white keys as a glissando, every key once, even when the hand jumps several keys a frame', () => {
-    const d = new KeyPressDetector();
-    const c = white(desk, 60)!;
-    stroke(d, (c.x0 + c.x1) / 2, desk.bottom - 5);
-    const g = white(desk, 67)!;
-    // One camera frame later the fingertip is already four white keys further: C → G passes D, E, F.
-    const r = d.update({ x: (g.x0 + g.x1) / 2, y: desk.bottom - 5 }, 1, desk);
-    expect(r.presses.map((p) => p.midi)).toEqual([62, 64, 65, 67]);
-    expect(r.releases).toEqual([60, 62, 64, 65]);
-    expect(d.holding).toBe(67);
-    const back = d.update({ x: (c.x0 + c.x1) / 2, y: desk.bottom - 5 }, 1.1, desk);
-    expect(back.presses.map((p) => p.midi)).toEqual([65, 64, 62, 60]);
-  });
-
-  it('keeps a glissando on the black keys when it started on one', () => {
-    const d = new KeyPressDetector();
-    const cs = black(desk, 61)!;
-    stroke(d, (cs.x0 + cs.x1) / 2, desk.bottom - 5);
-    const as = black(desk, 70)!;
-    const r = d.update({ x: (as.x0 + as.x1) / 2, y: desk.bottom - 5 }, 1, desk);
-    expect(r.presses.map((p) => p.midi)).toEqual([63, 66, 68, 70]);
+    const { x, knuckleY } = over(62);
+    finger(d, x, knuckleY, [0, 0, 0.35]);
+    expect(d.update(null, null, HAND, 0.1, desk).releases).toEqual([]);
+    expect(d.update(null, null, HAND, 0.5, desk).releases).toEqual([62]);
   });
 });
 

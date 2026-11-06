@@ -1,6 +1,7 @@
 /** MediaPipe hand landmark indices used by the app. */
 export const HandLandmark = {
   wrist: 0,
+  thumbMcp: 2,
   thumbIp: 3,
   thumbTip: 4,
   indexMcp: 5,
