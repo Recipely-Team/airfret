@@ -48,7 +48,6 @@ export class FakeSoundOutput implements SoundOutputInterface {
   }
 
   readonly touches: number[] = [];
-  fretNoises = 0;
 
   /** Each touch's voices, in order. */
   readonly touchedVoices: (readonly Voice[])[] = [];
@@ -56,10 +55,6 @@ export class FakeSoundOutput implements SoundOutputInterface {
   touch(string: number, _when: number, voices: readonly Voice[]): void {
     this.touches.push(string);
     this.touchedVoices.push(voices);
-  }
-
-  fretNoise(): void {
-    this.fretNoises++;
   }
 
   readonly drumHits: DrumHitRequest[] = [];

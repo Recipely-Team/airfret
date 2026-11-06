@@ -50,6 +50,17 @@ function setup() {
 }
 
 describe('Player with camera hands', () => {
+  it('moving the fretting hand to another chord makes no sound of its own (it used to squeak on every change)', () => {
+    const { sound, player } = setup();
+    const boxes = chordSlots(layout, CHORDS.length);
+    boxes.forEach((box, i) => {
+      const tip = { x: (box.x0 + box.x1) / 2, y: layout.centerY };
+      for (let f = 0; f < 5; f++) player.updateHands([hand(tip, tip)], (i * 5 + f) / 30, 0, true);
+    });
+    expect(player.chord).toBe('Em');
+    expect([...sound.plucks, ...sound.retunes, ...sound.chucks]).toEqual([]);
+  });
+
   it('selects the chord box the fretting index finger points at', () => {
     const { player } = setup();
     const box = chordSlots(layout, CHORDS.length)[2]!;
