@@ -12,7 +12,11 @@ import { PIANO_LOWEST_MIDI } from '@domain/keys/piano';
 import { HandLandmark } from '@domain/tracking/hand-landmark';
 
 /** Every fingertip plays: thumb, index, middle, ring, little finger. */
-const TIPS = [HandLandmark.thumbTip, HandLandmark.indexTip, HandLandmark.middleTip, HandLandmark.ringTip, HandLandmark.pinkyTip] as const;
+/** Every finger plays, each judged against its own knuckle: thumb, index, middle, ring, little finger. */
+const FINGERS = [
+  [HandLandmark.thumbTip, HandLandmark.thumbMcp], [HandLandmark.indexTip, HandLandmark.indexMcp], [HandLandmark.middleTip, HandLandmark.middleMcp],
+  [HandLandmark.ringTip, HandLandmark.ringMcp], [HandLandmark.pinkyTip, HandLandmark.pinkyMcp],
+] as const;
 /** A note is scheduled this far ahead, so it is never in the past. */
 const LEAD = 0.004;
 /** The hammer strikes about an eighth of the way along the string. */
@@ -30,7 +34,8 @@ const GLOW_DECAY = 3;
  * **PianoPlayer** — the piano played by hands in the air, the mouse, or fingers on a touch screen.
  *
  * @remarks
- * - Each fingertip of each hand has its own `KeyPressDetector`; hands are told apart left to right, so they
+ * - Each finger of each hand has its own `KeyPressDetector`, judging it against its own knuckle (moving or resting
+ *   the hand plays nothing); hands are told apart left to right, so they
  *   keep their detectors when tracking lists them in another order.
  * - A key sounds while something holds it (a fingertip, the mouse, a touch) and stops when the last lets go
  *   — unless the sustain pedal is down; lifting the pedal stops every key no longer held.
@@ -79,12 +84,17 @@ export class PianoPlayer {
     const ordered = [...hands].sort((a, b) => (a[HandLandmark.wrist]?.x ?? 0) - (b[HandLandmark.wrist]?.x ?? 0));
     this.hands = ordered;
     const seen = new Set<string>();
-    ordered.forEach((hand, h) => TIPS.forEach((tip) => {
-      const id = `hand${h}:${tip}`;
-      seen.add(id);
-      this.feed(id, hand[tip] ?? null, t, audioNow, l);
-    }));
-    for (const id of this.detectors.keys()) if (!seen.has(id)) this.feed(id, null, t, audioNow, l);
+    ordered.forEach((hand, h) => {
+      const wrist = hand[HandLandmark.wrist];
+      const knuckle = hand[HandLandmark.middleMcp];
+      const size = wrist && knuckle ? Math.hypot(knuckle.x - wrist.x, knuckle.y - wrist.y) : 0;
+      for (const [tip, mcp] of FINGERS) {
+        const id = `hand${h}:${tip}`;
+        seen.add(id);
+        this.feed(id, hand[tip] ?? null, hand[mcp] ?? null, size, t, audioNow, l);
+      }
+    });
+    for (const id of this.detectors.keys()) if (!seen.has(id)) this.feed(id, null, null, 0, t, audioNow, l);
   }
 
   /**
@@ -123,13 +133,13 @@ export class PianoPlayer {
     }
   }
 
-  private feed(id: string, tip: Point | null, t: number, audioNow: number, l: KeyboardLayout): void {
+  private feed(id: string, tip: Point | null, knuckle: Point | null, handSize: number, t: number, audioNow: number, l: KeyboardLayout): void {
     let d = this.detectors.get(id);
     if (!d) {
       d = new KeyPressDetector();
       this.detectors.set(id, d);
     }
-    const { presses, releases } = d.update(tip, t, l);
+    const { presses, releases } = d.update(tip, knuckle, handSize, t, l);
     // Within a frame, a glissando's keys follow each other: let each go as the next sounds.
     releases.forEach((midi, i) => this.release(id, midi, audioNow + LEAD + i * GLISS_STEP));
     presses.forEach((p, i) => this.press(id, p.midi, p.velocity, audioNow + LEAD + i * GLISS_STEP));

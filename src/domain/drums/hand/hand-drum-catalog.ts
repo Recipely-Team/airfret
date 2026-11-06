@@ -4,8 +4,8 @@ import type { HandStroke } from '@domain/drums/hand/hand-stroke';
 import { midiToFreq } from '@domain/music/pitch';
 
 /**
- * Every hand drum, as data the one synth (`HandDrumVoice`) and the one stage play. Pitches and decays are set by
- * ear from each drum's character — no measured recordings yet: the membrane drums' bass strokes sag in pitch as
+ * Every hand drum, as data the one voice (`HandDrumVoice`) and the one stage play. The darbuka and the congas
+ * play real recordings; the others are synthesised, pitches and decays set by ear from each drum's character: the membrane drums' bass strokes sag in pitch as
  * the skin settles, their edge strokes ring in the body's partials over a click; frame drums add their jingles or
  * snare strings as noise; the handpan's fields are tuned notes with their octave and compound-fifth partials.
  */
@@ -14,9 +14,10 @@ const s = (label: string, modes: HandStroke['modes'], noise?: HandStroke['noise'
 
 const DARBUKA: HandDrumHead = {
   cxOfWidth: 0.5, cyOfHeight: 0.62, size: 0.26, flatten: 0.55, look: 'goblet', edgeAt: 0.62,
-  center: s('stroke.doum', [{ hz: 128, toHz: 92, decay: 0.5, level: 0.9 }, { hz: 203, toHz: 146, decay: 0.18, level: 0.32 }], { type: 'lowpass', hz: 260, length: 0.03, level: 0.45 }),
-  edge: s('stroke.tek', [{ hz: 740, decay: 0.16, level: 0.42 }, { hz: 1180, decay: 0.12, level: 0.26 }, { hz: 1690, decay: 0.1, level: 0.18 }, { hz: 2480, decay: 0.08, level: 0.12 }], { type: 'bandpass', hz: 3200, length: 0.012, level: 0.42 }),
-  edgeLeft: s('stroke.ka', [{ hz: 620, decay: 0.1, level: 0.32 }, { hz: 990, decay: 0.075, level: 0.2 }, { hz: 1420, decay: 0.06, level: 0.13 }], { type: 'bandpass', hz: 2400, length: 0.012, level: 0.32 }),
+  // Recorded: a real darbuka's düm and tek (Wikimedia Commons, CC BY-SA 4.0); ka is the tek, a little lower and softer.
+  center: { ...s('stroke.doum', [{ hz: 128, toHz: 92, decay: 0.5, level: 0.9 }, { hz: 203, toHz: 146, decay: 0.18, level: 0.32 }], { type: 'lowpass', hz: 260, length: 0.03, level: 0.45 }), recording: { layers: [['darbuka-doum']] } },
+  edge: { ...s('stroke.tek', [{ hz: 740, decay: 0.16, level: 0.42 }, { hz: 1180, decay: 0.12, level: 0.26 }, { hz: 1690, decay: 0.1, level: 0.18 }, { hz: 2480, decay: 0.08, level: 0.12 }], { type: 'bandpass', hz: 3200, length: 0.012, level: 0.42 }), recording: { layers: [['darbuka-tek']] } },
+  edgeLeft: { ...s('stroke.ka', [{ hz: 620, decay: 0.1, level: 0.32 }, { hz: 990, decay: 0.075, level: 0.2 }, { hz: 1420, decay: 0.06, level: 0.13 }], { type: 'bandpass', hz: 2400, length: 0.012, level: 0.32 }), recording: { layers: [['darbuka-tek']], rate: 0.94, gain: 0.7 } },
 };
 
 const frame = (bassHz: number, ring: HandStroke['noise'], name: { center: string; edge: string; left: string }): HandDrumHead => ({
@@ -34,6 +35,21 @@ const barrel = (cx: number, size: number, bassHz: number, toneHz: number, names:
 });
 
 const CONGA_STROKES = { center: 'stroke.bass', edge: 'stroke.open', left: 'stroke.slap' };
+
+/**
+ * A conga or tumba with VSCO 2 CE's recordings (CC0): open hits at three strengths (two takes of the middle one)
+ * for the open tone, taps for the slap, and the open hit played slower for the bass in the middle.
+ */
+const recordedConga = (head: HandDrumHead, name: 'conga' | 'tumba'): HandDrumHead => {
+  const open = [[`${name}-open-v1-a`], [`${name}-open-v2-a`, `${name}-open-v2-b`], [`${name}-open-v3-a`]];
+  return {
+    ...head,
+    center: { ...head.center, recording: { layers: open, rate: 0.72, gain: 0.95 } },
+    edge: { ...head.edge, recording: { layers: open } },
+    // The taps were recorded soft; brought up to sit with the open tones.
+    edgeLeft: { ...(head.edgeLeft ?? head.edge), recording: { layers: [[`${name}-tap-a`, `${name}-tap-b`]], gain: 4 } },
+  };
+};
 
 /** A handpan's tone field: a tuned note with its octave and compound fifth, ringing long. */
 const field = (midi: number, size: number, ring?: HandDrumHead['ring']): HandDrumHead => {
@@ -59,7 +75,7 @@ export const HAND_DRUMS: readonly HandDrum[] = [
       edge: s('stroke.slap', [{ hz: 350, decay: 0.05, level: 0.25 }], { type: 'bandpass', hz: 4000, length: 0.18, level: 0.55 }),
     }],
   },
-  { id: 'congas', name: 'inst.congas', heads: [barrel(0.3, 0.17, 110, 330, CONGA_STROKES), barrel(0.7, 0.19, 90, 245, CONGA_STROKES)] },
+  { id: 'congas', name: 'inst.congas', heads: [recordedConga(barrel(0.3, 0.17, 110, 330, CONGA_STROKES), 'conga'), recordedConga(barrel(0.7, 0.19, 90, 245, CONGA_STROKES), 'tumba')] },
   { id: 'bongos', name: 'inst.bongos', heads: [barrel(0.38, 0.11, 300, 520, { center: 'stroke.open', edge: 'stroke.open', left: 'stroke.slap' }), barrel(0.63, 0.14, 230, 400, { center: 'stroke.open', edge: 'stroke.open', left: 'stroke.slap' })] },
   { id: 'djembe', name: 'inst.djembe', heads: [{ ...barrel(0.5, 0.25, 75, 330, { center: 'stroke.bass', edge: 'stroke.tone', left: 'stroke.slap' }), look: 'goblet', flatten: 0.55 }] },
   {

@@ -96,7 +96,8 @@ song test before it ships. Grouped by how much of the existing code they reuse.
 
 **Percussion (reuse the drum kit's stick and pad code)**
 - ~~Darbuka, def, bendir, cajón, congas, bongos, djembe, tabla, handpan~~ (shipped 2026-11-06: hand drums are data —
-  heads and strokes — for one player and one synth; sounds set by ear, no recordings yet); timpani (pitched, pedal)
+  heads and strokes — for one player and one voice); the darbuka (Commons, CC BY-SA) and congas (VSCO 2 CE, CC0) play
+  real recordings, the rest are synthesised until recordings are found; timpani (pitched, pedal)
 - Mallets: marimba, xylophone, vibraphone, glockenspiel
 
 **Air-only**

@@ -43,12 +43,18 @@ export class HandDrumPlayer {
   private readonly detectors = new Map<string, HitDetector>();
   private h = 1;
   private lastT = 0;
+  private isPrepared = false;
 
   constructor(private readonly sound: SoundOutputInterface) {}
 
   /** The drum to play (by instrument id) and the screen it fills. */
   configure(drumId: string, w: number, h: number): void {
-    this.drum = handDrumFor(drumId) ?? this.drum;
+    const drum = handDrumFor(drumId) ?? this.drum;
+    if (drum !== this.drum || !this.isPrepared) {
+      this.sound.prepareHandStrokes(drum.heads.flatMap((head) => [head.center, head.edge, ...(head.edgeLeft ? [head.edgeLeft] : [])]));
+      this.isPrepared = true;
+    }
+    this.drum = drum;
     this.pads = headPads(this.drum, w, h);
     this.h = h;
   }

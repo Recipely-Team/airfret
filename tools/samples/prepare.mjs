@@ -14,7 +14,7 @@
 // For every sample: decode to mono, cut the silence before the attack, keep at most `seconds` with
 // a fade-out, normalise the whole set to one reference peak, measure the pitch error, and write
 // `manifest.json` — { samples: [{ file, midi, lo, hi, string, layer, cents }] }. `string` is −1 when
-// the source does not say which string was played. CC0 sources only (public/samples/CREDITS.md).
+// the source does not say which string was played. Licences and attribution: public/samples/CREDITS.md.
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
