@@ -1,7 +1,7 @@
 import type { HandRhythm } from '@domain/drums/hand/rhythms/hand-rhythm';
 
 /** The goblet and frame drums of the Middle East and the Balkans share their rhythms. */
-const GOBLET_AND_FRAME = ['darbuka', 'def', 'bendir'];
+const GOBLET_AND_FRAME = ['darbuka', 'def', 'bendir', 'davul'];
 const BARS = 8;
 
 /**
@@ -26,6 +26,10 @@ export const HAND_RHYTHMS: readonly HandRhythm[] = [
     phrase: 'D . . T . T D . D . T . T . . . D k k T k T D k D k T k T k T k' },
   { id: 'wahda', title: 'rhythm.wahda', about: 'rhythm.wahda.about', bpm: 76, beatsPerBar: 4, subdiv: 2, bars: BARS, drums: GOBLET_AND_FRAME,
     phrase: 'D . . . T . . . D . k k T . k k' },
+  { id: 'halay', title: 'rhythm.halay', about: 'rhythm.halay.about', bpm: 112, beatsPerBar: 4, subdiv: 2, bars: BARS, drums: ['davul'],
+    phrase: 'D . T T D . T T D . T T D T D T' },
+  { id: 'zeybek', title: 'rhythm.zeybek', about: 'rhythm.zeybek.about', bpm: 100, beatsPerBar: 9, subdiv: 1, bars: 4, drums: ['davul', 'darbuka'],
+    phrase: 'D . T . D . T T . D k T . D . T T k' },
   { id: 'tumbao', title: 'rhythm.tumbao', about: 'rhythm.tumbao.about', bpm: 100, beatsPerBar: 4, subdiv: 2, bars: BARS, drums: ['congas'],
     phrase: '0d 0k 0K 0k 0d 0k 0T 1T 0d 0k 0K 0k 0d 0k 0T 0T' },
   { id: 'bolero', title: 'rhythm.bolero', about: 'rhythm.bolero.about', bpm: 76, beatsPerBar: 4, subdiv: 2, bars: BARS, drums: ['congas', 'bongos'],
