@@ -1,3 +1,4 @@
+import { InstrumentInfo } from '@presentation/ui/navigation/instrument-info';
 import { KitPerformance } from '@presentation/app/stages/kit-performance';
 import { SONGS } from '@domain/lessons/catalog/song-catalog';
 import { launchFeature } from '@presentation/app/launch-feature';
@@ -140,7 +141,9 @@ function bootstrap(): void {
   byId('pedalsBtn').onclick = () => ui.pedals.open();
   // Escape closes whatever overlay is open (lessons, Explore, a lesson's intro) and returns the address to the
   // page under it — `closeOverlay` only rewrites the address, so the overlays are closed here first.
+  const info = new InstrumentInfo(() => store.value.instrument);
   wirePopovers(canvas, () => {
+    info.hide();
     drawer.close();
     ui.explore.close();
     ui.intro.hide();
@@ -161,6 +164,7 @@ function bootstrap(): void {
     drawer.render();
     ui.pedals.render();
     ui.home.render();
+    info.render(running.isOnStage);
     ui.nav.render(running.baseRoute);
     languageSwitch.render();
     running.apply();

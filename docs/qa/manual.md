@@ -199,6 +199,15 @@ F/B rows (id — note):
 | H4 | Reload the page | The choice is remembered; the button shows pressed (accent) with a slash | |
 | H5 | Screen reader / hover on the button | Says "Hide camera — show only the hands", then "Show camera" once pressed (Turkish when the UI is Turkish) | |
 | H6 | Explore → *Hands only* → Try it | Camera hides and a toast explains how to bring it back | |
+## I. Instrument info cards
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| I1 | Any instrument page → the ⓘ beside its name | A card: icon, family, name, origin, a short history, *How it developed* on a timeline, its range, and its sound (real recordings with their source, or synthesised) | |
+| I2 | Turkish (TR) | Every line in Turkish | |
+| I3 | Close with ×, Escape or a click outside | The card closes | |
+| I4 | Phone width | The card fits and scrolls; nothing overflows sideways | |
+
 ## S. Self-play — the *Watch it play* mode
 
 | # | Step | Expected | Result |
