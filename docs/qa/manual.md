@@ -102,6 +102,7 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | # | Step | Expected | Result |
 |---|---|---|---|
 | C5.1 | `/saz` → Start | A long neck with 17 frets an octave (some pairs close together: the in-between notes), three doubled courses, a pear-shaped bowl; modes are Notes and Free only | |
+| C5.9 | `/kopuz` → Start | A short-necked lute with a pale skin top and three strings (A2 D3 G3); Notes and Free modes; every note is a real recording (a short-neck baglama), the ⓘ card explains why | |
 | C5.2 | Notes → keys 1–9, strum | Each fret sounds its own pitch; fret 2 is a neutral second (between a semitone and a tone) | |
 | C5.3 | Settings → Tuning | The duzens: Bozuk, Baglama, Misket, Abdal, Acem, Kutahya, Mustezat; Baglama lowers the top course to E | |
 | C5.4 | Free mode with the camera | Fingers on any fret, the in-between ones included, sound their microtonal notes | |

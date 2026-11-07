@@ -27,6 +27,8 @@ export const VOICES: Readonly<Record<string, readonly InstrumentVoice[]>> = {
   banjo: [RECORDED, FITTED],
   // No freely licensed saz recordings yet (roadmap): the synth is its only voice.
   saz: [FITTED],
+  // A short-necked baglama's real notes (fcerim, CC0) — the kopuz's own descendant; no kopuz recording is free.
+  kopuz: [RECORDED, FITTED],
   ukulele: [FITTED],
   mandolin: [FITTED],
   balalaika: [FITTED],

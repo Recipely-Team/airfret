@@ -52,6 +52,8 @@ const SYNTH_LIMITS: Record<string, { decayLog: number; profileDb: number }> = {
   // Measured 2026-11-05: decay ×1.7, but the tone colour is the furthest of all — the banjo takes are
   // short (0.6–2 s) and their early harmonics swing ±20 dB note to note, so the profile metric is noisy here.
   banjo: { decayLog: 0.55, profileDb: 32 },
+  // Measured 2026-11-07 against the short-neck baglama notes: the plain string synth stands in for a skin-topped lute.
+  kopuz: { decayLog: 1.1, profileDb: 30 },
   // Measured 2026-11-06 against the KW upright: decay ×2.9 too short, tone colour 14.3 dB off.
   piano: { decayLog: 1.1, profileDb: 14.5 },
 };
