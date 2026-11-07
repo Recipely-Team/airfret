@@ -564,7 +564,7 @@ export const EN: Readonly<Record<string, string>> = {
   'credit.ungor': "O. Zeki Üngör",
   'about.istiklalMarsi': "The national anthem of Türkiye (1921), as in the official score: both quatrains of Mehmet Âkif’s poem, with the tonic and dominant under the tune.",
   'about.katibim': "Üsküdar’a Gider İken — the Istanbul song of the scribe in the rain, in its verse and refrain.",
-  'about.izmirMarsi': "İzmir’in dağlarında çiçekler açar: the march of the War of Independence, in A minor.",
+  'about.izmirMarsi': "İzmir’in dağlarında çiçekler açar: the march of the War of Independence, in A minor — all four stanzas.",
   'about.gencOsman': "The 17th-century lament for the young Janissary Genç Osman, on a lilting triplet pulse.",
   'about.furElise': "Beethoven’s best-known piano piece, its opening on guitar: the famous turn, answered in A minor and E.",
   'about.minuet': "The minuet from Anna Magdalena Bach’s notebook: a bright dance in G, a classic first classical piece.",

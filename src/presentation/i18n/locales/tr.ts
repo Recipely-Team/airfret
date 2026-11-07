@@ -564,7 +564,7 @@ export const TR: Readonly<Record<string, string>> = {
   'credit.ungor': "O. Zeki Üngör",
   'about.istiklalMarsi': "Türkiye’nin millî marşı (1921), resmî notadaki gibi: Mehmet Âkif’in şiirinin iki kıtası, ezginin altında tonik ve dominant.",
   'about.katibim': "Üsküdar’a Gider İken — yağmurda kâtibin İstanbul şarkısı, kıtası ve nakaratıyla.",
-  'about.izmirMarsi': "İzmir’in dağlarında çiçekler açar: Kurtuluş Savaşı’nın marşı, La minörde.",
+  'about.izmirMarsi': "İzmir’in dağlarında çiçekler açar: Kurtuluş Savaşı’nın marşı, La minörde — dört kıtasıyla.",
   'about.gencOsman': "17. yüzyıldan genç yeniçeri Genç Osman için yakılan ağıt, sallanan üçleme vuruşuyla.",
   'about.furElise': "Beethoven’ın en bilinen piyano parçasının girişi, gitarda: ünlü dönüş, ardından La minör ve Mi cevabı.",
   'about.minuet': "Anna Magdalena Bach’ın defterindeki menuet: Sol majörde parlak bir dans, klasik gitarda ilk parçalardan.",
