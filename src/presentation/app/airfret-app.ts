@@ -28,6 +28,7 @@ import type { InstrumentStage } from '@presentation/app/stages/instrument-stage'
 import { DemoController } from '@presentation/app/demo-controller';
 import { clearHands } from '@presentation/app/clear-hands';
 import { waitAtMost } from '@presentation/app/wait-at-most';
+import { playHands } from '@presentation/app/play-hands';
 import { lessonOptions } from '@presentation/app/lesson-options';
 import { stageHint } from '@presentation/app/stage-hint';
 import { TourController } from '@presentation/app/tour-controller';
@@ -48,6 +49,7 @@ interface Services {
   readonly drums: DrumPlayer;
   readonly stages: readonly InstrumentStage[];
   readonly kit: NonNullable<InstrumentStage['performance']>; // the drum kit playing by itself (it isn't a stage)
+  readonly motion: import('@application/play/motion-strummer').MotionStrummer; // strums a hand lost to motion blur
   readonly renderer: StageRenderer;
   readonly backing: BackingTrack;
   readonly guide: GuidePlayer;
@@ -79,7 +81,6 @@ export class AirfretApp {
       const first = SONGS.find((song) => song.course === 1);
       if (first) this.ui.navigate({ kind: 'lesson', songId: first.id });
     });
-    // Self-play sounds through the guide voice and is a mode in the toolbar: re-render when it starts or stops.
     const showStart = (isPlaying: boolean) => { this.ui.start.show(this.isOnStage && !this.isStarted && !isPlaying); this.s.store.update({}); };
     this.demo = new DemoController({
       player: s.player, sound: s.sound, startAudio: () => this.startAudio(), instrumentId: () => s.store.value.instrument, instrument: () => this.instrument(),
@@ -263,7 +264,6 @@ export class AirfretApp {
     }
     const stage = this.s.stages.find((x) => x.handles(st.instrument));
     const hint = this.demo.isPlaying ? null : stageHint({ isStarted: this.isStarted, hasCamera: this.camera.isOn, instrument: st.instrument, secondsWithoutHands: now - this.lastHandsAt });
-    // The self-playing hand is drawn as a skeleton: it isn't in the camera picture.
     const camera = { brightness: st.brightness, isHidden: st.isCameraHidden || this.demo.isPlaying };
     this.demo.tick(now);
     if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, hint, camera);
@@ -283,7 +283,7 @@ export class AirfretApp {
     if (this.isDrums) this.s.drums.updateHands(px, now, audioNow, now);
     else if (stage) stage.track(px, now, audioNow);
     else if (this.demo.isPlaying) this.s.player.strikeAlong(px, now, audioNow, !this.ui.pointer.isDown);
-    else this.s.player.updateHands(px, now, audioNow, !this.ui.pointer.isDown);
+    else playHands(this.s, px, now, audioNow, !this.ui.pointer.isDown);
   }
 
   private tickLesson(lesson: LessonSession, audioNow: number): void {

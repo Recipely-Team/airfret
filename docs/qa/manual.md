@@ -33,6 +33,7 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | B5 | Fist on the neck, strum | Muted "chuck", ringing strings stop | |
 | B6 | Settings → Strum direction → Down only; strum up and down | Only downstrokes sound | |
 | B7 | Settings → Left-handed | Instrument mirrors; hands swap roles | |
+| B8 | Chords → strum fast (5–6 strokes a second) for ten seconds | Nearly every stroke sounds, down and up, even when the strumming hand blurs; a still or resting hand plays nothing. Rig: `node camrun.mjs <dev url> <recording.mjpeg>` plays a recording as the camera (see docs/regressions.md) | |
 
 ## B2. Touch and tone
 
