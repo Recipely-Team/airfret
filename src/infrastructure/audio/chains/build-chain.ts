@@ -40,6 +40,9 @@ export function buildChain(ctx: BaseAudioContext, kind: ChainKind): AudioChain {
     case ChainKind.saz:
       // A thin top on a deep mulberry bowl: little low end, a nasal mid and the wire strings' bright edge.
       return chain([filter(ctx, 'highpass', 120), peaking(ctx, 300, -2), peaking(ctx, 1400, 4, 1.2), shelf(ctx, 4200, 3), gain(ctx, 1.1)], 0.2);
+    case ChainKind.kopuz:
+      // A skin top on a carved wooden bowl: a warm, soft body, a gentle presence, no wire edge.
+      return chain([filter(ctx, 'highpass', 90), peaking(ctx, 250, 1.5), peaking(ctx, 1100, 2.5, 1.1), filter(ctx, 'lowpass', 6000), gain(ctx, 1.1)], 0.2);
     case ChainKind.harpsichord:
       // A long thin case: little bass body, a bright nasal presence, a hall's reverb.
       return chain([filter(ctx, 'highpass', 60), peaking(ctx, 2200, 3, 1.1), shelf(ctx, 5000, 2), gain(ctx, 1)], 0.3);

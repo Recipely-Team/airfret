@@ -8,6 +8,7 @@ export const ChainKind = {
   banjo: 'banjo',
   piano: 'piano',
   saz: 'saz',
+  kopuz: 'kopuz',
   ukulele: 'ukulele',
   mandolin: 'mandolin',
   balalaika: 'balalaika',
