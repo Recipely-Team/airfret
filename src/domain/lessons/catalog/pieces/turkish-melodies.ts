@@ -23,6 +23,16 @@ const KATIBIM_REFRAIN =
   'A4+D3:0.25 C5:0.25 Bb4:0.25 A4:0.25 A4:0.25 G4:0.25 F#4:0.25 G4:0.25 A4+D3:2 ';
 
 /**
+ * One stanza of the Izmir March (the Commons MIDI, CC BY-SA 4.0): two lines on the same phrase, then the two that answer.
+ * Every verse is sung to it; the full march — as in the public-domain recording on Commons — is four of them.
+ */
+const IZMIR_STANZA =
+  'A4+A2:1 E5:0.5 E5:0.5 E5:0.5 E5:0.5 E5:0.5 E5:0.5 F5+D3:0.5 E5:0.5 D5:0.5 F5:0.5 E5+A2:2 ' +
+  'A4+A2:1 E5:0.5 E5:0.5 E5:0.5 E5:0.5 E5:0.5 E5:0.5 F5+D3:0.5 E5:0.5 D5:0.5 F5:0.5 E5+A2:2 ' +
+  'E5+A2:1 A5:0.5 A5:0.5 G5+C3:0.5 F5:0.5 E5:0.5 D5:0.5 E5+E2:0.5 D5:0.5 C5:0.5 B4:0.5 C5+A2:1 E5:1 ' +
+  'A4+A2:1 E5:0.5 E5:0.5 D5+E2:0.5 C5:0.5 B4:0.5 A4:0.5 C5+E2:0.5 B4:0.5 A4:0.5 G#4:0.5 A4+A2:1.5 ';
+
+/**
  * Turkish history in song: the national anthem, the Izmir March, and two of the oldest türküs — each from a score or
  * file whose rights are stated (docs/song-sources.md), never from memory.
  */
@@ -36,10 +46,7 @@ export const TURKISH_MELODIES: readonly Song[] = [
       'A4+D3:0.25 C5:0.25 Bb4:0.25 A4:0.25 A4:0.25 G4:0.25 F#4:0.25 G4:0.25 G4+G2:2',
     about: 'about.katibim' },
   { id: 'izmir-marsi', title: '\u0130zmir Mar\u015f\u0131', credit: 'credit.traditional', level: 1, bpm: 112, beatsPerBar: 4, mode: PlayMode.note, instrument: 'acoustic',
-    notes: 'A4+A2:1 E5:0.5 E5:0.5 E5:0.5 E5:0.5 E5:0.5 E5:0.5 F5+D3:0.5 E5:0.5 D5:0.5 F5:0.5 E5+A2:2 ' +
-      'A4+A2:1 E5:0.5 E5:0.5 E5:0.5 E5:0.5 E5:0.5 E5:0.5 F5+D3:0.5 E5:0.5 D5:0.5 F5:0.5 E5+A2:2 ' +
-      'E5+A2:1 A5:0.5 A5:0.5 G5+C3:0.5 F5:0.5 E5:0.5 D5:0.5 E5+E2:0.5 D5:0.5 C5:0.5 B4:0.5 C5+A2:1 E5:1 ' +
-      'A4+A2:1 E5:0.5 E5:0.5 D5+E2:0.5 C5:0.5 B4:0.5 A4:0.5 C5+E2:0.5 B4:0.5 A4:0.5 G#4:0.5 A4+A2:1.5',
+    notes: `${IZMIR_STANZA}r:0.5 ${IZMIR_STANZA}r:0.5 ${IZMIR_STANZA}r:0.5 ${IZMIR_STANZA}`.trim().replace(/A4\+A2:1\.5$/, 'A4+A2:4'),
     about: 'about.izmirMarsi' },
   { id: 'genc-osman', title: 'Gen\u00e7 Osman T\u00fcrk\u00fcs\u00fc', credit: 'credit.traditional', level: 2, bpm: 100, beatsPerBar: 4, mode: PlayMode.note, instrument: 'nylon',
     notes: 'D#5:2/3 D#5:1/3 A#4:1/3 D#5:2/3 D#5:1/3 A#4:1/3 D#5:2/3 D#5:1/3 A#4:1/3 D#5:2/3 C5:2/3 D#5:1/3 D5:1/3 D#5:1/3 A#4:1/3 ' +
