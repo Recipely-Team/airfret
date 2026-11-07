@@ -177,6 +177,12 @@ projects.) *Guard:* the *Down only* strum filter, covered by `player.test.ts`
 
 ## Flow
 
+**No sound at all on an older Windows 10 laptop (GTX 950M; owner's report).** Start unlocked audio and then waited
+for the camera and the hand model before closing its card; MediaPipe's GPU backend can hang on an old card or driver
+instead of failing, so the CPU fallback never came and nothing could be played, not even with the mouse. *Fix:* the
+GPU backend gets 8 s before the CPU one is used; Start stops waiting on the camera after 10 s (it comes on when it
+can); a `roundRect` fallback for browsers before Chrome/Edge 99. *Guard:* `wait-at-most.test.ts`; QA row A3b.
+
 **Turning the camera off left the hand skeleton hanging on the keys, the drums and the hand drums (owner's report).**
 Only the guitar's player was told the hands had gone. *Fix:* `clearHands` empties every stage. *Guard:*
 `clear-hands.test.ts` ("leaves no hand skeleton on the keys, the hand drums, the kit or the guitar").
