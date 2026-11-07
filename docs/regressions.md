@@ -169,6 +169,10 @@ projects.) *Guard:* the *Down only* strum filter, covered by `player.test.ts`
 
 ## Flow
 
+**Turning the camera off left the hand skeleton hanging on the keys, the drums and the hand drums (owner's report).**
+Only the guitar's player was told the hands had gone. *Fix:* `clearHands` empties every stage. *Guard:*
+`clear-hands.test.ts` ("leaves no hand skeleton on the keys, the hand drums, the kit or the guitar").
+
 **Going back from an instrument's page left it sounding behind the player (owner's report).** Nothing silenced the
 engine on leaving: notes already queued on the audio clock, a held key, ringing strings and recordings played on.
 *Fix:* leaving an instrument's page (back, home, another instrument) or hiding the tab stops self-play and calls the
