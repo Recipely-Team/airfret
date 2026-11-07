@@ -27,6 +27,7 @@ import { CameraController } from '@application/camera/camera-controller';
 import type { InstrumentStage } from '@presentation/app/stages/instrument-stage';
 import { DemoController } from '@presentation/app/demo-controller';
 import { clearHands } from '@presentation/app/clear-hands';
+import { waitAtMost } from '@presentation/app/wait-at-most';
 import { lessonOptions } from '@presentation/app/lesson-options';
 import { stageHint } from '@presentation/app/stage-hint';
 import { TourController } from '@presentation/app/tour-controller';
@@ -67,8 +68,7 @@ export class AirfretApp {
   readonly tours: TourController;
   /** The page under any overlay: home or an instrument. */
   private base: Route = { kind: 'home' };
-  /** The instrument playing by itself (outside lessons). */
-  readonly demo: DemoController;
+  readonly demo: DemoController; // the instrument playing by itself (outside lessons)
   private readonly camera: CameraController;
 
   constructor(
@@ -148,13 +148,13 @@ export class AirfretApp {
     return this.lesson !== null || this.tours.session !== null;
   }
 
-  /** Called from the start button: unlocks audio, then tries the camera. */
+  /** Called from the start button: unlocks audio, then tries the camera (never waiting on it for long). */
   async start(): Promise<void> {
     if (!(await this.startAudio())) return;
     this.demo.leave();
     this.isStarted = true;
     if (!this.s.store.value.isCameraOff) this.ui.start.status(t('app.loadingModel'));
-    await this.syncCamera();
+    await waitAtMost(this.syncCamera());
     this.lastHandsAt = performance.now() / MS_PER_SECOND;
     this.ui.start.hide();
     const isFirstRun = !this.s.store.value.hasSeenExplore;

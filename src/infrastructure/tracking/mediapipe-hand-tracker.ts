@@ -11,6 +11,8 @@ const CAMERA = { width: 1280, height: 720, frameRate: 60 } as const;
 /** Lower presence/tracking thresholds keep hands through motion blur in fast strokes. */
 const MODEL = { numHands: 2, detection: 0.5, presence: 0.3, tracking: 0.3 } as const;
 const HAVE_CURRENT_DATA = 2;
+/** The GPU backend gets this long to load before the CPU one is used, ms. */
+const GPU_TIMEOUT_MS = 8000;
 
 /**
  * **MediaPipeHandTracker** — webcam + MediaPipe Hand Landmarker, entirely in the browser.
@@ -87,6 +89,8 @@ export class MediaPipeHandTracker implements HandTrackerInterface {
         minHandPresenceConfidence: MODEL.presence,
         minTrackingConfidence: MODEL.tracking,
       });
-    return create('GPU').catch(() => create('CPU'));
+    // An old graphics card (or driver) can hang creating the GPU backend instead of failing: give up on it in time.
+    const gpu = Promise.race([create('GPU'), new Promise<never>((_, reject) => setTimeout(() => reject(new Error('GPU timeout')), GPU_TIMEOUT_MS))]);
+    return gpu.catch(() => create('CPU'));
   }
 }

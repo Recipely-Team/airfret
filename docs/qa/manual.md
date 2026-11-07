@@ -19,6 +19,7 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | A1 | Open the app | Start card over a dimmed instrument; language matches the browser | |
 | A2 | Click **Start**, allow the camera | Card closes; mirrored video appears behind the instrument | |
 | A3 | Reload, click **Start**, deny the camera | Card closes; toast explains; mouse-strum hint visible | |
+| A3b | An old laptop (integrated or old GPU), or DevTools → Rendering → disable WebGL; click **Start** | Within about 10 s the card closes and the mouse plays with sound; hand tracking comes on when the model has loaded | |
 | A4 | First Start (the tour runs) → *Exit tour* | Chords · Notes · Free (Pro) · Watch it play are usable at once (they used to stay greyed out) | |
 
 ## B. Chords (acoustic)
