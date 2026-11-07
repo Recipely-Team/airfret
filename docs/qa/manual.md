@@ -253,6 +253,7 @@ F/B rows (id — note):
 
 | # | Step | Expected | Result |
 |---|---|---|---|
+| M0 | Lessons → *Add your song* → *Open a file…* → a `.mid`, a `.musicxml` and an `.abc` file in turn | Title, tempo, meter and notes fill in (a melody with its bass); *Save and open* makes a lesson that every instrument can play by itself. A `.mxl` asks for uncompressed MusicXML | |
 | M1 | Lessons → *Add your own song* → name it, paste a melody as JSON (`{"tempo":108,"timeSignature":"4/4","notes":[{"note":"G4","duration":1},{"note":null,"duration":1}]}`) → Save | The song opens at its own tempo and meter, in note mode | |
 | M2 | Or type a melody: `G4:1 A4:0.5 B4:0.5 r:1` | Same, at the form's tempo | |
 | M3 | Its intro → *Watch it play* | The acoustic plays your melody by itself | |
