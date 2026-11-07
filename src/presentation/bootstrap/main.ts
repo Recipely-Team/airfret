@@ -1,3 +1,4 @@
+import { MotionStrummer } from '@application/play/motion-strummer';
 import { InstrumentInfo } from '@presentation/ui/navigation/instrument-info';
 import { KitPerformance } from '@presentation/app/stages/kit-performance';
 import { SONGS } from '@domain/lessons/catalog/song-catalog';
@@ -114,7 +115,7 @@ function bootstrap(): void {
     replaceRoute: (route) => router.replace(route),
   };
   app = new AirfretApp(
-    { store, sound, tracker, player, drums, stages, kit: new KitPerformance(drums, sound), renderer: new StageRenderer(canvas, ctx, video), backing: new BackingTrack(sound), guide: new GuidePlayer(sound), startLesson: new StartLessonUseCase() },
+    { store, sound, tracker, player, drums, stages, kit: new KitPerformance(drums, sound), motion: new MotionStrummer(), renderer: new StageRenderer(canvas, ctx, video), backing: new BackingTrack(sound), guide: new GuidePlayer(sound), startLesson: new StartLessonUseCase() },
     ui,
   );
   const running = app;

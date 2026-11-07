@@ -1,3 +1,4 @@
+import type { MotionGrid } from '@domain/tracking/motion-grid';
 import type { Failure } from '@core/failure/failure';
 import type { Result } from '@core/result/result';
 import type { TrackedHand } from '@domain/tracking/tracked-hand';
@@ -16,6 +17,8 @@ export interface HandTrackerInterface {
   pause(): void;
   /** Reopens the camera after `pause`; a no-op while running. */
   resume(): Promise<Result<void, Failure>>;
+  /** How the picture changed at the last detected frame (null before there are two) — motion the hand model misses. */
+  motion(): MotionGrid | null;
   /** Size of the camera frame in pixels, for mapping landmarks onto the screen. */
   frameSize(): { width: number; height: number };
 }
