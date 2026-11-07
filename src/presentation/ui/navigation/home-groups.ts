@@ -7,11 +7,11 @@ import { PIANO_ID } from '@domain/keys/piano-id';
  * line, keys, a wind or a beat. Every instrument appears once; ids match `INSTRUMENT_SLUGS`.
  */
 /** Hand drums listed with the Turkish instruments instead. */
-const TURKISH_DRUMS = new Set(['darbuka', 'def', 'bendir']);
+const TURKISH_DRUMS = new Set(['darbuka', 'def', 'bendir', 'davul']);
 
 export const HOME_GROUPS: readonly { readonly label: string; readonly ids: readonly string[] }[] = [
   { label: 'home.group.guitars', ids: ['acoustic', 'twelve', 'nylon', 'ukulele', 'clean', 'guitar7', 'drive'] },
-  { label: 'home.group.turkish', ids: ['saz', 'kopuz', 'kanun', 'darbuka', 'def', 'bendir'] },
+  { label: 'home.group.turkish', ids: ['saz', 'kopuz', 'kanun', 'darbuka', 'def', 'bendir', 'davul'] },
   { label: 'home.group.folk', ids: ['mandolin', 'balalaika', 'bouzouki', 'greekBouzouki', 'banjo'] },
   { label: 'home.group.bass', ids: ['bass', 'bass5', 'bass6'] },
   { label: 'home.group.keys', ids: [PIANO_ID, 'harpsichord', 'marimba', 'xylophone', 'glockenspiel'] },
