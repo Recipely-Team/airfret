@@ -120,6 +120,18 @@ catalogue, which imports it; the helper now uses `@domain/music/pitch` instead o
 
 ## Input
 
+**Fast strokes on the hand drums and the kit went unheard — 18 of well over a hundred in a 31 s clip (owner's
+recording, def).** A stroke had to cross the head's centre line going down, and the next one waited for the tip
+to climb back above it: fast, small strokes — the way drums are really played — did neither. A slap also struck
+once per fingertip. *Fix:* a stroke is a fast fall that stops (the hand meets the skin) anywhere on the head; a pad
+re-arms after a small lift (2 % of the height); a tip lost to motion blur and found lower has struck; one stroke per
+hand. *Guard:* `drums.test.ts` ("hears every stroke of a fast roll…", "…when tracking drops a frame in four", "plays
+nothing for a hand resting…") and `fast-hand-strokes.test.ts` (a slap is one stroke; seven strokes a second sound).
+
+**Fast strumming dropped up to 42 % of the strings (8 strokes a second).** A 60 ms per-string cooldown swallowed
+the return stroke. Jitter is already stopped by the side hysteresis. *Fix:* 30 ms. *Guard:* `strum-detector.test.ts`
+("sounds nearly every string of a fast strum…", "still ignores a hand resting on a string").
+
 **A curled index finger fretting one string was read as a barre.**
 Seen from the front, an arched finger's PIP→tip segment passes over the strings between the knuckle
 and the fingertip, so "segment crosses ≥ 3 strings" fired on ordinary fretting. *Guard:* a barre must

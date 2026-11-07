@@ -42,3 +42,25 @@ describe('StrumDetector', () => {
     expect(d.update({ x: 0, y: 400 }, 10, YS, H)).toEqual([]);
   });
 });
+
+describe('StrumDetector with fast strumming', () => {
+  const H = 800;
+  const ys = [300, 330, 360, 390, 420, 450];
+  const strum = (hz: number, fps: number) => {
+    const d = new StrumDetector();
+    let n = 0;
+    for (let i = 0; i < 2 * fps; i++) n += d.update({ x: 600, y: 375 + 140 * Math.sin(2 * Math.PI * hz * (i / fps)) }, i / fps, ys, H).length;
+    return n / (hz * 2 * 2 * ys.length);
+  };
+
+  it('sounds nearly every string of a fast strum, eight strokes a second each way (a 60 ms cooldown dropped a third)', () => {
+    for (const fps of [30, 60]) expect(strum(8, fps), `${fps} fps`).toBeGreaterThan(0.95);
+  });
+
+  it('still ignores a hand resting on a string', () => {
+    const d = new StrumDetector();
+    let n = 0;
+    for (let i = 0; i < 120; i++) n += d.update({ x: 600, y: 360 + 6 * Math.sin(i * 1.7) }, i / 60, ys, H).length;
+    expect(n).toBe(0);
+  });
+});
