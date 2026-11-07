@@ -33,6 +33,12 @@ function wind(id: string, bright: number): Instrument {
   return { ...PIANO, id, name: `inst.${id}`, t60: 6, t60Exponent: 0.3, bright, pick: 0.5, level: 0.5, voice: 'recorded', isRecorded: true };
 }
 
+/**
+ * The kanun: a trapezoid zither of the Ottoman court, its 26 triple courses plucked with rings on the forefingers.
+ * Voiced from Baris Bozkurt's recording of every chromatic note (Freesound, CC0); the strings ring on.
+ */
+const KANUN: Instrument = { ...PIANO, id: 'kanun', name: 'inst.kanun', t60: 3, t60Exponent: 0.5, bright: 0.75, pick: 0.2, level: 0.5, voice: 'recorded', isRecorded: true };
+
 /** The keyboard instruments, by id: each opens the keys page with its own sound, range and colours. */
 export const KEYBOARDS: Readonly<Record<string, KeyboardInstrument>> = {
   [PIANO_ID]: { instrument: PIANO, low: PIANO_LOWEST_MIDI, high: 108, isTouchSensitive: true, look: 'ivory', isDamped: true },
@@ -40,6 +46,7 @@ export const KEYBOARDS: Readonly<Record<string, KeyboardInstrument>> = {
   marimba: { instrument: mallet('marimba', 2.2, 0.4), low: 45, high: 96, isTouchSensitive: true, look: 'rosewood', isDamped: false },
   xylophone: { instrument: mallet('xylophone', 0.7, 0.85), low: 65, high: 108, isTouchSensitive: true, look: 'rosewood', isDamped: false },
   glockenspiel: { instrument: mallet('glockenspiel', 4, 0.95), low: 79, high: 108, isTouchSensitive: true, look: 'metal', isDamped: false },
+  kanun: { instrument: KANUN, low: 53, high: 88, isTouchSensitive: true, look: 'kanun', isDamped: false },
   clarinet: { instrument: wind('clarinet', 0.5), low: 50, high: 91, isTouchSensitive: true, look: 'ivory', isDamped: true, isMonophonic: true },
   flute: { instrument: wind('flute', 0.6), low: 60, high: 96, isTouchSensitive: true, look: 'ivory', isDamped: true, isMonophonic: true },
   trumpet: { instrument: wind('trumpet', 0.8), low: 52, high: 84, isTouchSensitive: true, look: 'ivory', isDamped: true, isMonophonic: true },
