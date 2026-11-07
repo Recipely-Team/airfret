@@ -177,6 +177,11 @@ projects.) *Guard:* the *Down only* strum filter, covered by `player.test.ts`
 
 ## Flow
 
+**The first-run tour could interrupt self-play the player had already started (found by the production check after
+v0.28.2).** Start no longer waits on the camera, so the tour could begin a moment after *Watch it play* — and
+starting the tour stops it. *Fix:* the first-run tour starts only while nothing else is playing (no self-play, no
+lesson). *Guard:* the production check (acoustic first, after the home page) passes 4/4, where it had failed 1 in 3.
+
 **No sound at all on an older Windows 10 laptop (GTX 950M; owner's report).** Start unlocked audio and then waited
 for the camera and the hand model before closing its card; MediaPipe's GPU backend can hang on an old card or driver
 instead of failing, so the CPU fallback never came and nothing could be played, not even with the mouse. *Fix:* the
