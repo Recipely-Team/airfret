@@ -523,3 +523,7 @@ a.btn, a.brand { text-decoration: none; color: inherit; display: inline-flex; al
   .info-icon svg { width: 48px; }
   .info-names h2 { font-size: 21px; }
 }
+
+/* Opening a melody file in the song form */
+.file-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 0 10px; }
+.file-btn { cursor: pointer; }
