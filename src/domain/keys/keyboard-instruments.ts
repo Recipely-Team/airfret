@@ -40,14 +40,14 @@ export const KEYBOARDS: Readonly<Record<string, KeyboardInstrument>> = {
   marimba: { instrument: mallet('marimba', 2.2, 0.4), low: 45, high: 96, isTouchSensitive: true, look: 'rosewood', isDamped: false },
   xylophone: { instrument: mallet('xylophone', 0.7, 0.85), low: 65, high: 108, isTouchSensitive: true, look: 'rosewood', isDamped: false },
   glockenspiel: { instrument: mallet('glockenspiel', 4, 0.95), low: 79, high: 108, isTouchSensitive: true, look: 'metal', isDamped: false },
-  clarinet: { instrument: wind('clarinet', 0.5), low: 50, high: 91, isTouchSensitive: true, look: 'ivory', isDamped: true },
-  flute: { instrument: wind('flute', 0.6), low: 60, high: 96, isTouchSensitive: true, look: 'ivory', isDamped: true },
-  trumpet: { instrument: wind('trumpet', 0.8), low: 52, high: 84, isTouchSensitive: true, look: 'ivory', isDamped: true },
-  oboe: { instrument: wind('oboe', 0.7), low: 57, high: 89, isTouchSensitive: true, look: 'ivory', isDamped: true },
-  bassoon: { instrument: wind('bassoon', 0.4), low: 33, high: 76, isTouchSensitive: true, look: 'ivory', isDamped: true },
-  horn: { instrument: wind('horn', 0.45), low: 36, high: 77, isTouchSensitive: true, look: 'ivory', isDamped: true },
-  trombone: { instrument: wind('trombone', 0.6), low: 33, high: 65, isTouchSensitive: true, look: 'ivory', isDamped: true },
-  tuba: { instrument: wind('tuba', 0.35), low: 29, high: 62, isTouchSensitive: true, look: 'ivory', isDamped: true },
+  clarinet: { instrument: wind('clarinet', 0.5), low: 50, high: 91, isTouchSensitive: true, look: 'ivory', isDamped: true, isMonophonic: true },
+  flute: { instrument: wind('flute', 0.6), low: 60, high: 96, isTouchSensitive: true, look: 'ivory', isDamped: true, isMonophonic: true },
+  trumpet: { instrument: wind('trumpet', 0.8), low: 52, high: 84, isTouchSensitive: true, look: 'ivory', isDamped: true, isMonophonic: true },
+  oboe: { instrument: wind('oboe', 0.7), low: 57, high: 89, isTouchSensitive: true, look: 'ivory', isDamped: true, isMonophonic: true },
+  bassoon: { instrument: wind('bassoon', 0.4), low: 33, high: 76, isTouchSensitive: true, look: 'ivory', isDamped: true, isMonophonic: true },
+  horn: { instrument: wind('horn', 0.45), low: 36, high: 77, isTouchSensitive: true, look: 'ivory', isDamped: true, isMonophonic: true },
+  trombone: { instrument: wind('trombone', 0.6), low: 33, high: 65, isTouchSensitive: true, look: 'ivory', isDamped: true, isMonophonic: true },
+  tuba: { instrument: wind('tuba', 0.35), low: 29, high: 62, isTouchSensitive: true, look: 'ivory', isDamped: true, isMonophonic: true },
 };
 
 /** The keyboard instrument with this id, if it is one. */

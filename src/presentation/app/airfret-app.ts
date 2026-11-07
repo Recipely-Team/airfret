@@ -45,6 +45,7 @@ interface Services {
   readonly player: Player;
   readonly drums: DrumPlayer;
   readonly stages: readonly InstrumentStage[];
+  readonly kit: NonNullable<InstrumentStage['performance']>; // the drum kit playing by itself (it isn't a stage)
   readonly renderer: StageRenderer;
   readonly backing: BackingTrack;
   readonly guide: GuidePlayer;
@@ -82,6 +83,7 @@ export class AirfretApp {
     this.demo = new DemoController({
       player: s.player, sound: s.sound, startAudio: () => this.startAudio(), instrumentId: () => s.store.value.instrument, instrument: () => this.instrument(),
       songs: () => songLibrary(s.store.value), prepare: (song) => s.store.update({ tuning: song.tuning ?? 'standard' }), onChange: showStart,
+      performance: () => (this.isDrums ? s.kit : s.stages.find((x) => x.handles(s.store.value.instrument))?.performance),
     });
     // When tracking stops, the last tracked hands leave the stage.
     this.camera = new CameraController(s.tracker, () => this.ui.toast.show(t('app.cameraError'), ERROR_TOAST_MS), () => s.player.updateHands([], performance.now() / MS_PER_SECOND, s.sound.now, false));
@@ -263,12 +265,10 @@ export class AirfretApp {
     const hint = this.demo.isPlaying ? null : stageHint({ isStarted: this.isStarted, hasCamera: this.camera.isOn, instrument: st.instrument, secondsWithoutHands: now - this.lastHandsAt });
     // The self-playing hand is drawn as a skeleton: it isn't in the camera picture.
     const camera = { brightness: st.brightness, isHidden: st.isCameraHidden || this.demo.isPlaying };
+    this.demo.tick(now);
     if (this.isDrums) this.s.renderer.drums(this.s.drums, st.pedalBindings, now, hint, camera);
     else if (stage) stage.draw(this.s.renderer, now, hint, camera);
-    else {
-      this.demo.tick(now);
-      this.s.renderer.draw(this.s.player, this.lesson, this.tours.session, audioNow, now, hint, camera);
-    }
+    else this.s.renderer.draw(this.s.player, this.lesson, this.tours.session, audioNow, now, hint, camera);
     requestAnimationFrame(this.frame);
   };
 

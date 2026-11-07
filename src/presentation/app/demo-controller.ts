@@ -5,6 +5,7 @@ import type { Player } from '@application/play/player';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
 import type { Instrument } from '@domain/instruments/instrument';
 import type { Song } from '@domain/lessons/catalog/song';
+import type { StagePerformance } from '@presentation/app/stages/stage-performance';
 import { t } from '@presentation/i18n/translator';
 import { byId } from '@presentation/ui/dom';
 import { SongPicker } from '@presentation/ui/controls/song-picker';
@@ -22,6 +23,8 @@ interface DemoHost {
   prepare(song: Song): void;
   /** Called when the mode or the playing changes. */
   onChange(isPlaying: boolean): void;
+  /** How the current page plays by itself, when it isn't a fretted instrument (keys, hand drums). */
+  performance(): StagePerformance | undefined;
 }
 
 /**
@@ -32,6 +35,7 @@ interface DemoHost {
  * @remarks
  * - The mode stays on when a song ends or is stopped; picking another mode leaves it.
  * - While it plays, the player can still strike the strings — mouse or strumming hand — and hears what its hand holds.
+ * - Other pages (keys, winds, hand drums) play through their stage's own `StagePerformance`.
  */
 export class DemoController {
   private readonly performer: DemoPerformer;
@@ -50,15 +54,15 @@ export class DemoController {
   }
 
   get isPlaying(): boolean {
-    return this.performer.isPlaying;
+    return this.performer.isPlaying || (this.host.performance()?.isPlaying ?? false);
   }
 
-  /** The *Watch it play* mode is on — never on the drums, which have nothing to play by themselves. */
+  /** The *Watch it play* mode is on (where the instrument has songs to play). */
   get isOn(): boolean {
     return this.on && this.hasDemo;
   }
 
-  /** The current instrument has songs it can play by itself (not the drums). */
+  /** The current instrument has songs it can play by itself. */
   get hasDemo(): boolean {
     return this.songs().length > 0;
   }
@@ -74,18 +78,23 @@ export class DemoController {
   leave(): void {
     if (!this.on) return;
     this.on = false;
-    this.performer.stop();
+    this.halt();
     this.changed();
   }
 
   stop(): void {
     if (!this.isPlaying) return;
-    this.performer.stop();
+    this.halt();
     this.changed();
   }
 
   /** One animation frame: advances the piece and shows it; notices when it has ended. */
   tick(now: number): void {
+    const stage = this.host.performance();
+    if (stage) {
+      if (stage.isPlaying && !stage.perform(this.host.sound.now)) this.changed();
+      return;
+    }
     const wasPlaying = this.isPlaying;
     const p = this.host.player;
     const frame = wasPlaying ? this.performer.update(p.layout, p.instrument, p.capo, this.host.sound.now) : null;
@@ -106,7 +115,8 @@ export class DemoController {
   }
 
   private songs(): Song[] {
-    return watchableSongs(this.host.songs(), this.host.instrumentId());
+    const stage = this.host.performance();
+    return stage ? stage.songs(this.host.songs()) : watchableSongs(this.host.songs(), this.host.instrumentId());
   }
 
   /** The chosen song if this instrument can play it, else its showcase piece. */
@@ -118,11 +128,18 @@ export class DemoController {
     const song = this.chosen(this.songs());
     if (!song) return;
     this.songId = song.id;
-    if (this.isPlaying) this.performer.stop();
+    if (this.isPlaying) this.halt();
     this.host.prepare(song);
     if (!(await this.host.startAudio())) return;
-    this.performer.start(song, this.host.instrument(), this.host.sound.now);
+    const stage = this.host.performance();
+    if (stage) stage.play(song, this.host.sound.now);
+    else this.performer.start(song, this.host.instrument(), this.host.sound.now);
     this.changed();
+  }
+
+  private halt(): void {
+    this.performer.stop();
+    this.host.performance()?.stop(this.host.sound.now);
   }
 
   private changed(): void {

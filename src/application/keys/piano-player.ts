@@ -51,6 +51,8 @@ export class PianoPlayer {
   private readonly holders = new Map<number, Set<string>>();
   private readonly ringing = new Set<number>();
   private isSustained = false;
+  /** Keys shown down while the instrument plays by itself. */
+  shown: ReadonlySet<number> = new Set();
 
   constructor(private readonly sound: SoundOutputInterface) {}
 

@@ -32,7 +32,7 @@ export function paintKeyboard(ctx: CanvasRenderingContext2D, piano: PianoPlayer)
   ctx.fill();
   ctx.fillStyle = COLOURS.felt;
   ctx.fillRect(x0, l.top - CASE_PAD * 0.8, x1 - x0, CASE_PAD * 0.6);
-  const down = new Set(piano.pressed);
+  const down = new Set([...piano.pressed, ...piano.shown]);
   const look = piano.keyboard?.look ?? 'ivory';
   const isReversed = look === 'reversed';
   for (const k of keys.filter((x) => !x.isBlack)) paintKey(ctx, k, down.has(k.midi), piano.glow.get(k.midi) ?? 0, keyLength, look);
