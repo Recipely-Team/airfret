@@ -32,5 +32,7 @@ export const DEFAULT_SETTINGS: Settings = {
   customSongs: [],
   hihatMode: HiHatPedalMode.holdToOpen,
   hasSeenExplore: false,
+  ensemble: [],
+  band: ['acoustic', 'piano', 'clarinet', 'bass', 'davul'],
   best: {},
 };

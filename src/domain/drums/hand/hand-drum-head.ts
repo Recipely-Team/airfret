@@ -8,7 +8,7 @@ export interface HandDrumHead {
   readonly size: number;
   /** Height over width of the head as seen: < 1 seen from above, ~1 facing the player. */
   readonly flatten: number;
-  readonly look: 'goblet' | 'frame' | 'box' | 'barrel' | 'steel';
+  readonly look: 'goblet' | 'frame' | 'box' | 'barrel' | 'steel' | 'davul';
   /** Strokes nearer the rim than this (share of the radius) are edge strokes; ≥ 1 means the head has no edge stroke. */
   readonly edgeAt: number;
   readonly center: HandStroke;

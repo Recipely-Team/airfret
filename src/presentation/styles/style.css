@@ -527,3 +527,58 @@ a.btn, a.brand { text-decoration: none; color: inherit; display: inline-flex; al
 /* Opening a melody file in the song form */
 .file-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 0 10px; }
 .file-btn { cursor: pointer; }
+
+/* Together: instruments that join one playing by itself */
+.ensemble-btn[aria-pressed='true'] { color: var(--accent); border-color: rgba(224, 164, 88, 0.5); }
+.ensemble-head { margin: 2px 4px 8px; }
+.ensemble-option { grid-template-columns: 34px 1fr 16px; align-items: center; gap: 10px; }
+.ensemble-option:disabled { opacity: 0.4; cursor: default; }
+.ensemble-option[aria-pressed='true'] strong { color: var(--accent); }
+.ensemble-icon svg { width: 34px; height: auto; color: var(--accent); display: block; }
+.ensemble-tick { color: var(--accent); font-weight: 600; }
+
+/* The band: a page of its own — the song and Play on top, each instrument a card in a responsive grid below. */
+.band { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; background: var(--bg); }
+.band-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.band-head h2 { margin: 0; font-size: 17px; font-weight: 600; }
+.band-song .select { max-width: min(52vw, 320px); }
+.band-grid { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; padding: 16px; align-content: start; grid-auto-rows: max-content; }
+.band-card { flex: none; border: 1px solid var(--line); border-radius: 12px; background: rgba(236, 232, 225, 0.02); overflow: hidden; display: flex; flex-direction: column; }
+.band-card-head { display: flex; align-items: center; gap: 8px; padding: 8px 8px 6px 12px; border-bottom: 1px solid var(--line); }
+.band-card-head strong { font-size: 14px; font-weight: 600; }
+.band-icon svg { width: 44px; height: 18px; display: block; color: var(--muted); }
+.band-role { font-size: 11px; color: var(--accent); border: 1px solid rgba(224, 164, 88, 0.35); border-radius: 999px; padding: 1px 8px; }
+.band-remove { margin-left: auto; width: 28px; height: 28px; border-radius: 8px; border: 0; background: none; color: var(--muted); font-size: 18px; cursor: pointer; }
+.band-remove:hover { color: var(--ink); background: rgba(236, 232, 225, 0.06); }
+.band-card canvas { flex: none; width: 100%; aspect-ratio: 16 / 9; display: block; }
+.band-add { border: 1px dashed var(--line-strong); border-radius: 12px; background: none; color: var(--muted); font: inherit; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 140px; cursor: pointer; }
+.band-add span { font-size: 28px; font-weight: 300; color: var(--accent); }
+.band-add:hover:not(:disabled) { color: var(--ink); border-color: rgba(224, 164, 88, 0.5); }
+.band-add:disabled { opacity: 0.4; cursor: default; }
+/* A phone shows two small cards a row: a squarer drawing, a compact head. */
+@media (max-width: 599px) {
+  .band-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 10px; }
+  .band-card canvas { aspect-ratio: 4 / 3; }
+  .band-card-head { flex-wrap: wrap; gap: 2px 6px; padding: 6px 4px 5px 8px; position: relative; }
+  .band-card-head strong { font-size: 12.5px; }
+  .band-icon { display: none; }
+  .band-role { font-size: 10px; padding: 0 6px; }
+  .band-remove { position: absolute; top: 2px; right: 2px; width: 24px; height: 24px; }
+  .band-add { min-height: 0; aspect-ratio: 4 / 3.6; }
+  .band-head { gap: 8px; padding: 10px; }
+  .band-song .select { max-width: 46vw; }
+}
+.band-sheet { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.55); display: flex; align-items: flex-end; justify-content: center; z-index: 2; }
+.band-sheet-card { width: min(760px, 100%); max-height: min(80vh, 680px); display: flex; flex-direction: column; background: #141414; border: 1px solid var(--line-strong); border-radius: 16px 16px 0 0; }
+@media (min-width: 700px) { .band-sheet { align-items: center; } .band-sheet-card { border-radius: 16px; } }
+.band-sheet-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.band-sheet-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.band-sheet-list { overflow-y: auto; padding: 4px 16px 16px; }
+.band-group { margin: 14px 0 8px; font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.band-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.band-option { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px 8px; border: 1px solid var(--line); border-radius: 10px; background: rgba(236, 232, 225, 0.03); color: var(--muted); font: inherit; font-size: 12.5px; cursor: pointer; }
+.band-option svg { width: 72px; height: 29px; }
+.band-option:hover:not(:disabled) { color: var(--ink); border-color: var(--line-strong); }
+.band-option[aria-pressed='true'] { color: var(--accent); border-color: rgba(224, 164, 88, 0.6); background: rgba(224, 164, 88, 0.08); }
+.band-option:disabled { opacity: 0.35; cursor: default; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
