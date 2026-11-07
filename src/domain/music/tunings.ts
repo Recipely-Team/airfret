@@ -20,6 +20,8 @@ export const GUITAR7_TUNING: readonly number[] = [35, 40, 45, 50, 55, 59, 64];
  * bottom course is the melody string — the highest, as a guitar's top E is.
  */
 export const SAZ_TUNING: readonly number[] = [55, 50, 57];
+/** Kopuz A2 D3 G3, low to high: three strings in fourths, as the revived short-necked kopuz is commonly tuned. */
+export const KOPUZ_TUNING: readonly number[] = [45, 50, 55];
 
 /** Ukulele G4 C4 E4 A4 (re-entrant: the G above the C), mandolin G3 D4 A4 E5, balalaika prima E4 E4 A4. */
 export const UKULELE_TUNING: readonly number[] = [67, 60, 64, 69];

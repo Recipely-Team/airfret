@@ -45,6 +45,12 @@ const LOOKS: Readonly<Record<ChainKind, GuitarLook>> = {
     headstock: '#3a2617', binding: '#e9dcc0', inlay: '#e8e2d2', hardware: '#cfcabf', pickguard: 'transparent',
     wound: '#d4d2cd', plain: '#dedbd5', woundCount: 0,
   },
+  kopuz: {
+    // A pale goatskin top over a carved walnut bowl, a short dark neck, gut-coloured strings.
+    style: 'saz', top: '#e3cfa6', topGrain: '#cdb486', burst: '#4a2412', board: '#2e1c11', boardGrain: '#1c110a',
+    headstock: '#2e1c11', binding: '#d9c7a2', inlay: '#e8e2d2', hardware: '#cfcabf', pickguard: 'transparent',
+    wound: '#e2d6bd', plain: '#e8dcc4', woundCount: 0,
+  },
   nylon: {
     style: 'classical', top: '#b9804d', topGrain: '#8f5a31', burst: '#3b2112', board: '#2a1a12', boardGrain: '#180e09',
     headstock: '#2a1a12', binding: '#e9dcc0', inlay: '#2a1a12', hardware: '#c9b98f', pickguard: 'transparent',

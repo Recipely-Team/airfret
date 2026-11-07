@@ -3,7 +3,7 @@ import type { Instrument } from '@domain/instruments/instrument';
 import { PlayMode } from '@domain/instruments/play-mode';
 import { SAZ_FRET_CENTS } from '@domain/instruments/saz-frets';
 import { UKULELE_SHAPES } from '@domain/music/chords/ukulele-shapes';
-import { BALALAIKA_TUNING, BASS5_TUNING, BASS6_TUNING, BASS_TUNING, GREEK_BOUZOUKI_TUNING, GUITAR7_TUNING, GUITAR_TUNING, IRISH_BOUZOUKI_TUNING, MANDOLIN_TUNING, SAZ_TUNING, UKULELE_TUNING } from '@domain/music/tunings';
+import { BALALAIKA_TUNING, BASS5_TUNING, BASS6_TUNING, BASS_TUNING, GREEK_BOUZOUKI_TUNING, GUITAR7_TUNING, GUITAR_TUNING, IRISH_BOUZOUKI_TUNING, KOPUZ_TUNING, MANDOLIN_TUNING, SAZ_TUNING, UKULELE_TUNING } from '@domain/music/tunings';
 import { WORLD_TUNINGS } from '@domain/music/world-tunings';
 
 const MAX_FRET = 12;
@@ -52,6 +52,7 @@ export const INSTRUMENTS: readonly Instrument[] = [
   { id: 'bass5', name: 'inst.bass5', tuning: BASS5_TUNING, maxFret: MAX_FRET, frets: FRETS.bass, t60: 7.9, t60Exponent: 0.49, bright: 0.22, pick: 0.22, level: 0.85, chain: ChainKind.bass, defaultMode: PlayMode.note, voice: 'recorded', isRecorded: true },
   { id: 'bass6', name: 'inst.bass6', tuning: BASS6_TUNING, maxFret: MAX_FRET, frets: FRETS.bass, t60: 7.9, t60Exponent: 0.49, bright: 0.24, pick: 0.22, level: 0.8, chain: ChainKind.bass, defaultMode: PlayMode.note, voice: 'recorded', isRecorded: true },
   { id: 'saz', name: 'inst.saz', tuning: SAZ_TUNING, maxFret: SAZ_VISIBLE_FRETS, frets: 23, t60: 3.2, t60Exponent: 0.6, bright: 0.86, pick: 0.07, level: 0.42, chain: ChainKind.saz, defaultMode: PlayMode.note, voice: 'fitted', isRecorded: false, courses: SAZ_COURSES, fretCents: SAZ_FRET_CENTS, modes: [PlayMode.note, PlayMode.free] },
+  { id: 'kopuz', name: 'inst.kopuz', tuning: KOPUZ_TUNING, maxFret: MAX_FRET, frets: 12, t60: 2.6, t60Exponent: 0.6, bright: 0.55, pick: 0.15, level: 0.45, chain: ChainKind.kopuz, defaultMode: PlayMode.note, voice: 'recorded', isRecorded: true, modes: MELODY_MODES },
   { id: 'mandolin', name: 'inst.mandolin', tuning: MANDOLIN_TUNING, maxFret: MAX_FRET, frets: 20, t60: 4, t60Exponent: 0.6, bright: 0.85, pick: 0.1, level: 0.36, chain: ChainKind.mandolin, defaultMode: PlayMode.note, voice: 'fitted', isRecorded: false, courses: [0, 0, 0, 0], tunings: WORLD_TUNINGS.mandolin, modes: MELODY_MODES },
   { id: 'balalaika', name: 'inst.balalaika', tuning: BALALAIKA_TUNING, maxFret: MAX_FRET, frets: 24, t60: 2.4, t60Exponent: 0.6, bright: 0.8, pick: 0.12, level: 0.42, chain: ChainKind.balalaika, defaultMode: PlayMode.note, voice: 'fitted', isRecorded: false, tunings: WORLD_TUNINGS.balalaika, modes: MELODY_MODES },
   { id: 'bouzouki', name: 'inst.bouzouki', tuning: IRISH_BOUZOUKI_TUNING, maxFret: MAX_FRET, frets: 24, t60: 6, t60Exponent: 0.5, bright: 0.72, pick: 0.11, level: 0.36, chain: ChainKind.bouzouki, defaultMode: PlayMode.note, voice: 'fitted', isRecorded: false, courses: [0, 0, 0, 0], tunings: WORLD_TUNINGS.irishBouzouki, modes: MELODY_MODES },
