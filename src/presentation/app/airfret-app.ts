@@ -164,7 +164,7 @@ export class AirfretApp {
   }
 
   /** Unlocks audio once (Start, or the demo before Start); false when the browser refuses. */
-  private async startAudio(): Promise<boolean> {
+  async startAudio(): Promise<boolean> {
     if (this.isAudioOn) return true;
     const audio = await this.s.sound.start(this.instrument());
     if (!audio.isOk) this.ui.start.status(audio.failure.detail);

@@ -38,11 +38,12 @@ export class HandDrumPerformer {
     return this.isOn;
   }
 
-  start(rhythm: HandRhythm, drum: HandDrum, audioNow: number): boolean {
+  /** Starts `rhythm`; its first beat lands at `firstAt` (audio clock), by default just after now. */
+  start(rhythm: HandRhythm, drum: HandDrum, audioNow: number, firstAt = audioNow + FIRST_AFTER): boolean {
     const parsed = parseRhythm(rhythm.phrase, rhythm.subdiv, rhythm.beatsPerBar, rhythm.bars);
     if (!parsed?.length) return false;
     const spb = 60 / rhythm.bpm;
-    const t0 = audioNow + FIRST_AFTER;
+    const t0 = firstAt;
     const timed: Timed[] = [];
     for (const s of parsed) {
       const head = drum.heads[s.head];

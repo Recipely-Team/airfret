@@ -27,9 +27,10 @@ export class KitPerformer {
     return this.isOn;
   }
 
-  start(groove: Groove, audioNow: number): boolean {
+  /** Starts `groove`; its first beat lands at `firstAt` (audio clock), by default just after now. */
+  start(groove: Groove, audioNow: number, firstAt = audioNow + FIRST_AFTER): boolean {
     const spb = 60 / groove.bpm;
-    const t0 = audioNow + FIRST_AFTER;
+    const t0 = firstAt;
     this.hits = parseGroove(groove).map((h) => ({ ...h, at: t0 + h.beat * spb }));
     if (!this.hits.length) return false;
     this.nextSound = 0;

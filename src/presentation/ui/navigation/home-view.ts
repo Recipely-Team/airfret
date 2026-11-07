@@ -54,6 +54,7 @@ export class HomeView {
     byId('homeLearn').replaceChildren(
       card(t('tour.start'), t('home.tourText'), undefined, this.onTour),
       card(t('lesson.course'), t('home.courseText'), '/lessons'),
+      card(t('band.title'), t('home.bandText'), '/band'),
       card(t('explore.title'), t('home.exploreText'), '/explore'),
     );
   }

@@ -74,19 +74,21 @@ const recordedFrame = (head: HandDrumHead, doum: string[], tek: string[], ka?: s
 
 /**
  * The davul: the big double-headed drum of Anatolian weddings and the mehter, struck with a heavy tokmak (düm) on
- * one head and a thin çubuk (tek) on the other. Real strokes (Despoina_kalantzi, Freesound, CC0).
+ * one head and a thin çubuk (tek) on the other. Real strokes (Despoina_kalantzi, Freesound, CC0): one clean hit
+ * of each — the çubuk's other hand a touch higher and softer. (Strokes cut from her quiet tremolo carried its room
+ * noise as loud as the hit, and were let go.)
  */
 const DAVUL: HandDrumHead = {
-  cxOfWidth: 0.5, cyOfHeight: 0.56, size: 0.26, flatten: 0.96, look: 'frame', edgeAt: 0.62,
+  cxOfWidth: 0.47, cyOfHeight: 0.58, size: 0.24, flatten: 0.96, look: 'davul', edgeAt: 0.62,
   center: { ...s('stroke.doum', [{ hz: 62, toHz: 52, decay: 0.7, level: 0.95 }], { type: 'lowpass', hz: 300, length: 0.05, level: 0.5 }), recording: { layers: [['davul-doum']] } },
-  edge: { ...s('stroke.tek', [{ hz: 380, decay: 0.06, level: 0.3 }], { type: 'highpass', hz: 3000, length: 0.06, level: 0.5 }), recording: { layers: [['davul-tek', 'davul-tek-b', 'davul-tek-c']] } },
-  edgeLeft: { ...s('stroke.tek', [{ hz: 380, decay: 0.06, level: 0.3 }], { type: 'highpass', hz: 3000, length: 0.06, level: 0.5 }), recording: { layers: [['davul-tek-b', 'davul-tek-c', 'davul-tek']] } },
+  edge: { ...s('stroke.tek', [{ hz: 380, decay: 0.06, level: 0.3 }], { type: 'highpass', hz: 3000, length: 0.06, level: 0.5 }), recording: { layers: [['davul-tek']] } },
+  edgeLeft: { ...s('stroke.tek', [{ hz: 380, decay: 0.06, level: 0.3 }], { type: 'highpass', hz: 3000, length: 0.06, level: 0.5 }), recording: { layers: [['davul-tek']], rate: 1.06, gain: 0.8 } },
 };
 
 export const HAND_DRUMS: readonly HandDrum[] = [
   { id: 'darbuka', name: 'inst.darbuka', heads: [DARBUKA] },
-  { id: 'def', name: 'inst.def', heads: [recordedFrame(frame(95, { type: 'highpass', hz: 6200, length: 0.35, level: 0.22 }, { center: 'stroke.doum', edge: 'stroke.tek', left: 'stroke.ka' }), ['def-doum'], ['def-tek', 'def-tek-b', 'def-tek-c'], ['def-ka', 'def-ka-b'])] },
-  { id: 'bendir', name: 'inst.bendir', heads: [recordedFrame(frame(68, { type: 'bandpass', hz: 1700, length: 0.45, level: 0.3 }, { center: 'stroke.doum', edge: 'stroke.tek', left: 'stroke.ka' }), ['bendir-doum', 'bendir-doum-b', 'bendir-doum-c'], ['bendir-tek', 'bendir-tek-b'])] },
+  { id: 'def', name: 'inst.def', heads: [recordedFrame(frame(95, { type: 'highpass', hz: 6200, length: 0.35, level: 0.22 }, { center: 'stroke.doum', edge: 'stroke.tek', left: 'stroke.ka' }), ['def-doum'], ['def-tek', 'def-tek-b', 'def-tek-c'])] },
+  { id: 'bendir', name: 'inst.bendir', heads: [recordedFrame(frame(68, { type: 'bandpass', hz: 1700, length: 0.45, level: 0.3 }, { center: 'stroke.doum', edge: 'stroke.tek', left: 'stroke.ka' }), ['bendir-doum'], ['bendir-tek'])] },
   { id: 'davul', name: 'inst.davul', heads: [DAVUL] },
   {
     id: 'cajon', name: 'inst.cajon', heads: [{

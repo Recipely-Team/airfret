@@ -57,6 +57,10 @@ export class StageRenderer {
     private readonly video: HTMLVideoElement,
   ) {}
 
+  private area(): { w: number; h: number } {
+    return { w: this.canvas.clientWidth || window.innerWidth, h: this.canvas.clientHeight || window.innerHeight };
+  }
+
   resize(w: number, h: number): void {
     const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
     this.canvas.width = Math.round(w * dpr);
@@ -68,8 +72,7 @@ export class StageRenderer {
 
   /** Piano frame: the keyboard with what sounds lit, then the real hands (or their skeleton) over it. */
   piano(piano: PianoPlayer, now: number, hint: string | null, camera: CameraView): void {
-    const w = this.canvas.clientWidth || window.innerWidth;
-    const h = this.canvas.clientHeight || window.innerHeight;
+    const { w, h } = this.area();
     const dt = this.lastT ? Math.min(MAX_FRAME, now - this.lastT) : 0;
     this.lastT = now;
     piano.fade(dt);
@@ -81,23 +84,21 @@ export class StageRenderer {
 
   /** Hand drum frame: its heads with their strokes' ripples, the real hands (or their skeleton) over them. */
   handDrum(drums: HandDrumPlayer, now: number, hint: string | null, camera: CameraView): void {
-    const w = this.canvas.clientWidth || window.innerWidth;
-    const h = this.canvas.clientHeight || window.innerHeight;
+    const { w, h } = this.area();
     this.ctx.clearRect(0, 0, w, h);
     paintHandDrum(this.ctx, drums, w, h, now);
     this.paintHands(drums.hands, w, h, camera);
     this.hint(hint, w, h * 0.16);
   }
 
-  /** Drum mode frame: kit, sticks, the real hands holding them, and the pedals. */
-  drums(drums: DrumPlayer, bindings: PedalBindings, now: number, hint: string | null, camera: CameraView): void {
-    const w = this.canvas.clientWidth || window.innerWidth;
-    const h = this.canvas.clientHeight || window.innerHeight;
+  /** Drum mode frame: kit, sticks, the real hands holding them, and the pedals (none in the band: no one presses them). */
+  drums(drums: DrumPlayer, bindings: PedalBindings | null, now: number, hint: string | null, camera: CameraView): void {
+    const { w, h } = this.area();
     this.ctx.clearRect(0, 0, w, h);
     paintKit(this.ctx, drums, now, h);
     paintSticks(this.ctx, drums.sticks);
     this.paintHands(drums.hands, w, h, camera);
-    paintPedals(this.ctx, drums, bindings, w, h);
+    if (bindings) paintPedals(this.ctx, drums, bindings, w, h);
     this.hint(hint, w, h * 0.16);
   }
 

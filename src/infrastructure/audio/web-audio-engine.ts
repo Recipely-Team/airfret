@@ -143,6 +143,10 @@ export class WebAudioEngine implements SoundOutputInterface {
     return this.tap.stream;
   }
 
+  joinMix(): { ctx: AudioContext; mix: AudioNode; room: AudioNode } { // where the ensemble joins: clock, mix, room
+    return { ctx: this.ctx, mix: this.master, room: this.reverbIn };
+  }
+
   setVolume(volume: number): void {
     this.volume = volume;
     this.master.gain.setTargetAtTime(volume, this.ctx.currentTime, SMOOTHING);

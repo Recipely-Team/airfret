@@ -42,6 +42,10 @@ export interface Settings {
   readonly hihatMode: HiHatPedalMode;
   /** The first-run introduction has been offered (once: the guided tour on a six-string chord instrument; the name is historical). */
   readonly hasSeenExplore: boolean;
+  /** Instruments that join in when one plays by itself: the same song, together (ids). */
+  readonly ensemble: readonly string[];
+  /** The band page's members (instrument ids), in the order they are shown. */
+  readonly band: readonly string[];
   /** Best accuracy (0–1) per song id. */
   readonly best: Readonly<Record<string, number>>;
 }

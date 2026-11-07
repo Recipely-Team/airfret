@@ -4,6 +4,7 @@ import { SHELL } from '@domain/drums/hand/hand-drum-pads';
 import { midiToName } from '@domain/music/pitch';
 import { FONT, Palette, rgba } from '@presentation/canvas/palette';
 import { t } from '@presentation/i18n/translator';
+import { paintDavul, paintDavulMallets } from '@presentation/canvas/drums/paint-davul';
 
 /** Copper, wood, skin, chrome and the handpan's dark nitrided steel. */
 const C = { copper: '#8a5232', copperLight: '#c98a55', wood: '#7a4a28', woodLight: '#b07a48', skin: '#efe6d2', skinShade: '#d6c9ab', goat: '#e6d3ad', rim: '#d8d8da', rimDark: '#7c7c80', steel: '#3b3f44', steelLight: '#6c737b' } as const;
@@ -28,10 +29,12 @@ export function paintHandDrum(ctx: CanvasRenderingContext2D, d: HandDrumPlayer, 
   for (const pad of d.pads) {
     if (pad.head.look === 'goblet' || pad.head.look === 'barrel') paintBody(ctx, pad);
     if (pad.head.look === 'box') paintBox(ctx, pad);
+    else if (pad.head.look === 'davul') paintDavul(ctx, pad);
     else paintHead(ctx, pad, d.drum.id === 'def');
     paintLabels(ctx, pad);
   }
-  for (const r of d.visibleRipples(now)) {
+  const ripples = d.visibleRipples(now);
+  for (const r of ripples) {
     const pad = d.pads[r.head];
     if (!pad) continue;
     const age = (now - r.at) / RIPPLE_SECONDS;
@@ -43,6 +46,7 @@ export function paintHandDrum(ctx: CanvasRenderingContext2D, d: HandDrumPlayer, 
     ctx.lineWidth = 3;
     ctx.stroke();
   }
+  for (const pad of d.pads) if (pad.head.look === 'davul') paintDavulMallets(ctx, pad, ripples, now);
 }
 
 /** A goblet (darbuka, djembe) narrows below its head; a barrel (conga, bongo, tabla) drops straight down. */

@@ -36,12 +36,17 @@
           </div>
           <button class="select song-pick" id="demoSong" type="button" aria-haspopup="listbox" aria-expanded="false" hidden></button>
           <button class="btn ghost" id="demoBtn" type="button" aria-pressed="false" hidden></button>
+          <button class="btn ghost ensemble-btn" id="ensembleBtn" type="button" aria-haspopup="listbox" aria-expanded="false" hidden></button>
         </div>
         <div class="spacer"></div>
         <nav class="learn-group" data-i18n-label="home.learn">
           <a class="learn-link" id="lessonsBtn" href="/lessons" data-link data-i18n-label="ui.lessons">
             <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5c2.4-1 4.8-1 7 .5 2.2-1.5 4.6-1.5 7-.5v11c-2.4-1-4.8-1-7 .5-2.2-1.5-4.6-1.5-7-.5z"/><path d="M10 5v11"/></svg>
             <span data-i18n="ui.lessons"></span>
+          </a>
+          <a class="learn-link" id="bandBtn" href="/band" data-link data-i18n-label="band.title">
+            <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="14.5" r="2.3"/><circle cx="14" cy="13" r="2.3"/><path d="M8.3 14.5V5l8-1.6V13"/></svg>
+            <span data-i18n="band.title"></span>
           </a>
           <a class="learn-link" id="exploreBtn" href="/explore" data-link data-i18n-label="explore.title">
             <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.2"/><path d="m12.8 7.2-1.6 4-4 1.6 1.6-4z"/></svg>
@@ -118,6 +123,23 @@
           <button class="btn small ghost" id="pedalsReset" data-i18n="pedals.reset"></button>
         </div>
       </div>
+
+      <section class="band" id="band" hidden>
+        <div class="band-head">
+          <h2 data-i18n="band.title"></h2>
+          <label class="band-song"><span class="sr-only" data-i18n="band.song"></span><select id="bandSong" class="select"></select></label>
+          <button class="btn primary" id="bandPlay" type="button" aria-pressed="false"></button>
+          <div class="spacer"></div>
+          <button class="btn ghost" id="bandClose" type="button" data-i18n="ui.close"></button>
+        </div>
+        <div class="band-grid" id="bandGrid" role="group" data-i18n-label="band.members"></div>
+        <div class="band-sheet" id="bandPicker" hidden>
+          <div class="band-sheet-card" role="dialog" aria-modal="true" data-i18n-label="band.add">
+            <div class="band-sheet-head"><h3 data-i18n="band.add"></h3><span class="muted small" id="bandPickerNote"></span><div class="spacer"></div><button class="btn primary" id="bandPickerDone" type="button" data-i18n="band.done"></button></div>
+            <div class="band-sheet-list" id="bandPickerList"></div>
+          </div>
+        </div>
+      </section>
 
       <div class="overlay" id="explore" hidden>
         <div class="card explore">
@@ -260,6 +282,7 @@
         </div>
       </div>
 
+      <div class="popover song-picker ensemble-picker" id="ensemblePicker" hidden><div class="song-picker-list" id="ensembleList"></div></div>
       <div class="popover song-picker" id="songPicker" hidden>
         <input type="search" class="search" id="songPickerSearch" autocomplete="off" spellcheck="false" data-i18n-label="lesson.search" />
         <div class="song-picker-list" id="songPickerList" role="listbox"></div>
