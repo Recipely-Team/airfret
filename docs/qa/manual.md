@@ -212,6 +212,14 @@ F/B rows (id — note):
 | I3 | Close with ×, Escape or a click outside | The card closes | |
 | I4 | Phone width | The card fits and scrolls; nothing overflows sideways | |
 
+## N. Navigation
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| N1 | `/kanun` → *Watch it play*, or hold a clarinet note → browser Back | Silence at once; the home page plays nothing | |
+| N2 | Any instrument playing → switch to another tab or app | It goes quiet | |
+| N3 | `/handpan` (near the end of the list) → open the instrument menu | The menu opens scrolled to Handpan, highlighted | |
+
 ## S. Self-play — the *Watch it play* mode
 
 | # | Step | Expected | Result |

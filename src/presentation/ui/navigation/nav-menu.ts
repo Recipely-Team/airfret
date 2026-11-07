@@ -29,7 +29,13 @@ export class NavMenu {
     this.el.hidden = false;
     this.scrim.hidden = false;
     this.button.setAttribute('aria-expanded', 'true');
-    this.el.querySelector<HTMLElement>('[aria-current="page"], a')?.focus();
+    // The list is rebuilt as the app re-renders: centre the current instrument once that frame is drawn, so a long
+    // menu opens where the player is, not at its top.
+    requestAnimationFrame(() => {
+      const current = this.el.querySelector<HTMLElement>('[aria-current="page"]');
+      current?.scrollIntoView({ block: 'center' });
+      (current ?? this.el.querySelector<HTMLElement>('a'))?.focus({ preventScroll: true });
+    });
   }
 
   close(): void {

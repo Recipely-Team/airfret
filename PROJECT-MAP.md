@@ -305,7 +305,7 @@ Layers and rules: `CLAUDE.md`, `architecture.md`.
 
 - `drum-kit.ts` — DrumKit — synthesised metronome click, kick, snare and hi-hat.
 - `string-noises.ts` — Strumming strings the fretting hand mutes: a short band of noise, lower on the bass.
-- `web-audio-engine.ts` — Drums sit in a small room: a little of the shared reverb (`room`).
+- `web-audio-engine.ts` — Leaving a page: everything fades this fast and stays muted this long, past any note already queued, seconds.
 
 ## src/infrastructure/audio/drums/
 
