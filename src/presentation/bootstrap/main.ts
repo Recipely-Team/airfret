@@ -1,3 +1,4 @@
+import { installPolyfills } from '@presentation/bootstrap/polyfills';
 import { MotionStrummer } from '@application/play/motion-strummer';
 import { InstrumentInfo } from '@presentation/ui/navigation/instrument-info';
 import { KitPerformance } from '@presentation/app/stages/kit-performance';
@@ -58,6 +59,7 @@ import { showBuildTag } from '@presentation/ui/build-tag';
  * - Builds adapters, injects them into application services through their ports, and wires the UI.
  */
 function bootstrap(): void {
+  installPolyfills();
   const canvas = byId<HTMLCanvasElement>('stage');
   const ctx = canvas.getContext('2d');
   if (!ctx) {
