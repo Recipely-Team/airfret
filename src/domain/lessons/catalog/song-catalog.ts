@@ -3,6 +3,8 @@ import type { Song } from '@domain/lessons/catalog/song';
 import { BACH_PRELUDE } from '@domain/lessons/catalog/pieces/bach-prelude';
 import { BACH_PRELUDE_BASS } from '@domain/lessons/catalog/pieces/bach-prelude-bass';
 import { CLARO_DE_LUNA } from '@domain/lessons/catalog/pieces/claro-de-luna';
+import { CLASSICAL_THEMES } from '@domain/lessons/catalog/pieces/classical-themes';
+import { FOLK_MELODIES } from '@domain/lessons/catalog/pieces/folk-melodies';
 import { MELODIES } from '@domain/lessons/catalog/pieces/melodies';
 import { midiToName } from '@domain/music/pitch';
 
@@ -91,6 +93,8 @@ export const SONGS: readonly Song[] = [
       'E4:1 E4:1 F4:1 G4:1 G4:1 F4:1 E4:1 D4:1 C4:1 C4:1 D4:1 E4:1 D4:1.5 C4:0.5 C4:2',
     about: 'about.ode' },
   ...MELODIES,
+  ...CLASSICAL_THEMES,
+  ...FOLK_MELODIES,
 
   // Real pieces — complete, at full tempo
   { id: 'bach-prelude', title: 'Cello Suite No. 1 — Prélude', credit: 'credit.bach', level: 3, bpm: PRELUDE_BPM, beatsPerBar: 4, mode: PlayMode.note, instrument: 'acoustic',

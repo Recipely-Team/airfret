@@ -1,3 +1,4 @@
+import type { PerformedStroke } from '@application/drums/performed-stroke';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
 import { HAND_DRUMS, handDrumFor } from '@domain/drums/hand/hand-drum-catalog';
 import type { HandDrum } from '@domain/drums/hand/hand-drum';
@@ -15,6 +16,8 @@ const MAX_SPREAD = 0.05;
 const POINTER_VELOCITY = 0.75;
 /** How long a stroke's ripple shows, seconds. */
 const RIPPLE_SECONDS = 0.6;
+/** An edge stroke of the drum playing by itself lands this far out (share of the head's radius). */
+const SELF_RIM = 0.78;
 
 /** One stroke as the stage shows it. */
 interface Ripple {
@@ -88,6 +91,14 @@ export class HandDrumPlayer {
     if (!pad) return;
     const r = Math.hypot((p.x - pad.cx) / pad.rx, (p.y - pad.cy) / pad.ry);
     this.strike(p, index, strokeAt(pad.head, r, p.x >= pad.cx), POINTER_VELOCITY, audioNow + SCHEDULE_LEAD, now);
+  }
+
+  /** A stroke of the drum playing by itself, shown where it lands: the centre, or the rim on the striking hand's side. */
+  show(s: PerformedStroke, now: number): void {
+    const pad = this.pads[s.head];
+    if (!pad) return;
+    const side = s.part === 'center' ? 0 : s.part === 'edgeLeft' ? -SELF_RIM : SELF_RIM;
+    this.ripples.push({ x: pad.cx + pad.rx * side, y: pad.cy, head: s.head, stroke: s.stroke, velocity: s.velocity, at: now });
   }
 
   /** Strokes still showing at `now`. */

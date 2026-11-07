@@ -10,16 +10,19 @@ import type { Song } from '@domain/lessons/catalog/song';
 const isBass = (instrumentId: string) => instrumentById(instrumentId).chain === ChainKind.bass;
 
 /**
- * The songs an instrument can play by itself in the *Watch it play* mode: every guitar song on any guitar (and
- * the banjo), every bass song on either bass — the player's own songs included. Its own showcase piece comes first.
+ * The songs a fretted instrument can play by itself in the *Watch it play* mode: every guitar song on any guitar (and
+ * the banjo), every bass song on any bass; on a ukulele, a mandolin, a saz, a balalaika or a bouzouki every melody
+ * (moved into its range by octaves when it plays) and, where it has chord shapes, every chord song. The player's own
+ * songs included; its showcase piece first.
  */
 export function watchableSongs(songs: readonly Song[], instrumentId: string): Song[] {
-  // The self-playing hand is a guitarist's; the drums and keyboards don't play by themselves yet.
-  // …and plays guitar or bass songs: not a ukulele's, a mandolin's or a saz's (fewer strings, other ranges).
   const inst = instrumentById(instrumentId);
   // Only fretted instruments in the catalogue (an unknown id falls back to the acoustic guitar).
-  if (inst.id !== instrumentId || instrumentId === DRUMS_ID || isKeyboard(instrumentId) || (!isBass(instrumentId) && inst.tuning.length < GUITAR_STRING_COUNT)) return [];
-  const fits = songs.filter((s) => s.instrument !== DRUMS_ID && isBass(s.instrument) === isBass(instrumentId));
+  if (inst.id !== instrumentId || instrumentId === DRUMS_ID || isKeyboard(instrumentId)) return [];
+  const isShortNeck = !isBass(instrumentId) && inst.tuning.length < GUITAR_STRING_COUNT;
+  const fits = isShortNeck
+    ? songs.filter((s) => s.instrument !== DRUMS_ID && (s.mode === PlayMode.note || (s.mode === PlayMode.chord && inst.chordShapes !== undefined)))
+    : songs.filter((s) => s.instrument !== DRUMS_ID && isBass(s.instrument) === isBass(instrumentId));
   const own = DEMO_SONG_BY_INSTRUMENT[instrumentId];
   return [...fits.filter((s) => s.id === own), ...fits.filter((s) => s.id !== own)];
 }

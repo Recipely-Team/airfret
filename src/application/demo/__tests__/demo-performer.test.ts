@@ -9,6 +9,7 @@ import { watchableSongs } from '@application/demo/watchable-songs';
 import { SONGS } from '@domain/lessons/catalog/song-catalog';
 import { DRUMS_ID } from '@domain/drums/drums-id';
 import { effectiveTuning } from '@domain/music/tuning-catalog';
+import { fretForSemitones } from '@domain/music/fretted-range';
 
 const FRAME = 1 / 60;
 /** Enough of each piece to cover chord changes and position shifts. */
@@ -40,7 +41,7 @@ function expectHeldNotes(instrumentId: string, songId?: string, seconds = SECOND
     const f = frames.find((x) => x.t >= p.when);
     if (!f) continue;
     const fret = f.fretting.frets[p.string] ?? 0;
-    expect(fret, `${songId ?? instrumentId}: string ${p.string} at ${p.when.toFixed(2)} s`).toBe(p.midi - (instrument.tuning[p.string] ?? 0));
+    expect(fret, `${songId ?? instrumentId}: string ${p.string} at ${p.when.toFixed(2)} s`).toBe(fretForSemitones(instrument, p.midi - (instrument.tuning[p.string] ?? 0)));
     checked++;
   }
   return checked;
@@ -69,7 +70,7 @@ describe('DemoPerformer — the instrument playing by itself', () => {
         const f = frames.find((x) => x.t >= p.when);
         if (!f) continue;
         const fret = f.fretting.frets[p.string] ?? 0;
-        expect(fret, `${id}: string ${p.string} at ${p.when.toFixed(2)} s`).toBe(p.midi - (instrument.tuning[p.string] ?? 0));
+        expect(fret, `${id}: string ${p.string} at ${p.when.toFixed(2)} s`).toBe(fretForSemitones(instrument, p.midi - (instrument.tuning[p.string] ?? 0)));
         checked++;
       }
       expect(checked).toBeGreaterThan(20);
