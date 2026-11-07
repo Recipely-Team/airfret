@@ -75,7 +75,21 @@ function bootstrap(): void {
   const pedalInput = new BrowserPedalInput();
 
   let app: AirfretApp | null = null;
-  const router = new Router((route) => app?.show(route));
+  const router = new Router((route) => {
+    // Leaving an instrument's page (back, home, another instrument) silences it: nothing plays on behind the player.
+    const base = app?.baseRoute;
+    if (app && base?.kind === 'instrument' && (route.kind === 'home' || (route.kind === 'instrument' && route.instrument !== base.instrument))) {
+      app.demo.leave();
+      sound.silence();
+    }
+    app?.show(route);
+  });
+  // A hidden tab or a phone app sent to the background goes quiet too.
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden || !app) return;
+    app.demo.leave();
+    sound.silence();
+  });
   const drawer = new LessonsDrawer(store, (song) => router.navigate({ kind: 'lesson', songId: song.id }), () => app?.tourFromAnywhere(), () => app?.closeOverlay(), () => ui.customSong.open());
   const ui: AppUi = {
     start: new StartScreen(() => app?.start() ?? Promise.resolve()),

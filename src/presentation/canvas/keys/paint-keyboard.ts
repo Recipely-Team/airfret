@@ -1,6 +1,7 @@
 import type { PianoPlayer } from '@application/keys/piano-player';
 import type { PianoKey } from '@domain/keys/piano-key';
 import { FONT, Palette, rgba } from '@presentation/canvas/palette';
+import { paintRowInstrument } from '@presentation/canvas/keys/paint-row-instrument';
 
 /** Ivory, ebony and the case: natural materials, as the guitars are; rosewood and metal for struck bars. */
 const COLOURS = { ivory: '#f2ece0', ivoryShade: '#d9d1c2', ebony: '#17140f', ebonyTop: '#3a342b', case: '#1d120c', felt: '#6b1f1f' } as const;
@@ -8,7 +9,6 @@ const COLOURS = { ivory: '#f2ece0', ivoryShade: '#d9d1c2', ebony: '#17140f', ebo
 const BARS = {
   rosewood: { light: '#a8573a', dark: '#6b2f1c', sharpLight: '#8e4630', sharpDark: '#5a2616' },
   metal: { light: '#e4e6e9', dark: '#9aa0a6', sharpLight: '#cfd2d6', sharpDark: '#868c93' },
-  kanun: { light: '#dcc293', dark: '#a27a49', sharpLight: '#c7a978', sharpDark: '#8c6638' },
 } as const;
 const CASE_PAD = 10;
 const RADIUS = 4;
@@ -24,6 +24,11 @@ const OCTAVE = 12;
 export function paintKeyboard(ctx: CanvasRenderingContext2D, piano: PianoPlayer): void {
   const l = piano.layout;
   if (!l) return;
+  // A kanun, a ney, a clarinet…: drawn as itself, not as keys.
+  if (piano.keyboard?.body) {
+    paintRowInstrument(ctx, piano);
+    return;
+  }
   const keys = l.keys;
   const x0 = Math.min(...keys.map((k) => k.x0));
   const x1 = Math.max(...keys.map((k) => k.x1));
@@ -47,7 +52,7 @@ export function paintKeyboard(ctx: CanvasRenderingContext2D, piano: PianoPlayer)
   }
 }
 
-function paintKey(ctx: CanvasRenderingContext2D, k: PianoKey, isDown: boolean, glow: number, keyLength: number, look: 'ivory' | 'reversed' | 'rosewood' | 'metal' | 'kanun'): void {
+function paintKey(ctx: CanvasRenderingContext2D, k: PianoKey, isDown: boolean, glow: number, keyLength: number, look: 'ivory' | 'reversed' | 'rosewood' | 'metal'): void {
   // A harpsichord's naturals are dark and its sharps light: the key's colour, not its shape, swaps.
   const isDark = k.isBlack !== (look === 'reversed');
   const sink = isDown ? keyLength * PRESS_DEPTH : 0;
@@ -56,8 +61,8 @@ function paintKey(ctx: CanvasRenderingContext2D, k: PianoKey, isDown: boolean, g
   const y0 = k.y0 + sink;
   const h = k.y1 - k.y0;
   const grad = ctx.createLinearGradient(0, y0, 0, y0 + h);
-  if (look === 'rosewood' || look === 'metal' || look === 'kanun') {
-    // A struck bar (or a kanun's course of strings): its own wood or metal, the sharps a shade darker.
+  if (look === 'rosewood' || look === 'metal') {
+    // A struck bar: its own wood or metal, the sharps a shade darker.
     const bar = BARS[look];
     grad.addColorStop(0, k.isBlack ? bar.sharpLight : bar.light);
     grad.addColorStop(1, k.isBlack ? bar.sharpDark : bar.dark);

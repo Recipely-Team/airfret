@@ -43,6 +43,13 @@ export class FakeSoundOutput implements SoundOutputInterface {
     this.damps.push(string);
   }
 
+  /** How many times everything was silenced. */
+  silenced = 0;
+
+  silence(): void {
+    this.silenced++;
+  }
+
   chuck(amp: number): void {
     this.chucks.push(amp);
   }
