@@ -3,62 +3,123 @@ import type { Point } from '@domain/fretboard/point';
 const DEFAULTS = {
   /** Slower downward motion than this (screen heights per second) is not a stroke. */
   minSpeed: 0.35,
-  /** The tip must come back above the head by this fraction of the pad's vertical radius before it can hit again. */
-  rebound: 0.35,
   /** Speed (heights/s) that gives a full-strength hit. */
   fullSpeed: 3.2,
-  /** Tracking gap after which the previous tip position is forgotten, seconds. */
-  dropout: 0.15,
+  /** A falling tip that slows to this share of its fastest speed (or turns back) has struck. */
+  impactSlowdown: 0.35,
+  /** After a hit, the tip must lift this far (share of the screen height) before that pad can be hit again. */
+  rearm: 0.02,
+  /** A tip lost for longer than this (tracking blurs on fast strokes) is forgotten, seconds. */
+  dropout: 0.25,
+  /** The pad's outline, a little generous: a stroke landing just on its rim still counts. */
+  reach: 1.08,
 } as const;
 
+type Pad<K extends string> = { readonly piece: K; readonly cx: number; readonly cy: number; readonly rx: number; readonly ry: number };
+type Hit<K extends string> = { piece: K; velocity: number; radius: number; frac: number };
+
 /**
- * **HitDetector** — turns one stick tip's path into drum hits.
+ * **HitDetector** — turns one striking tip's path (a stick tip, a fingertip) into drum hits.
  *
  * @remarks
- * - Each pad has a "head line" through its centre. A hit fires when the tip crosses it *downward*
- *   (screen +y) inside the pad's horizontal extent — immediate, no waiting for the rebound.
- * - The crossing point and time are interpolated within the frame; velocity = 1 − e^(−v/v_full).
- * - After a hit the pad is disarmed until the tip rises back above it (rebound), so a stick resting
- *   on a head doesn't machine-gun.
- * - Where several pads overlap, the one whose head line is crossed first (highest on screen) wins.
+ * - A stroke is a fast downward movement that stops: the hand or stick meets the head and bounces. It fires where
+ *   the tip strikes inside a pad — anywhere on it, at any height — when its downward speed collapses or turns back.
+ * - A tip that crosses a pad's centre line on its way down fires at once, without waiting for the stop.
+ * - After a hit a pad re-arms once the tip has lifted a little (`rearm`), not after climbing back above the head:
+ *   fast, small strokes — a roll, a tremolo — each sound. Jitter of a still or resting hand stays far below that.
+ * - Fast strokes blur, and tracking may lose the tip for a few frames: a tip that was falling and is found again
+ *   lower down has struck.
+ * - Where several pads overlap, the highest on screen wins.
  */
 export class HitDetector {
   private prev: Point | null = null;
   private prevT = 0;
-  private readonly armed = new Map<string, boolean>();
+  /** The fastest downward speed of the current fall (0 when not falling). */
+  private peak = 0;
+  /** Per pad: the lowest point the tip has reached since its last hit (null: armed). */
+  private readonly struckAt = new Map<string, number | null>();
 
   /**
    * One new sample of the tip; returns the hits it made. Works on any ellipse targets named by `piece` — the
    * kit's pads, a hand drum's heads.
    */
-  update<K extends string>(tip: Point | null, t: number, pads: readonly { readonly piece: K; readonly cx: number; readonly cy: number; readonly rx: number; readonly ry: number }[], h: number): { piece: K; velocity: number; radius: number; frac: number }[] {
+  update<K extends string>(tip: Point | null, t: number, pads: readonly Pad<K>[], h: number): Hit<K>[] {
     if (!tip) {
-      if (this.prev && t - this.prevT > DEFAULTS.dropout) this.prev = null;
+      if (this.prev && t - this.prevT > DEFAULTS.dropout) {
+        this.prev = null;
+        this.peak = 0;
+      }
       return [];
     }
-    const prev = this.prev;
+    // A tip not seen for too long (its hand left the picture) starts afresh.
+    const prev = this.prev && t - this.prevT <= DEFAULTS.dropout ? this.prev : null;
+    if (!prev) this.peak = 0;
     const dt = Math.max(1e-3, t - this.prevT);
     this.prev = tip;
     this.prevT = t;
-    for (const pad of pads) {
-      if (tip.y < pad.cy - pad.ry * DEFAULTS.rebound) this.armed.set(pad.piece, true);
+    // Judge the movement up to this frame first, then let this frame's lift re-arm the pads for the next stroke.
+    const hits = prev ? this.judge(prev, tip, (tip.y - prev.y) / dt / h, pads) : [];
+    this.rearm(tip, pads, h);
+    return hits;
+  }
+
+  private judge<K extends string>(prev: Point, tip: Point, speed: number, pads: readonly Pad<K>[]): Hit<K>[] {
+    // On the way down, through a pad's centre line: hit at once.
+    if (speed >= DEFAULTS.minSpeed) {
+      this.peak = Math.max(this.peak, speed);
+      const crossed = this.crossing(prev, tip, pads, speed);
+      if (crossed) this.peak = 0;
+      return crossed ? [crossed] : [];
     }
-    if (!prev) return [];
-    const dy = tip.y - prev.y;
-    const speed = dy / dt / h;
-    if (speed < DEFAULTS.minSpeed) return [];
-    const hits: { piece: K; velocity: number; radius: number; frac: number }[] = [];
+    // The fall has stopped (or turned back) — the stroke met the head.
+    if (this.peak >= DEFAULTS.minSpeed && speed < this.peak * DEFAULTS.impactSlowdown) {
+      const strength = this.peak;
+      this.peak = 0;
+      const hit = this.impact(speed > 0 ? tip : prev, pads, strength);
+      return hit ? [hit] : [];
+    }
+    if (speed <= 0) this.peak = 0;
+    return [];
+  }
+
+  /** A pad struck before re-arms once the tip has lifted far enough above the lowest point since. */
+  private rearm<K extends string>(tip: Point, pads: readonly Pad<K>[], h: number): void {
+    for (const pad of pads) {
+      const low = this.struckAt.get(pad.piece);
+      if (low === undefined || low === null) continue;
+      if (tip.y > low) this.struckAt.set(pad.piece, tip.y);
+      else if (low - tip.y >= DEFAULTS.rearm * h) this.struckAt.set(pad.piece, null);
+    }
+  }
+
+  private crossing<K extends string>(prev: Point, tip: Point, pads: readonly Pad<K>[], speed: number): Hit<K> | null {
     for (const pad of [...pads].sort((a, b) => a.cy - b.cy)) {
-      if (this.armed.get(pad.piece) === false) continue;
-      if (!(prev.y < pad.cy && tip.y >= pad.cy)) continue;
-      const frac = (pad.cy - prev.y) / dy;
+      if (!(prev.y < pad.cy && tip.y >= pad.cy) || !this.isArmed(pad.piece)) continue;
+      const frac = (pad.cy - prev.y) / (tip.y - prev.y);
       const x = prev.x + (tip.x - prev.x) * frac;
       const across = Math.abs(x - pad.cx) / pad.rx;
       if (across > 1) continue;
-      this.armed.set(pad.piece, false);
-      hits.push({ piece: pad.piece, velocity: 1 - Math.exp(-speed / DEFAULTS.fullSpeed), radius: across, frac });
-      break;
+      return this.strike(pad, tip.y, speed, across, frac);
     }
-    return hits;
+    return null;
+  }
+
+  private impact<K extends string>(at: Point, pads: readonly Pad<K>[], speed: number): Hit<K> | null {
+    for (const pad of [...pads].sort((a, b) => a.cy - b.cy)) {
+      const inside = Math.hypot((at.x - pad.cx) / pad.rx, (at.y - pad.cy) / pad.ry);
+      if (inside > DEFAULTS.reach || !this.isArmed(pad.piece)) continue;
+      // It has already struck by now: sound it at once.
+      return this.strike(pad, at.y, speed, Math.min(1, Math.abs(at.x - pad.cx) / pad.rx), 0);
+    }
+    return null;
+  }
+
+  private isArmed(piece: string): boolean {
+    return (this.struckAt.get(piece) ?? null) === null;
+  }
+
+  private strike<K extends string>(pad: Pad<K>, y: number, speed: number, radius: number, frac: number): Hit<K> {
+    this.struckAt.set(pad.piece, y);
+    return { piece: pad.piece, velocity: 1 - Math.exp(-speed / DEFAULTS.fullSpeed), radius, frac };
   }
 }

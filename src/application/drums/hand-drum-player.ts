@@ -16,6 +16,8 @@ const MAX_SPREAD = 0.05;
 const POINTER_VELOCITY = 0.75;
 /** How long a stroke's ripple shows, seconds. */
 const RIPPLE_SECONDS = 0.6;
+/** A hand's fingertips landing together are one stroke: others on the same head within this are ignored, seconds. */
+const ONE_STROKE = 0.06;
 /** An edge stroke of the drum playing by itself lands this far out (share of the head's radius). */
 const SELF_RIM = 0.78;
 
@@ -47,6 +49,8 @@ export class HandDrumPlayer {
   private h = 1;
   private lastT = 0;
   private isPrepared = false;
+  /** Per hand: the head it last struck, and when. */
+  private readonly lastStroke = new Map<number, { head: number; t: number }>();
 
   constructor(private readonly sound: SoundOutputInterface) {}
 
@@ -78,6 +82,10 @@ export class HandDrumPlayer {
         for (const hit of d.update(p, t, this.pads, this.h)) {
           const index = this.pads.findIndex((pad) => pad.piece === hit.piece);
           const pad = this.pads[index];
+          // A slap lands on three fingertips at once: one stroke, not three.
+          const last = this.lastStroke.get(i);
+          if (last && last.head === index && t - last.t < ONE_STROKE) continue;
+          this.lastStroke.set(i, { head: index, t });
           if (pad) this.strike(p ?? { x: pad.cx, y: pad.cy }, index, strokeAt(pad.head, hit.radius, isRight), hit.velocity, audioNow + SCHEDULE_LEAD + hit.frac * dt, t);
         }
       }

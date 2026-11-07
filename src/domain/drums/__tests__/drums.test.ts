@@ -71,3 +71,38 @@ describe('kit layout', () => {
     expect(lefty.find((p) => p.piece === DrumPiece.hihat)!.cx).toBeGreaterThan(lefty.find((p) => p.piece === DrumPiece.ride)!.cx);
   });
 });
+
+describe('HitDetector with fast strokes', () => {
+  /** A frame drum filling most of the screen, the way the hand drums are drawn. */
+  const head = [{ piece: 'head', cx: 640, cy: 420, rx: 300, ry: 280 }] as const;
+  /** Fast small strokes: the hand bounces `amp` (share of the screen height) below `base`, `hz` times a second, seen at `fps`. */
+  const bounce = (hz: number, amp: number, base: number, fps: number, seconds: number, drop = 0) => {
+    const d = new HitDetector();
+    let hits = 0;
+    for (let i = 0; i * (1 / fps) < seconds; i++) {
+      const t = i / fps;
+      // Down fast, a sharp stop on the head, back up: |sin| gives the bounce of a hand on a skin.
+      const y = base + amp * H * Math.abs(Math.sin(Math.PI * hz * t));
+      const isLost = drop > 0 && i % drop === drop - 1;
+      hits += d.update(isLost ? null : { x: 600, y }, t, head, H).length;
+    }
+    return hits;
+  };
+
+  it('hears every stroke of a fast roll that never crosses the head\'s middle or rises above it', () => {
+    // Six strokes a second for two seconds, a tenth of the screen deep, all below the centre line.
+    expect(bounce(6, 0.1, 450, 30, 2)).toBeGreaterThanOrEqual(11);
+    // …and above it.
+    expect(bounce(6, 0.1, 250, 30, 2)).toBeGreaterThanOrEqual(11);
+  });
+
+  it('keeps up at eight strokes a second, and when tracking drops a frame in four', () => {
+    expect(bounce(8, 0.08, 300, 30, 2)).toBeGreaterThanOrEqual(15);
+    expect(bounce(6, 0.1, 300, 30, 2, 4)).toBeGreaterThanOrEqual(10);
+  });
+
+  it('plays nothing for a hand resting on the head or drifting slowly over it', () => {
+    expect(bounce(0.5, 0.05, 300, 30, 3)).toBe(0);
+    expect(bounce(6, 0.008, 300, 30, 2)).toBe(0);
+  });
+});
