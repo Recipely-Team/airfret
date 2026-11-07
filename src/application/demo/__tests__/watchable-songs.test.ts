@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEMO_SONG_BY_INSTRUMENT } from '@application/demo/demo-songs';
-import { watchableSongs } from '@application/demo/watchable-songs';
+import { keyboardSongs, watchableSongs } from '@application/demo/watchable-songs';
+import { isKeyboard } from '@domain/keys/keyboard-instruments';
 import { DRUMS_ID } from '@domain/drums/drums-id';
 import { instrumentById } from '@domain/instruments/instrument-catalog';
 import type { Song } from '@domain/lessons/catalog/song';
@@ -11,7 +12,10 @@ const isBass = (id: string) => instrumentById(id).chain === 'bass';
 
 describe('The songs the Watch it play mode offers', () => {
   it("lists the instrument's showcase piece first", () => {
-    for (const [inst, id] of Object.entries(DEMO_SONG_BY_INSTRUMENT)) expect(watchableSongs(SONGS, inst)[0]?.id).toBe(id);
+    for (const [inst, id] of Object.entries(DEMO_SONG_BY_INSTRUMENT)) {
+      const list = isKeyboard(inst) ? keyboardSongs(SONGS, inst) : watchableSongs(SONGS, inst);
+      expect(list[0]?.id, inst).toBe(id);
+    }
   });
 
   it('offers guitar songs on guitars and bass songs on basses, never drum grooves', () => {

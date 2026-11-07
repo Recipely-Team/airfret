@@ -15,4 +15,6 @@ export interface KeyboardInstrument {
   readonly look: 'ivory' | 'reversed' | 'rosewood' | 'metal';
   /** A damper stops a note when its key rises (piano, harpsichord); a struck bar rings on (marimba, glockenspiel). */
   readonly isDamped: boolean;
+  /** One note at a time (a clarinet, a trumpet): playing by itself, it keeps a song's melody alone. */
+  readonly isMonophonic?: boolean;
 }

@@ -1,6 +1,7 @@
 /** Turkish UI copy. Keys must match every other locale. */
 export const TR: Readonly<Record<string, string>> = {
   'app.tagline': 'Havada gitar çal. Kamera ellerini görür; teller sanal.',
+  'demo.you': 'Sen çal',
   'demo.play': 'Kendi çalsın',
   'demo.stop': 'Durdur',
   'demo.song': 'Çalınacak şarkı',

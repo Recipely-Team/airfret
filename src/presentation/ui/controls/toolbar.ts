@@ -10,6 +10,8 @@ import type { SelfPlayControl } from '@presentation/ui/controls/self-play-contro
 
 /** The mode switch's extra segment: the instrument plays by itself. */
 const SELF_PLAY = 'self-play';
+/** On pages without strumming modes (keys, winds, drums), the other side of the switch: you play. */
+const YOU_PLAY = 'you-play';
 
 /**
  * **Toolbar** — page title and the current page's controls: play mode and chord set on guitars, pedals on drums,
@@ -18,7 +20,8 @@ const SELF_PLAY = 'self-play';
  *
  * @remarks
  * - Mode and chord set are locked while a lesson runs (the song decides them).
- * - Guitars and basses get a fourth mode, *Watch it play* (`DemoController`): a song list and Play / Stop.
+ * - Guitars and basses get a fourth mode, *Watch it play* (`DemoController`): a song list and Play / Stop. Pages
+ *   without modes (keys, winds, drums) get just *You play* | *Watch it play*.
  */
 export class Toolbar {
   constructor(
@@ -40,7 +43,7 @@ export class Toolbar {
     // Keyboards have no strumming modes or chord sets: every key is just a note.
     // Only fretted instruments (in the catalogue) have strumming modes; the drums, keyboards and darbuka don't.
     const hasModes = instrumentById(s.instrument).id === s.instrument;
-    byId('modes').hidden = !hasModes;
+    byId('modes').hidden = !hasModes && !this.selfPlay.isOffered();
     byId('pedalsBtn').hidden = !isDrums;
     const cam = byId('camBtn');
     // The camera button only means something where the camera picture is: on an instrument's stage.
@@ -59,9 +62,12 @@ export class Toolbar {
     cam.title = camLabel;
     // An instrument may offer fewer modes (a saz has no guitar chord shapes).
     const allowed = instrumentById(s.instrument).modes ?? Object.values(PlayMode);
-    const modes: { value: PlayMode | typeof SELF_PLAY; label: string }[] = allowed.map((m) => ({ value: m, label: t(`mode.${m}`) }));
+    const modes: { value: PlayMode | typeof SELF_PLAY | typeof YOU_PLAY; label: string }[] = hasModes
+      ? allowed.map((m) => ({ value: m, label: t(`mode.${m}`) }))
+      : [{ value: YOU_PLAY, label: t('demo.you') }];
     if (this.selfPlay.isOffered()) modes.push({ value: SELF_PLAY, label: t('demo.play') });
-    renderSegmented(byId('modes'), modes, this.selfPlay.isOn() ? SELF_PLAY : s.mode, (mode) => this.pick(mode), isLocked);
+    const current = this.selfPlay.isOn() ? SELF_PLAY : hasModes ? s.mode : YOU_PLAY;
+    renderSegmented(byId('modes'), modes, current, (mode) => this.pick(mode), isLocked);
     const select = byId<HTMLSelectElement>('chordSet');
     select.replaceChildren(
       ...CHORD_SETS.map((c) => {
@@ -76,12 +82,12 @@ export class Toolbar {
     select.hidden = s.mode !== PlayMode.chord || !hasModes || this.selfPlay.isOn();
   }
 
-  private pick(mode: PlayMode | typeof SELF_PLAY): void {
+  private pick(mode: PlayMode | typeof SELF_PLAY | typeof YOU_PLAY): void {
     if (mode === SELF_PLAY) {
       if (!this.selfPlay.isOn()) this.selfPlay.enter();
       return;
     }
     this.selfPlay.leave();
-    this.store.update({ mode });
+    if (mode !== YOU_PLAY) this.store.update({ mode });
   }
 }

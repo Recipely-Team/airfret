@@ -69,7 +69,7 @@ function bootstrap(): void {
   const drums = new DrumPlayer(sound);
   const piano = new PianoPlayer(sound);
   /** Pages that aren't a fretted instrument, each with its own player and drawing. */
-  const stages = [new KeysStage(piano), new HandDrumStage(new HandDrumPlayer(sound))];
+  const stages = [new KeysStage(piano, sound), new HandDrumStage(new HandDrumPlayer(sound))];
   const pedalInput = new BrowserPedalInput();
 
   let app: AirfretApp | null = null;
