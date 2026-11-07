@@ -160,7 +160,7 @@ export class AirfretApp {
     this.ui.start.hide();
     const isFirstRun = !this.s.store.value.hasSeenExplore;
     this.s.store.update({ hasSeenExplore: true });
-    if (isFirstRun && tourInstrument(this.s.store.value.instrument) === this.s.store.value.instrument) this.startTour();
+    if (isFirstRun && !this.demo.isOn && !this.lesson && tourInstrument(this.s.store.value.instrument) === this.s.store.value.instrument) this.startTour();
   }
 
   /** Unlocks audio once (Start, or the demo before Start); false when the browser refuses. */
