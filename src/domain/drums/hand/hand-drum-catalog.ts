@@ -4,8 +4,8 @@ import type { HandStroke } from '@domain/drums/hand/hand-stroke';
 import { midiToFreq } from '@domain/music/pitch';
 
 /**
- * Every hand drum, as data the one voice (`HandDrumVoice`) and the one stage play. The darbuka and the congas
- * play real recordings; the others are synthesised, pitches and decays set by ear from each drum's character: the membrane drums' bass strokes sag in pitch as
+ * Every hand drum, as data the one voice (`HandDrumVoice`) and the one stage play. The darbuka, def, bendir, davul
+ * and congas play real recordings (see CREDITS.md); the others are synthesised, pitches and decays set by ear from each drum's character: the membrane drums' bass strokes sag in pitch as
  * the skin settles, their edge strokes ring in the body's partials over a click; frame drums add their jingles or
  * snare strings as noise; the handpan's fields are tuned notes with their octave and compound-fifth partials.
  */
@@ -64,10 +64,30 @@ const RING_ANGLES = [112.5, 67.5, 157.5, 22.5, 202.5, -22.5, 247.5, -67.5];
 /** The ding sits in the middle of the shell; the fields round it, this far out and this big (shares of its radius). */
 const HANDPAN = { ding: 0.22, ring: 0.7, field: 0.15 } as const;
 
+/** A frame drum's real strokes: düm in the middle, tek at the rim, ka the tek a little lower and softer. */
+const recordedFrame = (head: HandDrumHead, doum: string[], tek: string[], ka?: string[]): HandDrumHead => ({
+  ...head,
+  center: { ...head.center, recording: { layers: [doum] } },
+  edge: { ...head.edge, recording: { layers: [tek] } },
+  edgeLeft: { ...(head.edgeLeft ?? head.edge), recording: ka ? { layers: [ka] } : { layers: [tek], rate: 0.94, gain: 0.7 } },
+});
+
+/**
+ * The davul: the big double-headed drum of Anatolian weddings and the mehter, struck with a heavy tokmak (düm) on
+ * one head and a thin çubuk (tek) on the other. Real strokes (Despoina_kalantzi, Freesound, CC0).
+ */
+const DAVUL: HandDrumHead = {
+  cxOfWidth: 0.5, cyOfHeight: 0.56, size: 0.26, flatten: 0.96, look: 'frame', edgeAt: 0.62,
+  center: { ...s('stroke.doum', [{ hz: 62, toHz: 52, decay: 0.7, level: 0.95 }], { type: 'lowpass', hz: 300, length: 0.05, level: 0.5 }), recording: { layers: [['davul-doum']] } },
+  edge: { ...s('stroke.tek', [{ hz: 380, decay: 0.06, level: 0.3 }], { type: 'highpass', hz: 3000, length: 0.06, level: 0.5 }), recording: { layers: [['davul-tek', 'davul-tek-b', 'davul-tek-c']] } },
+  edgeLeft: { ...s('stroke.tek', [{ hz: 380, decay: 0.06, level: 0.3 }], { type: 'highpass', hz: 3000, length: 0.06, level: 0.5 }), recording: { layers: [['davul-tek-b', 'davul-tek-c', 'davul-tek']] } },
+};
+
 export const HAND_DRUMS: readonly HandDrum[] = [
   { id: 'darbuka', name: 'inst.darbuka', heads: [DARBUKA] },
-  { id: 'def', name: 'inst.def', heads: [frame(95, { type: 'highpass', hz: 6200, length: 0.35, level: 0.22 }, { center: 'stroke.doum', edge: 'stroke.tek', left: 'stroke.ka' })] },
-  { id: 'bendir', name: 'inst.bendir', heads: [frame(68, { type: 'bandpass', hz: 1700, length: 0.45, level: 0.3 }, { center: 'stroke.doum', edge: 'stroke.tek', left: 'stroke.ka' })] },
+  { id: 'def', name: 'inst.def', heads: [recordedFrame(frame(95, { type: 'highpass', hz: 6200, length: 0.35, level: 0.22 }, { center: 'stroke.doum', edge: 'stroke.tek', left: 'stroke.ka' }), ['def-doum'], ['def-tek', 'def-tek-b', 'def-tek-c'], ['def-ka', 'def-ka-b'])] },
+  { id: 'bendir', name: 'inst.bendir', heads: [recordedFrame(frame(68, { type: 'bandpass', hz: 1700, length: 0.45, level: 0.3 }, { center: 'stroke.doum', edge: 'stroke.tek', left: 'stroke.ka' }), ['bendir-doum', 'bendir-doum-b', 'bendir-doum-c'], ['bendir-tek', 'bendir-tek-b'])] },
+  { id: 'davul', name: 'inst.davul', heads: [DAVUL] },
   {
     id: 'cajon', name: 'inst.cajon', heads: [{
       cxOfWidth: 0.5, cyOfHeight: 0.58, size: 0.22, flatten: 1.25, look: 'box', edgeAt: 0.62,

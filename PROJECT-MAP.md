@@ -124,7 +124,7 @@ Layers and rules: `CLAUDE.md`, `architecture.md`.
 
 ## src/domain/drums/hand/
 
-- `hand-drum-catalog.ts` — Every hand drum, as data the one voice (`HandDrumVoice`) and the one stage play. The darbuka and the congas
+- `hand-drum-catalog.ts` — Every hand drum, as data the one voice (`HandDrumVoice`) and the one stage play. The darbuka, def, bendir, dav
 - `hand-drum-head.ts` — One head of a hand drum: where it sits on screen, how it looks, and what each kind of stroke sounds like.
 - `hand-drum-pads.ts` — A head's radius is `size` of the width, but never more than this times `size` of the height.
 - `hand-drum.ts` — A drum played with the hands — darbuka, congas, handpan…: its id (and page), name, and heads.
