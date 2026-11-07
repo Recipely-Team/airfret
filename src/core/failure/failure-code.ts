@@ -5,6 +5,7 @@ export const FailureCode = {
   audioUnavailable: 'audio-unavailable',
   invalidChart: 'invalid-chart',
   recordingUnavailable: 'recording-unavailable',
+  unreadableScore: 'unreadable-score',
 } as const;
 
 export type FailureCode = (typeof FailureCode)[keyof typeof FailureCode];

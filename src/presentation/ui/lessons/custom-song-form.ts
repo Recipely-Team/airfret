@@ -5,8 +5,13 @@ import type { Song } from '@domain/lessons/catalog/song';
 import { t } from '@presentation/i18n/translator';
 import { renderSegmented } from '@presentation/ui/controls/segmented-control';
 import { byId } from '@presentation/ui/dom';
+import { readScoreFile, SCORE_FILE_TYPES } from '@presentation/ui/lessons/read-score-file';
+import { scoreToNotes } from '@domain/lessons/import/score-to-notes';
 
 const METERS = [3, 4, 6];
+/** The title field's length, and the tempo range it accepts. */
+const TITLE_MAX = 60;
+const BPM = { min: 40, max: 220 } as const;
 /** Strum patterns offered per meter, simplest first. */
 const RHYTHMS: Readonly<Record<number, readonly string[]>> = {
   3: ['D.D.D.', 'D.D.DU', 'D.DUDU'],
@@ -29,6 +34,13 @@ export class CustomSongForm {
     private readonly onSaved: (song: Song) => void,
   ) {
     byId('customCancel').onclick = () => this.close();
+    const file = byId<HTMLInputElement>('customFile');
+    file.accept = SCORE_FILE_TYPES;
+    file.onchange = () => {
+      const chosen = file.files?.[0];
+      file.value = '';
+      if (chosen) void this.openFile(chosen);
+    };
     byId<HTMLFormElement>('customForm').onsubmit = (e) => {
       e.preventDefault();
       this.save();
@@ -53,6 +65,23 @@ export class CustomSongForm {
       this.render();
     });
     renderSegmented(byId('customRhythm'), (RHYTHMS[this.meter] ?? []).map((p) => ({ value: p, label: ARROWS(p) })), this.rhythm, (p) => (this.rhythm = p));
+  }
+
+  /** A melody file (MIDI, MusicXML, ABC) fills in the form: its notes, title, tempo and meter, ready to check and save. */
+  private async openFile(file: File): Promise<void> {
+    const r = await readScoreFile(file);
+    if (!r.isOk) {
+      const isKey = r.failure.detail.startsWith('custom.');
+      byId('customError').textContent = t(isKey ? r.failure.detail : 'custom.error.file', { name: file.name });
+      return;
+    }
+    byId('customError').textContent = '';
+    const title = byId<HTMLInputElement>('customTitle');
+    if (!title.value.trim()) title.value = (r.value.title ?? file.name.replace(/\.[^.]+$/, '')).slice(0, TITLE_MAX);
+    byId<HTMLInputElement>('customBpm').value = String(Math.max(BPM.min, Math.min(BPM.max, r.value.bpm)));
+    this.meter = METERS.includes(r.value.beatsPerBar) ? r.value.beatsPerBar : METERS[1] ?? 4;
+    byId<HTMLTextAreaElement>('customChords').value = scoreToNotes(r.value);
+    this.render();
   }
 
   private save(): void {
