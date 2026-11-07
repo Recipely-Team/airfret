@@ -41,3 +41,19 @@ describe('The wind instruments', () => {
     }
   });
 });
+
+describe('Instruments that are not keyboards', () => {
+  it('lay their notes out in one even row — no white and black keys — on a kanun, a ney, a kemence and every wind', () => {
+    for (const id of ['kanun', 'ney', 'kemence', 'clarinet', 'flute', 'trumpet', 'tuba']) {
+      const k = keyboardFor(id)!;
+      expect(k.body, id).toBeDefined();
+      const l = computeKeyboardLayout(1280, 800, 0, k);
+      expect(l.keys.every((key) => !key.isBlack), id).toBe(true);
+      const widths = new Set(l.keys.map((key) => Math.round(key.x1 - key.x0)));
+      expect(widths.size, id).toBe(1);
+      for (let i = 1; i < l.keys.length; i++) expect(l.keys[i]!.midi - l.keys[i - 1]!.midi, id).toBe(1);
+    }
+    expect(keyboardFor('piano')!.body).toBeUndefined();
+    expect(keyboardFor('marimba')!.body).toBeUndefined();
+  });
+});

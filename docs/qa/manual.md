@@ -98,6 +98,7 @@ Mark each row: `P` pass · `F` fail · `B` blocked (say why) · `S` skipped. Onl
 | C4.13 | `/oboe`, `/bassoon`, `/horn`, `/trombone`, `/tuba` → Start | As C4.12: each holds its recorded note while the key is down; the arrows stop at A3–F6, A1–E5, C2–F5, A1–F4, F1–D4 | |
 | C4.14 | `/kanun` → Start | Pale wooden courses for keys, F3 to E6; every note a real kanun recording that rings on after the key rises; the home page lists it under *Turkish instruments* with the saz, kopuz, darbuka, def and bendir | |
 | C4.15 | `/ney`, `/kemence` → Start | One note at a time, real recordings (ney E4–D6, kemençe B3–C♯5); notes are short, as cut from scales; *Watch it play* plays a melody | |
+| C4.16 | `/kanun`, `/ney`, `/kemence`, `/clarinet`, `/flute`, `/trumpet` → Start | Each is drawn as itself — the kanun's string courses and mandals, the ney's reed and holes, the kemençe's neck and body, a black clarinet, a silver flute, a brass trumpet with valves and bell — with its notes in one row, named beneath; a sounding note glows where it is | |
 
 ## C5. Saz (baglama)
 
