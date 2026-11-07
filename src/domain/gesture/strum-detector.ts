@@ -4,7 +4,7 @@ import type { StrumOptions } from '@domain/gesture/strum-options';
 import type { Point } from '@domain/fretboard/point';
 import { clamp } from '@core/math/clamp';
 
-const DEFAULTS: StrumOptions = { hysteresis: 0.016, minSpeed: 0.12, cooldown: 0.06, dropout: 0.18 };
+const DEFAULTS: StrumOptions = { hysteresis: 0.016, minSpeed: 0.12, cooldown: 0.03, dropout: 0.18 };
 const MIN_DT = 1e-3;
 const ABOVE = -1;
 const BELOW = 1;
