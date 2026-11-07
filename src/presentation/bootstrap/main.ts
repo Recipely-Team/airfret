@@ -1,3 +1,7 @@
+import { WebAudioEnsemble } from '@infrastructure/audio/ensemble/web-audio-ensemble';
+import { BandView } from '@presentation/band/band-view';
+import { keepPlayingWhileHidden } from '@presentation/app/keep-playing-hidden';
+import { songLibrary } from '@application/lessons/song-library';
 import { installPolyfills } from '@presentation/bootstrap/polyfills';
 import { MotionStrummer } from '@application/play/motion-strummer';
 import { InstrumentInfo } from '@presentation/ui/navigation/instrument-info';
@@ -52,6 +56,8 @@ import { Toast } from '@presentation/ui/toast';
 import { TourBar } from '@presentation/ui/tour-bar';
 import { showBuildTag } from '@presentation/ui/build-tag';
 
+const MS_PER_SECOND = 1000;
+
 /**
  * **Composition root** — the only place that knows concrete infrastructure classes.
  *
@@ -78,7 +84,26 @@ function bootstrap(): void {
   const pedalInput = new BrowserPedalInput();
 
   let app: AirfretApp | null = null;
+  const ensemble = new WebAudioEnsemble(sound.joinMix());
+  const band = new BandView({
+    sound,
+    ensemble,
+    songs: () => songLibrary(store.value),
+    members: () => store.value.band,
+    setMembers: (ids) => store.update({ band: ids }),
+    startAudio: () => app?.startAudio() ?? Promise.resolve(false),
+    onClose: () => router.navigate({ kind: 'home' }),
+  });
   const router = new Router((route) => {
+    // The band is a page of its own: the instrument under it goes quiet and lets go of the camera (home).
+    if (route.kind === 'band') {
+      app?.demo.leave();
+      sound.silence();
+      app?.show({ kind: 'home' });
+      band.open();
+      return;
+    }
+    band.close();
     // Leaving an instrument's page (back, home, another instrument) silences it: nothing plays on behind the player.
     const base = app?.baseRoute;
     if (app && base?.kind === 'instrument' && (route.kind === 'home' || (route.kind === 'instrument' && route.instrument !== base.instrument))) {
@@ -87,11 +112,9 @@ function bootstrap(): void {
     }
     app?.show(route);
   });
-  // A hidden tab or a phone app sent to the background goes quiet too.
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden || !app) return;
-    app.demo.leave();
-    sound.silence();
+  keepPlayingWhileHidden(document, () => {
+    app?.demo.tick(performance.now() / MS_PER_SECOND);
+    band.tick();
   });
   const drawer = new LessonsDrawer(store, (song) => router.navigate({ kind: 'lesson', songId: song.id }), () => app?.tourFromAnywhere(), () => app?.closeOverlay(), () => ui.customSong.open());
   const ui: AppUi = {
@@ -121,6 +144,8 @@ function bootstrap(): void {
     ui,
   );
   const running = app;
+  // Other instruments joining the one playing by itself: their own recordings, in the engine's mix and clock.
+  running.demo.joinWith(ensemble, () => store.value.ensemble, (ids) => store.update({ ensemble: ids }));
   // Explore's "Try it": sets the app up for one feature and says what to do.
   function tryFeature(id: string): void {
     launchFeature(id, {
@@ -160,6 +185,10 @@ function bootstrap(): void {
   // page under it — `closeOverlay` only rewrites the address, so the overlays are closed here first.
   const info = new InstrumentInfo(() => store.value.instrument);
   wirePopovers(canvas, () => {
+    if (band.isOpen) {
+      router.navigate({ kind: 'home' });
+      return;
+    }
     info.hide();
     drawer.close();
     ui.explore.close();

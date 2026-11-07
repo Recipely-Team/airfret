@@ -1,4 +1,11 @@
 import { DemoPerformer } from '@application/demo/demo-performer';
+import { EnsemblePerformer } from '@application/demo/ensemble-performer';
+import type { EnsembleOutputInterface } from '@domain/audio/ensemble-output-interface';
+import { PlayMode } from '@domain/instruments/play-mode';
+import { DRUMS_ID } from '@domain/drums/drums-id';
+import { handDrumFor } from '@domain/drums/hand/hand-drum-catalog';
+import { EnsemblePicker } from '@presentation/ui/controls/ensemble-picker';
+import { HOME_GROUPS } from '@presentation/ui/navigation/home-groups';
 import { showPerformance } from '@application/demo/show-performance';
 import { watchableSongs } from '@application/demo/watchable-songs';
 import type { Player } from '@application/play/player';
@@ -43,6 +50,7 @@ export class DemoController {
   private readonly picker: SongPicker;
   private on = false;
   private songId = '';
+  private together: { performer: EnsemblePerformer; picker: EnsemblePicker; out: EnsembleOutputInterface; members: () => readonly string[] } | null = null;
 
   constructor(private readonly host: DemoHost) {
     this.performer = new DemoPerformer(host.sound);
@@ -65,6 +73,14 @@ export class DemoController {
   /** The current instrument has songs it can play by itself. */
   get hasDemo(): boolean {
     return this.songs().length > 0;
+  }
+
+  /**
+   * Lets other instruments join in (*Together*): their sound, and the chosen ones in the settings. They play the same
+   * song as the instrument on screen, each in its own range, from their own recordings.
+   */
+  joinWith(out: EnsembleOutputInterface, members: () => readonly string[], setMembers: (ids: readonly string[]) => void): void {
+    this.together = { performer: new EnsemblePerformer(out, this.host.sound), picker: new EnsemblePicker((ids) => setMembers(ids)), out, members };
   }
 
   /** Turns the mode on and plays `song`, or the chosen one (at first the instrument's showcase piece). */
@@ -90,6 +106,7 @@ export class DemoController {
 
   /** One animation frame: advances the piece and shows it; notices when it has ended. */
   tick(now: number): void {
+    this.together?.performer.update(this.host.sound.now);
     const stage = this.host.performance();
     if (stage) {
       if (stage.isPlaying && !stage.perform(this.host.sound.now)) this.changed();
@@ -107,9 +124,13 @@ export class DemoController {
   render(): void {
     this.picker.hidden = !this.isOn;
     this.button.hidden = !this.isOn;
-    if (!this.isOn) return;
+    if (!this.isOn) {
+      if (this.together) this.together.picker.hidden = true;
+      return;
+    }
     const songs = this.songs();
     this.picker.show(songs, this.chosen(songs));
+    this.renderTogether(this.chosen(songs));
     this.button.textContent = t(this.isPlaying ? 'demo.stop' : 'demo.start');
     this.button.setAttribute('aria-pressed', String(this.isPlaying));
   }
@@ -134,12 +155,32 @@ export class DemoController {
     const stage = this.host.performance();
     if (stage) stage.play(song, this.host.sound.now);
     else this.performer.start(song, this.host.instrument(), this.host.sound.now);
+    this.together?.performer.start(song, this.joining(), this.host.sound.now);
     this.changed();
   }
 
   private halt(): void {
+    this.together?.performer.stop();
     this.performer.stop();
     this.host.performance()?.stop(this.host.sound.now);
+  }
+
+  /** The instruments joining in: those chosen, but not the one on screen. */
+  private joining(): string[] {
+    return (this.together?.members() ?? []).filter((id) => id !== this.host.instrumentId());
+  }
+
+  /** *Together* shows beside a melody (a drum rhythm has nothing to join), its members' recordings loading. */
+  private renderTogether(song: Song | undefined): void {
+    const t = this.together;
+    if (!t) return;
+    const isMelody = song?.mode === PlayMode.note || song?.mode === PlayMode.chord;
+    t.picker.hidden = !isMelody;
+    if (!isMelody) return;
+    const here = this.host.instrumentId();
+    // Every instrument with real recordings can join, and every drum: a drum plays the song's beat.
+    t.picker.show(HOME_GROUPS.flatMap((g) => g.ids).filter((id) => id !== here && (t.out.canPlay(id) || id === DRUMS_ID || handDrumFor(id) !== undefined)), this.joining());
+    t.out.prepare(this.joining());
   }
 
   private changed(): void {

@@ -1,3 +1,6 @@
+import { DRUMS_ID } from '@domain/drums/drums-id';
+import { rhythmForSong, songDrumSpan } from '@domain/drums/song-drums';
+import { parseSong } from '@domain/lessons/chart/parse-song';
 import { HandDrumPerformer } from '@application/drums/hand-drum-performer';
 import type { HandDrumPlayer } from '@application/drums/hand-drum-player';
 import type { SoundOutputInterface } from '@domain/audio/sound-output-interface';
@@ -15,6 +18,9 @@ import type { StageRenderer } from '@presentation/canvas/stage-renderer';
 import { t } from '@presentation/i18n/translator';
 
 const MS = 1000;
+/** A tune that plays by itself starts this soon (`KeysPerformer`, `DemoPerformer`): its drums keep time with it, seconds. */
+const TUNE_STARTS_AFTER = 0.3;
+const isMelody = (s: Song) => s.instrument !== DRUMS_ID && (s.mode === PlayMode.note || s.mode === PlayMode.chord);
 /** A self-playing rhythm's entry in the song list is named `<drum>-<rhythm>`. */
 const SEPARATOR = '-';
 
@@ -70,15 +76,22 @@ export class HandDrumStage implements InstrumentStage, StagePerformance {
     // A drum has no pedal to hold.
   }
 
-  songs(): Song[] {
-    return rhythmsFor(this.drumId).map((r) => this.asSong(r));
+  /** Its own rhythms first, then every song with a tune — played as a rhythm in that song's meter and tempo. */
+  songs(all: readonly Song[]): Song[] {
+    return [...rhythmsFor(this.drumId).map((r) => this.asSong(r)), ...all.filter(isMelody)];
   }
 
   play(song: Song, audioNow: number): boolean {
     const drum = handDrumFor(this.drumId);
+    if (!drum) return false;
     const rhythm = rhythmsFor(this.drumId).find((r) => `${this.drumId}${SEPARATOR}${r.id}` === song.id);
-    if (!drum || !rhythm) return false;
-    return this.performer.start(rhythm, drum, audioNow);
+    if (rhythm) return this.performer.start(rhythm, drum, audioNow);
+    const chart = parseSong(song, false);
+    if (!chart.isOk) return false;
+    // A song's drum part starts on its first full bar, in time with the tune's first note (as the tune starts).
+    const span = songDrumSpan(song, chart.value);
+    const firstAt = audioNow + TUNE_STARTS_AFTER + ((span.start - span.first) * 60) / song.bpm;
+    return this.performer.start(rhythmForSong(song, this.drumId, span.bars), drum, audioNow, firstAt);
   }
 
   stop(): void {

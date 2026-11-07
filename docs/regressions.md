@@ -177,6 +177,11 @@ projects.) *Guard:* the *Down only* strum filter, covered by `player.test.ts`
 
 ## Flow
 
+**Switching to another tab stopped the music (owner's report).** Leaving the tab was treated as leaving the page:
+it silenced the engine — and even without that, self-play is moved on by animation frames, which a hidden tab
+doesn't get, so it ran dry 0.2 s later. *Fix:* a hidden tab keeps playing; a timer moves self-play and the band on
+until the tab shows again. *Guard:* `keep-playing-hidden.test.ts`; QA row X6.
+
 **The first-run tour could interrupt self-play the player had already started (found by the production check after
 v0.28.2).** Start no longer waits on the camera, so the tour could begin a moment after *Watch it play* — and
 starting the tour stops it. *Fix:* the first-run tour starts only while nothing else is playing (no self-play, no
@@ -209,6 +214,11 @@ the first run starts the guided tour instead (`tour-instrument.test.ts`); QA row
 **A stray brace in `style.css` passed every local gate and broke the CI build.** Lint, types and tests
 never parse the stylesheet; only the production build's CSS minifier does. *Guard:* the pre-commit hook
 runs `vite build` too (well under a second).
+
+**The davul, def and bendir had strokes that were mostly hiss (owner: the davul sounds bad).** Some takes were cut
+from quiet tremolos and normalised, so their room noise came up nearly as loud as the hit (noise floor within 6 dB
+of the stroke). *Fix:* those takes are gone; each stroke plays its clean take (the other hand a touch higher and
+softer). *Guard:* the noise-floor scan in `public/samples/CREDITS.md`'s notes; QA row X8.
 
 ## Tools
 

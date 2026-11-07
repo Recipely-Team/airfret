@@ -307,3 +307,17 @@ F/B rows (id — note):
 | V3 | Pick a synth voice, switch to nylon and back | Each instrument remembers its own choice | |
 | V4 | Move the volume slider while a recorded chord rings | The chord keeps ringing (it used to be cut off) | |
 | V5 | Drums page → Settings | No Sound row | |
+
+## X. The band
+
+| # | Do | Expect | ✓ |
+|---|----|--------|---|
+| X1 | Home → *Band* (or the top bar's *Band*) | A page of its own: the song, Play, and a card per instrument (acoustic, piano, clarinet, bass, davul at first), each named with its part — tune, chords, bass, beat | |
+| X2 | Play *İzmir Marşı* | All start together and keep time; the clarinet carries the tune, the guitar and piano answer on the afterbeats, the bass plays root and fifth, the davul düm-tek; each card shows its own part being played | |
+| X3 | *Add instrument* → add a kanun, a flute, the drum kit; take the piano out | The sheet groups instruments as on the home page; the parts re-deal (the flute or clarinet leads, the other holds an inner line; the kanun takes a pattern of its own) | |
+| X4 | Only ney, kemençe and darbuka | Both winds play the tune together (heterophony), the darbuka the beat — no made-up chords | |
+| X5 | Phone width | Two small cards a row, nothing cut off; the sheet slides up from the bottom | |
+| X6 | Play, then switch to another browser tab for 10 s | It keeps playing; back on the tab, the cards catch up | |
+| X7 | Close, Escape or Back while it plays | Silence; the page underneath is as it was | |
+| X8 | The davul page: *Watch it play* | A davul (shell, ropes, strap); the tokmak swings into the middle on each düm, the çubuk taps the rim on each tek — clean strokes, no hiss | |
+

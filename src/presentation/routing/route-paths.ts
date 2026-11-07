@@ -44,6 +44,7 @@ export const INSTRUMENT_SLUGS: readonly (readonly [slug: string, instrument: str
 
 const LESSONS = 'lessons';
 const EXPLORE = 'explore';
+const BAND = 'band';
 
 /** Path for a route, e.g. `/bass`, `/lessons/c-em`. */
 export function pathFor(route: Route): string {
@@ -52,6 +53,7 @@ export function pathFor(route: Route): string {
     case 'lessons': return `/${LESSONS}`;
     case 'lesson': return `/${LESSONS}/${encodeURIComponent(route.songId)}`;
     case 'explore': return `/${EXPLORE}`;
+    case 'band': return `/${BAND}`;
     case 'instrument': return `/${INSTRUMENT_SLUGS.find(([, id]) => id === route.instrument)?.[0] ?? 'acoustic'}`;
   }
 }
@@ -62,6 +64,7 @@ export function parseRoute(pathname: string): Route {
   if (!first) return { kind: 'home' };
   if (first === LESSONS) return second ? { kind: 'lesson', songId: second } : { kind: 'lessons' };
   if (first === EXPLORE) return { kind: 'explore' };
+  if (first === BAND) return { kind: 'band' };
   const instrument = INSTRUMENT_SLUGS.find(([slug]) => slug === first)?.[1];
   return instrument ? { kind: 'instrument', instrument } : { kind: 'home' };
 }
