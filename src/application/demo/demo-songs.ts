@@ -19,6 +19,7 @@ export const DEMO_SONG_BY_INSTRUMENT: Readonly<Record<string, string>> = {
   mandolin: 'minuet-in-g',
   saz: 'greensleeves-melody',
   kopuz: 'sakura',
+  kanun: 'fur-elise',
   balalaika: 'jingle-bells-melody',
   bouzouki: 'auld-lang-syne',
   greekBouzouki: 'fur-elise',
