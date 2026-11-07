@@ -25,6 +25,8 @@ export interface SoundOutputInterface {
   setVoiceVolume(voice: Voice, volume: number): void;
   /** Stops a ringing string; -1 stops all of them. */
   damp(string: number, when: number): void;
+  /** Stops every sound now — ringing strings, recordings, drums, notes already queued — as the player leaves the page. */
+  silence(): void;
   /** Percussive strum on strings muted by the fretting hand. */
   chuck(amp: number, when: number): void;
   /** A fingertip lands on a string: the string stops ringing in each of `voices`, silently. */

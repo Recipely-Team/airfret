@@ -26,6 +26,7 @@ import type { AppUi } from '@presentation/app/app-ui';
 import { CameraController } from '@application/camera/camera-controller';
 import type { InstrumentStage } from '@presentation/app/stages/instrument-stage';
 import { DemoController } from '@presentation/app/demo-controller';
+import { clearHands } from '@presentation/app/clear-hands';
 import { lessonOptions } from '@presentation/app/lesson-options';
 import { stageHint } from '@presentation/app/stage-hint';
 import { TourController } from '@presentation/app/tour-controller';
@@ -85,8 +86,7 @@ export class AirfretApp {
       songs: () => songLibrary(s.store.value), prepare: (song) => s.store.update({ tuning: song.tuning ?? 'standard' }), onChange: showStart,
       performance: () => (this.isDrums ? s.kit : s.stages.find((x) => x.handles(s.store.value.instrument))?.performance),
     });
-    // When tracking stops, the last tracked hands leave the stage.
-    this.camera = new CameraController(s.tracker, () => this.ui.toast.show(t('app.cameraError'), ERROR_TOAST_MS), () => s.player.updateHands([], performance.now() / MS_PER_SECOND, s.sound.now, false));
+    this.camera = new CameraController(s.tracker, () => this.ui.toast.show(t('app.cameraError'), ERROR_TOAST_MS), () => clearHands(s, performance.now() / MS_PER_SECOND));
     s.player.onEvent = (e) => {
       this.tours.onEvent(e);
       const played = e.recognized ? { chord: e.recognized.name, recognized: e.recognized } : e.chord !== undefined ? { chord: e.chord } : e.midi === undefined ? {} : { midi: e.midi };

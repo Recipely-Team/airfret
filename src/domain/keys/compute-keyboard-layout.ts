@@ -22,11 +22,15 @@ const BLACK = { width: 0.58, height: 0.62 } as const;
 const LINES = { black: 0.5, white: 0.76 } as const;
 const OCTAVE = 12;
 
-/** A keyboard's lowest and highest key. */
+/** A keyboard's lowest and highest key; an instrument with a `body` lays its notes out in one even row. */
 interface KeyRange {
   readonly low: number;
   readonly high: number;
+  readonly body?: string;
 }
+/** A row of notes holds about as many as the white and black keys of the same width would. */
+const NOTES_PER_WHITE = 12 / 7;
+const ROW_HEIGHT_OF_SCREEN = 0.3;
 
 const isBlack = (midi: number) => BLACK_CLASSES.has(((midi % OCTAVE) + OCTAVE) % OCTAVE);
 const nextWhite = (midi: number) => (isBlack(midi + 1) ? midi + 2 : midi + 1);
@@ -38,6 +42,7 @@ const whiteCount = (r: KeyRange) => Array.from({ length: r.high - r.low + 1 }, (
  */
 export function computeKeyboardLayout(w: number, h: number, shift = 0, range: KeyRange = PIANO_RANGE): KeyboardLayout {
   const fit = RANGES.find((r) => w >= r.minWidth) ?? RANGES[RANGES.length - 1];
+  if (range.body) return rowLayout(w, h, shift, range, fit?.whites ?? 10, fit?.firstMidi ?? 60);
   const whites = Math.min(fit?.whites ?? 10, whiteCount(range));
   const firstMidi = keyboardStart(fit?.firstMidi ?? 60, whites, shift, range);
   const span = w * SPAN_OF_WIDTH;
@@ -78,10 +83,30 @@ function keyboardStart(home: number, whites: number, shift: number, range: KeyRa
   return Math.max(low, Math.min(wanted, lastStart));
 }
 
+/** Notes in one even row along an instrument (a kanun, a ney), slid `shift` octaves within its range. */
+function rowLayout(w: number, h: number, shift: number, range: KeyRange, whites: number, home: number): KeyboardLayout {
+  const count = rowCount(whites, range);
+  const firstMidi = rowStart(home, count, shift, range);
+  const span = w * SPAN_OF_WIDTH;
+  const colW = span / count;
+  const left = (w - span) / 2;
+  const top = h * TOP_OF_HEIGHT;
+  const rowH = h * ROW_HEIGHT_OF_SCREEN;
+  const keys: PianoKey[] = Array.from({ length: count }, (_, i) => ({ midi: firstMidi + i, isBlack: false, x0: left + i * colW, x1: left + (i + 1) * colW, y0: top, y1: top + rowH }));
+  return { w, h, keys, firstMidi, lastMidi: firstMidi + count - 1, top, bottom: top + rowH, blackLine: top + rowH * LINES.black, whiteLine: top + rowH * LINES.black };
+}
+
+const rowCount = (whites: number, range: KeyRange) => Math.min(Math.round(whites * NOTES_PER_WHITE), range.high - range.low + 1);
+const rowStart = (home: number, count: number, shift: number, range: KeyRange) => Math.max(range.low, Math.min(home + shift * OCTAVE, range.high - count + 1));
+
 /** How far the keyboard can slide each way from home, in octaves, so the player's buttons know when to stop. */
 export function shiftLimits(w: number, range: KeyRange = PIANO_RANGE): { down: number; up: number } {
   const fit = RANGES.find((r) => w >= r.minWidth) ?? RANGES[RANGES.length - 1];
   const home = fit?.firstMidi ?? 60;
+  if (range.body) {
+    const count = rowCount(fit?.whites ?? 10, range);
+    return { down: -Math.ceil((home - rowStart(home, count, -99, range)) / OCTAVE), up: Math.ceil((rowStart(home, count, 99, range) - home) / OCTAVE) };
+  }
   const whites = Math.min(fit?.whites ?? 10, whiteCount(range));
   const top = keyboardStart(home, whites, 99, range);
   const bottom = keyboardStart(home, whites, -99, range);

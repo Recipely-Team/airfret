@@ -30,6 +30,8 @@ import { StringNoises } from '@infrastructure/audio/string-noises';
 import { coursePair, courseStrings, pairInterval } from '@infrastructure/audio/strings/course-pair';
 
 const Level = { master: 0.8, click: 0.5, samples: 0.9 } as const;
+/** Leaving a page: everything fades this fast and stays muted this long, past any note already queued, seconds. */
+const SILENCE = { fade: 0.015, hold: 0.4 } as const;
 const Reverb = { seconds: 2.2, decay: 3.2 } as const;
 /** Drums sit in a small room: a little of the shared reverb (`room`). */
 const KIT = { level: 0.9, room: 0.6 } as const;
@@ -49,6 +51,8 @@ const SMOOTHING = 0.02;
 export class WebAudioEngine implements SoundOutputInterface {
   private readonly ctx = new AudioContext({ latencyHint: 'interactive' });
   private readonly master: GainNode;
+  /** The master level last set (`setVolume`). */
+  private volume: number = Level.master;
   private readonly chainOut: GainNode;
   private readonly reverbIn: GainNode;
   private readonly noise: AudioBuffer;
@@ -140,6 +144,7 @@ export class WebAudioEngine implements SoundOutputInterface {
   }
 
   setVolume(volume: number): void {
+    this.volume = volume;
     this.master.gain.setTargetAtTime(volume, this.ctx.currentTime, SMOOTHING);
   }
 
@@ -234,6 +239,18 @@ export class WebAudioEngine implements SoundOutputInterface {
 
   touch(string: number, when: number, voices: readonly Voice[]): void {
     for (const v of voices) this.dampVoice(v, string, when);
+  }
+
+  silence(): void {
+    const now = this.ctx.currentTime;
+    this.samples.stopAll(now);
+    for (const bank of this.banks.values()) bank.port.postMessage({ type: 'damp', when: now, string: -1 });
+    // Notes already handed to the clock (self-play, a lesson's backing) sound under a brief mute, then the level returns.
+    // The level set last, not the gain now: a second silence mid-fade must not restore a half-faded level.
+    const level = this.volume;
+    this.master.gain.cancelScheduledValues(now);
+    this.master.gain.setTargetAtTime(0, now, SILENCE.fade);
+    this.master.gain.setTargetAtTime(level, now + SILENCE.hold, SILENCE.fade);
   }
 
   damp(string: number, when: number): void {

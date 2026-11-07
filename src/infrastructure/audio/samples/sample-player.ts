@@ -90,7 +90,7 @@ export class SamplePlayer {
     }
   }
 
-  private stopAll(when: number): void {
+  stopAll(when: number): void {
     for (const key of [...this.active.keys()]) this.release(key, when);
   }
 

@@ -169,6 +169,19 @@ projects.) *Guard:* the *Down only* strum filter, covered by `player.test.ts`
 
 ## Flow
 
+**Turning the camera off left the hand skeleton hanging on the keys, the drums and the hand drums (owner's report).**
+Only the guitar's player was told the hands had gone. *Fix:* `clearHands` empties every stage. *Guard:*
+`clear-hands.test.ts` ("leaves no hand skeleton on the keys, the hand drums, the kit or the guitar").
+
+**Going back from an instrument's page left it sounding behind the player (owner's report).** Nothing silenced the
+engine on leaving: notes already queued on the audio clock, a held key, ringing strings and recordings played on.
+*Fix:* leaving an instrument's page (back, home, another instrument) or hiding the tab stops self-play and calls the
+new `SoundOutputInterface.silence()` — every recording stopped, every string damped, the master briefly muted past
+any queued note, then restored to the level last set. *Guard:* QA rows N1–N2.
+
+**The instrument menu always opened at its top (owner's report).** The list is rebuilt as the app re-renders, losing
+the focus scroll. *Fix:* the current instrument is centred once that frame is drawn. *Guard:* QA row N3.
+
 **Escape didn't close Explore or a lesson's intro, and the very first Start buried the stage under all
 fifteen Explore cards.** Escape only knew the popovers and the lessons drawer; the first-run guide showed
 every feature at once. *Guard:* Escape closes every overlay, then `closeOverlay()` puts the address back (it only rewrites the URL, never closes anything — the cause);
