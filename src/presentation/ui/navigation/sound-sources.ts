@@ -13,6 +13,8 @@ export const SOUND_SOURCES: Readonly<Record<string, string>> = {
   bass5: 'FreePats Finger Bass (CC0)',
   bass6: 'FreePats Finger Bass (CC0)',
   banjo: 'sfzinstruments ganjo (CC0)',
+  ney: 'ajaysm (CompMusic) and yurci on Freesound (CC BY 4.0 / 3.0)',
+  kemence: 'ajaysm (CompMusic) on Freesound (CC BY 4.0)',
   kanun: 'Baris Bozkurt on Freesound, every chromatic note (CC0)',
   kopuz: 'fcerim on Freesound, a short-neck baglama (CC0)',
   piano: 'FreePats Upright Piano KW (CC0)',

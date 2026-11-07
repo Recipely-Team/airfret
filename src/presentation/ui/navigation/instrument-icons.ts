@@ -44,5 +44,7 @@ export const INSTRUMENT_ICONS: Readonly<Record<string, string>> = {
   kopuz: `${OPEN}<path d="M6 20h8v8H6zM14 23h44M14 25h44"/><path d="M58 24c0-11 12-16 26-16 16 0 26 7 26 16s-10 16-26 16c-14 0-26-5-26-16z"/><path d="M74 16c6 4 6 12 0 16"/></svg>`,
   kanun: `${OPEN}<path d="M10 38h100L94 10H26z"/><path d="M30 16h62M27 22h70M24 28h76M20 34h84"/><path d="M84 12v24"/></svg>`,
   davul: `${OPEN}<ellipse cx="44" cy="24" rx="12" ry="18"/><path d="M44 6h32M44 42h32"/><ellipse cx="76" cy="24" rx="12" ry="18"/><path d="M50 12l20 24M50 36l20-24"/><path d="M96 8l14 10M8 30l18-8"/></svg>`,
+  ney: `${OPEN}<path d="M8 22h104v4H8z"/><path d="M8 21l-3-2v10l3-2"/><circle cx="52" cy="24" r="1.4"/><circle cx="62" cy="24" r="1.4"/><circle cx="72" cy="24" r="1.4"/><circle cx="86" cy="24" r="1.4"/><circle cx="96" cy="24" r="1.4"/></svg>`,
+  kemence: `${OPEN}<path d="M40 24c0-12 10-17 26-17 18 0 26 8 26 17s-8 17-26 17c-16 0-26-5-26-17z"/><path d="M92 24h16M108 20v8M24 10l64 30"/><path d="M58 18v12M66 18v12"/></svg>`,
   drums: `${OPEN}<ellipse cx="60" cy="32" rx="13" ry="13"/><ellipse cx="38" cy="30" rx="11" ry="4"/><path d="M27 30v8M49 30v8M27 38c0 2 22 2 22 0"/><ellipse cx="84" cy="33" rx="12" ry="4.5"/><path d="M72 33v8M96 33v8M72 41c0 2 24 2 24 0"/><ellipse cx="52" cy="15" rx="7" ry="2.6"/><ellipse cx="70" cy="15" rx="7" ry="2.6"/><path d="M14 10h20M24 10v34M88 8h22M99 8v36"/></svg>`,
 };
