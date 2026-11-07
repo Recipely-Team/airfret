@@ -18,6 +18,8 @@ export const INSTRUMENT_SLUGS: readonly (readonly [slug: string, instrument: str
   ['saz', 'saz'],
   ['kopuz', 'kopuz'],
   ['kanun', 'kanun'],
+  ['ney', 'ney'],
+  ['kemence', 'kemence'],
   ['mandolin', 'mandolin'],
   ['balalaika', 'balalaika'],
   ['bouzouki', 'bouzouki'],

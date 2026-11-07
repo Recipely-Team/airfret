@@ -19,6 +19,8 @@ export const SAMPLE_SET_BY_INSTRUMENT: Readonly<Record<string, string>> = {
   banjo: 'banjo',
   kopuz: 'kopuz',
   kanun: 'kanun',
+  ney: 'ney',
+  kemence: 'kemence',
   piano: 'piano',
   marimba: 'marimba',
   xylophone: 'xylophone',

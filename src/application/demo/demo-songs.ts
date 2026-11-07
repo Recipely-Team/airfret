@@ -20,6 +20,8 @@ export const DEMO_SONG_BY_INSTRUMENT: Readonly<Record<string, string>> = {
   saz: 'greensleeves-melody',
   kopuz: 'sakura',
   kanun: 'fur-elise',
+  ney: 'sakura',
+  kemence: 'greensleeves-melody',
   balalaika: 'jingle-bells-melody',
   bouzouki: 'auld-lang-syne',
   greekBouzouki: 'fur-elise',
