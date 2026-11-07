@@ -22,6 +22,9 @@
           <span class="picker-name" id="pageTitle"></span>
           <svg class="chevron" viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg>
         </button>
+        <button class="btn icon info-btn" id="infoBtn" type="button" data-i18n-label="info.open" hidden>
+          <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 9v5"/><circle cx="10" cy="6.2" r="0.6" fill="currentColor" stroke="none"/></svg>
+        </button>
         <div class="bar-context" id="barContext">
           <div class="seg" id="modes" role="radiogroup"></div>
           <select id="chordSet" class="select" data-i18n-label="ui.chordSet"></select>
@@ -164,6 +167,25 @@
         </div>
       </div>
 
+      <div class="overlay" id="info" hidden>
+        <article class="card info" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+          <header class="info-head">
+            <div class="info-icon" id="infoIcon" aria-hidden="true"></div>
+            <div class="info-names">
+              <p class="eyebrow" id="infoFamily"></p>
+              <h2 id="infoTitle"></h2>
+              <p class="info-origin" id="infoOrigin"></p>
+            </div>
+            <button class="btn icon info-close" id="infoClose" type="button" data-i18n-label="ui.close">
+              <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>
+            </button>
+          </header>
+          <p class="info-history" id="infoHistory"></p>
+          <h3 class="info-label" data-i18n="info.timeline"></h3>
+          <ol class="timeline" id="infoTimeline"></ol>
+          <dl class="info-facts" id="infoFacts"></dl>
+        </article>
+      </div>
       <div class="overlay" id="intro" hidden>
         <div class="card intro">
           <p class="eyebrow" id="introEyebrow"></p>
