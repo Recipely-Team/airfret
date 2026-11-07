@@ -8,6 +8,7 @@ const COLOURS = { ivory: '#f2ece0', ivoryShade: '#d9d1c2', ebony: '#17140f', ebo
 const BARS = {
   rosewood: { light: '#a8573a', dark: '#6b2f1c', sharpLight: '#8e4630', sharpDark: '#5a2616' },
   metal: { light: '#e4e6e9', dark: '#9aa0a6', sharpLight: '#cfd2d6', sharpDark: '#868c93' },
+  kanun: { light: '#dcc293', dark: '#a27a49', sharpLight: '#c7a978', sharpDark: '#8c6638' },
 } as const;
 const CASE_PAD = 10;
 const RADIUS = 4;
@@ -46,7 +47,7 @@ export function paintKeyboard(ctx: CanvasRenderingContext2D, piano: PianoPlayer)
   }
 }
 
-function paintKey(ctx: CanvasRenderingContext2D, k: PianoKey, isDown: boolean, glow: number, keyLength: number, look: 'ivory' | 'reversed' | 'rosewood' | 'metal'): void {
+function paintKey(ctx: CanvasRenderingContext2D, k: PianoKey, isDown: boolean, glow: number, keyLength: number, look: 'ivory' | 'reversed' | 'rosewood' | 'metal' | 'kanun'): void {
   // A harpsichord's naturals are dark and its sharps light: the key's colour, not its shape, swaps.
   const isDark = k.isBlack !== (look === 'reversed');
   const sink = isDown ? keyLength * PRESS_DEPTH : 0;
@@ -55,8 +56,8 @@ function paintKey(ctx: CanvasRenderingContext2D, k: PianoKey, isDown: boolean, g
   const y0 = k.y0 + sink;
   const h = k.y1 - k.y0;
   const grad = ctx.createLinearGradient(0, y0, 0, y0 + h);
-  if (look === 'rosewood' || look === 'metal') {
-    // A struck bar: its own wood or metal, the sharps a shade darker.
+  if (look === 'rosewood' || look === 'metal' || look === 'kanun') {
+    // A struck bar (or a kanun's course of strings): its own wood or metal, the sharps a shade darker.
     const bar = BARS[look];
     grad.addColorStop(0, k.isBlack ? bar.sharpLight : bar.light);
     grad.addColorStop(1, k.isBlack ? bar.sharpDark : bar.dark);
