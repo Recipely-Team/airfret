@@ -26,6 +26,7 @@ import { chordNotes } from '@domain/music/chords/chord-voicing';
 import { StrumFilter } from '@domain/settings/strum-filter';
 import { HandLandmark } from '@domain/tracking/hand-landmark';
 import { extendedFingers } from '@domain/tracking/hand-pose';
+import type { PlayerSetup } from '@application/play/player-setup';
 
 const Timing = {
   /** Crossings further apart than this start a new strum gesture, seconds. */
@@ -36,6 +37,8 @@ const Timing = {
   defaultFrame: 0.016,
   maxFrame: 0.05,
   trail: 0.25,
+  /** A stroke seen only as motion sweeps the strings this far apart, seconds. */
+  motionStagger: 0.008,
 } as const;
 const FIST_FRAMES = 2;
 /** A fingertip resting on a string this long stops it; passing over it on the way does not. */
@@ -43,16 +46,6 @@ const REST_TO_DAMP_SECONDS = 0.15;
 const MUTED_ENERGY = 0.3;
 const FRET_FILTER = { minCutoff: 1, beta: 0.02 } as const;
 const STRUM_FILTER = { minCutoff: 4, beta: 0.05 } as const;
-
-interface PlayerSetup {
-  readonly layout: FretboardLayout;
-  readonly instrument: Instrument;
-  readonly mode: PlayMode;
-  readonly chords: readonly string[];
-  readonly strumFilter: StrumFilter;
-  /** Capo fret; the tuning passed in already includes it. */
-  readonly capo: number;
-}
 
 /**
  * **Player** — turns tracked hands into sound.
@@ -158,6 +151,14 @@ export class Player {
     this.strumHand = strum;
     this.updateFretHand(fret, t, audioNow);
     if (canStrum) this.feedStrum(this.strumTip(strum, t), t, audioNow, strum);
+  }
+
+  /** A stroke the camera saw only as motion (a fast hand blurred past the tracker): every string, in its direction. */
+  motionStrum(dir: StrumDirection, speed: number, audioNow: number): void {
+    const ys = strumStringYs(this.layout);
+    const order = ys.map((y, string) => ({ y, string })).sort((a, b) => (a.y - b.y) * dir);
+    const x = (this.layout.strumX0 + this.layout.strumX1) / 2;
+    order.forEach(({ string }, i) => this.play({ string, x, frac: 0, speed, dir }, audioNow + Timing.scheduleLead + i * Timing.motionStagger, null));
   }
 
   /** Mouse / touch fallback for the strumming hand; a tap on one string plucks it (`TapDetector`). */

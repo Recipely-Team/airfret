@@ -120,6 +120,14 @@ catalogue, which imports it; the helper now uses `@domain/music/pitch` instead o
 
 ## Input
 
+**Strumming with the hand did nothing much while the mouse worked (owner's recording, ukulele).** Run frame by
+frame through the app's own tracker, the recording showed why: the fast strumming hand blurs, and the hand model found
+it in only 15 % of frames. *Fix:* lower detection thresholds (39 % of frames, measured), and a motion fallback — while
+the strumming hand isn't tracked, each burst of motion in the strumming area sweeps the strings, down or up
+(`MotionStrumDetector`, `MotionStrummer`; never in Notes mode or during self-play). With the recording as the camera
+the app went from 38 to 170 plucks in 27 s (about 9 strums to 42). *Guard:* `motion-strum.test.ts`,
+`motion-strummer.test.ts`; QA row B8.
+
 **Fast strokes on the hand drums and the kit went unheard — 18 of well over a hundred in a 31 s clip (owner's
 recording, def).** A stroke had to cross the head's centre line going down, and the next one waited for the tip
 to climb back above it: fast, small strokes — the way drums are really played — did neither. A slap also struck

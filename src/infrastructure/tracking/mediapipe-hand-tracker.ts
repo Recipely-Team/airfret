@@ -6,10 +6,15 @@ import { fail, ok } from '@core/result/result-factories';
 import type { HandTrackerInterface } from '@domain/tracking/hand-tracker-interface';
 import type { TrackedHand } from '@domain/tracking/tracked-hand';
 import { AssetPath } from '@infrastructure/constants/assets';
+import type { MotionGrid } from '@domain/tracking/motion-grid';
+import { MotionSampler } from '@infrastructure/tracking/motion-sampler';
 
 const CAMERA = { width: 1280, height: 720, frameRate: 60 } as const;
-/** Lower presence/tracking thresholds keep hands through motion blur in fast strokes. */
-const MODEL = { numHands: 2, detection: 0.5, presence: 0.3, tracking: 0.3 } as const;
+/**
+ * Lower thresholds keep hands through the motion blur of fast strokes: on the owner's strumming recording, 0.3/0.2/0.2
+ * found the strumming hand in 39 % of frames where 0.5/0.3/0.3 found it in 15 %; lower still gained nothing.
+ */
+const MODEL = { numHands: 2, detection: 0.3, presence: 0.2, tracking: 0.2 } as const;
 const HAVE_CURRENT_DATA = 2;
 
 /**
@@ -24,6 +29,7 @@ export class MediaPipeHandTracker implements HandTrackerInterface {
   private landmarker: HandLandmarker | null = null;
   private lastVideoTime = -1;
   private stream: MediaStream | null = null;
+  private readonly sampler = new MotionSampler();
 
   constructor(private readonly video: HTMLVideoElement) {}
 
@@ -42,6 +48,7 @@ export class MediaPipeHandTracker implements HandTrackerInterface {
     for (const track of this.stream?.getTracks() ?? []) track.stop();
     this.stream = null;
     this.video.srcObject = null;
+    this.sampler.reset();
   }
 
   async resume(): Promise<Result<void, Failure>> {
@@ -68,7 +75,12 @@ export class MediaPipeHandTracker implements HandTrackerInterface {
     const v = this.video;
     if (!this.stream || !this.landmarker || v.readyState < HAVE_CURRENT_DATA || v.currentTime === this.lastVideoTime) return null;
     this.lastVideoTime = v.currentTime;
+    this.sampler.sample(v);
     return this.landmarker.detectForVideo(v, nowMs).landmarks.map((lm) => ({ landmarks: lm.map((p) => ({ x: 1 - p.x, y: p.y, z: p.z })) }));
+  }
+
+  motion(): MotionGrid | null {
+    return this.stream ? this.sampler.latest : null;
   }
 
   frameSize(): { width: number; height: number } {

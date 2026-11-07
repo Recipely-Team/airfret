@@ -1,3 +1,4 @@
+import type { MotionGrid } from '@domain/tracking/motion-grid';
 import { Failure } from '@core/failure/failure';
 import { FailureCode } from '@core/failure/failure-code';
 import type { Result } from '@core/result/result';
@@ -26,6 +27,13 @@ export class FakeHandTracker implements HandTrackerInterface {
 
   detect(): TrackedHand[] | null {
     return null;
+  }
+
+  /** The motion grid `motion()` returns. */
+  grid: MotionGrid | null = null;
+
+  motion(): MotionGrid | null {
+    return this.grid;
   }
 
   frameSize(): { width: number; height: number } {
