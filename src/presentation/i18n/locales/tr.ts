@@ -286,7 +286,7 @@ export const TR: Readonly<Record<string, string>> = {
   'stroke.slap': "şaplak",
   'stroke.tone': "ton",
   'stroke.ge': "ge",
-  'stroke.tin': "tin",
+  'stroke.tun': "tun",
   'stroke.na': "na",
   'app.mouseHintHandDrum': "Kamera yok mu? Davula tıkla ya da dokun: ortası ile kenarı, sağı ile solu farklı ses verir.",
   'app.noHands': 'İki elini de kameraya göster',

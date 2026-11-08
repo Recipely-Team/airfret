@@ -286,7 +286,7 @@ export const EN: Readonly<Record<string, string>> = {
   'stroke.slap': "slap",
   'stroke.tone': "tone",
   'stroke.ge': "ge",
-  'stroke.tin': "tin",
+  'stroke.tun': "tun",
   'stroke.na': "na",
   'app.mouseHintHandDrum': "No camera? Click or tap the drum: the middle and the edges sound differently, left and right too.",
   'app.noHands': 'Show both hands to the camera',
