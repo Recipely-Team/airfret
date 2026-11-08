@@ -13,4 +13,10 @@ export interface SampleRef {
   readonly layer: number;
   /** Measured tuning error, cents to add on playback to land in tune. */
   readonly cents: number;
+  /**
+   * A held note's loop, seconds into the file (`tools/samples/sustain.mjs --loop`): it repeats seamlessly while the
+   * note is held, so a short recording of a bowed or blown note can last as long as it is played.
+   */
+  readonly loopStart?: number;
+  readonly loopEnd?: number;
 }

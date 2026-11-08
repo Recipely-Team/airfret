@@ -29,4 +29,11 @@ describe('SampleSet', () => {
     const set = new SampleSet([{ ref: ref(83, 5, 83, 83, 40), buffer: buffer(1) }]);
     expect(set.choose(5, 83)?.detune).toBe(40);
   });
+
+  it('holds a bowed or blown note as long as it is played: a recording with a loop passes the loop on', () => {
+    const looped: SampleRef = { ...ref(62, -1, 60, 64), loopStart: 0.3, loopEnd: 0.74 };
+    const set = new SampleSet([{ ref: looped, buffer: buffer(1) }, { ref: ref(70, -1, 68, 72), buffer: buffer(2) }]);
+    expect(set.choose(-1, 62)?.loop).toEqual({ start: 0.3, end: 0.74 });
+    expect(set.choose(-1, 70)?.loop).toBeUndefined();
+  });
 });

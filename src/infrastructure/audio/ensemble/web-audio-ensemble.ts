@@ -52,9 +52,15 @@ export class WebAudioEnsemble implements EnsembleOutputInterface {
     const source = ctx.createBufferSource();
     source.buffer = choice.buffer;
     source.detune.value = choice.detune;
+    if (choice.loop) {
+      source.loop = true;
+      source.loopStart = choice.loop.start;
+      source.loopEnd = choice.loop.end;
+    }
     const gain = ctx.createGain();
     const level = Math.max(MIN_GAIN, Math.min(1, velocity));
-    const end = start + Math.min(dur, choice.buffer.duration);
+    // A looping recording lasts as long as the note; any other, at most its own length.
+    const end = start + (choice.loop ? dur : Math.min(dur, choice.buffer.duration));
     gain.gain.setValueAtTime(level, start);
     gain.gain.setTargetAtTime(0, end, RELEASE / 3);
     source.connect(gain).connect(this.bus);
