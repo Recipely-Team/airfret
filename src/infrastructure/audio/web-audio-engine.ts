@@ -19,6 +19,7 @@ import { impulseResponse } from '@infrastructure/audio/chains/impulse-response';
 import { outputStage } from '@infrastructure/audio/chains/output-stage';
 import { DrumKit } from '@infrastructure/audio/drum-kit';
 import { AcousticKit } from '@infrastructure/audio/drums/acoustic-kit';
+import { RecordedKit } from '@infrastructure/audio/drums/recorded-kit';
 import { HandDrumVoice } from '@infrastructure/audio/drums/hand-drum-voice';
 import { loadSampleSet } from '@infrastructure/audio/samples/load-sample-set';
 import { SamplePlayer } from '@infrastructure/audio/samples/sample-player';
@@ -58,7 +59,7 @@ export class WebAudioEngine implements SoundOutputInterface {
   private readonly noise: AudioBuffer;
   private readonly noises: StringNoises;
   private readonly drums: DrumKit;
-  private readonly kit: AcousticKit;
+  private readonly kit: RecordedKit;
   private readonly handDrum: HandDrumVoice;
   private readonly chains = new Map<ChainKind, AudioChain>();
   private readonly banks = new Map<Voice, AudioWorkletNode>();
@@ -100,7 +101,7 @@ export class WebAudioEngine implements SoundOutputInterface {
     const kitRoom = ctx.createGain();
     kitRoom.gain.value = KIT.room;
     kitBus.connect(kitRoom).connect(this.reverbIn);
-    this.kit = new AcousticKit(ctx, kitBus, this.noise);
+    this.kit = new RecordedKit(ctx, kitBus, new AcousticKit(ctx, kitBus, this.noise), `${import.meta.env.BASE_URL}${AssetPath.kitSamples}`);
     this.handDrum = new HandDrumVoice(ctx, kitBus, this.noise, `${import.meta.env.BASE_URL}${AssetPath.handDrumSamples}`);
     this.sampleBus = ctx.createGain();
     this.sampleBus.gain.value = Level.samples;
@@ -281,13 +282,11 @@ export class WebAudioEngine implements SoundOutputInterface {
     this.handDrum.hit(stroke, velocity, when);
   }
 
-  prepareHandStrokes(strokes: readonly HandStroke[]): void {
-    this.handDrum.prepare(strokes);
-  }
+  /** Load the hand drum's or the kit's recordings ahead of their first stroke. */
+  prepareHandStrokes(strokes: readonly HandStroke[]): void { this.handDrum.prepare(strokes); }
+  prepareKit(): void { this.kit.prepare(); }
 
-  chokeHiHat(when: number): void {
-    this.kit.choke(when);
-  }
+  chokeHiHat(when: number): void { this.kit.choke(when); }
 
   click(when: number, isAccent: boolean): void {
     this.drums.click(when, isAccent);
