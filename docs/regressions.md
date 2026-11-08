@@ -220,6 +220,16 @@ from quiet tremolos and normalised, so their room noise came up nearly as loud a
 of the stroke). *Fix:* those takes are gone; each stroke plays its clean take (the other hand a touch higher and
 softer). *Guard:* the noise-floor scan in `public/samples/CREDITS.md`'s notes; QA row X8.
 
+**The clarinet sounded incomplete (owner's report) — and the other winds and bowed strings less so.** Their
+recordings are sustained takes that swell in: the clarinet's low D needed a second to reach full level, so a short note
+(a quarter second in a march) played only its faint start — 20 dB under the next note. Levels also jumped up to 19 dB
+from note to note, and the kemençe and ney takes (under a second or two) stopped while a note was still held.
+*Fix:* `tools/samples/sustain.mjs` — each note starts at its onset and reaches full level in 50 ms (only the swell is
+lifted; the note's own life after it stays), levels evened, tuning re-measured; short takes get crossfaded loops
+matched by cross-correlation, which both players and the offline renderer honour. *Guard:*
+`held-notes.audio.test.ts` (fails on the old clarinet: 390 ms against 80); `instruments-vs-real` keeps them in tune;
+a `SampleSet` test passes loops on; QA rows V6–V7.
+
 ## Tools
 
 **The sample tools silently dropped SFZ regions they didn't expect.** SFZ lets a region leave out

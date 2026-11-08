@@ -307,6 +307,8 @@ F/B rows (id — note):
 | V3 | Pick a synth voice, switch to nylon and back | Each instrument remembers its own choice | |
 | V4 | Move the volume slider while a recorded chord rings | The chord keeps ringing (it used to be cut off) | |
 | V5 | Drums page → Settings | No Sound row | |
+| V6 | Clarinet (then flute, trumpet, tuba): *Watch it play* the İzmir March | Every note, short ones too, speaks at once and whole; no note jumps out louder or softer than its neighbours | |
+| V7 | Kemençe and ney: hold a key down 5 s | The note sounds the whole time, evenly, and stops when let go (their recordings are under a second or two) | |
 
 ## X. The band
 
