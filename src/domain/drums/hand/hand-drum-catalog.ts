@@ -5,7 +5,7 @@ import { midiToFreq } from '@domain/music/pitch';
 
 /**
  * Every hand drum, as data the one voice (`HandDrumVoice`) and the one stage play. The darbuka, def, bendir, davul
- * congas, cajón, bongos and djembe play real recordings (see CREDITS.md), the tabla its na; the rest is synthesised, pitches and decays set by ear from each drum's character: the membrane drums' bass strokes sag in pitch as
+ * congas, cajón, bongos, djembe, tabla and handpan play real recordings (see CREDITS.md); the synth below voices each until its take loads, pitches and decays set by ear from each drum's character: the membrane drums' bass strokes sag in pitch as
  * the skin settles, their edge strokes ring in the body's partials over a click; frame drums add their jingles or
  * snare strings as noise; the handpan's fields are tuned notes with their octave and compound-fifth partials.
  */
@@ -66,9 +66,28 @@ const recordedConga = (head: HandDrumHead, name: 'conga' | 'tumba'): HandDrumHea
 };
 
 /** A handpan's tone field: a tuned note with its octave and compound fifth, ringing long. */
+/**
+ * The handpan's real notes (Freesound, GAMEDRIX974's "HandPan 1st model", CC0), each with its pitch and tuning error
+ * as measured (cents): D-Kurd's D3 A3 C4 D4 F4 G4 A4; its B♭3 and E4 are the A3 and F4 a semitone off.
+ */
+const PAN_TAKES: readonly { readonly midi: number; readonly file: string; readonly cents: number }[] = [
+  { midi: 50, file: 'pan-d3', cents: 4 }, { midi: 57, file: 'pan-a3', cents: -3 }, { midi: 60, file: 'pan-c4', cents: 0 },
+  { midi: 62, file: 'pan-d4', cents: 0 }, { midi: 65, file: 'pan-f4', cents: -7 }, { midi: 67, file: 'pan-g4', cents: -6 }, { midi: 69, file: 'pan-a4', cents: -7 },
+];
+const CENTS_PER_OCTAVE = 1200;
+const SEMITONES = 12;
+
+/** A handpan note's real take: the nearest recorded note, played at the rate that puts it exactly in tune. */
+const panRecording = (midi: number): HandStroke['recording'] => {
+  const t = [...PAN_TAKES].sort((a, b) => Math.abs(a.midi - midi) - Math.abs(b.midi - midi))[0];
+  return t ? { layers: [[t.file]], rate: 2 ** ((midi - t.midi) / SEMITONES - t.cents / CENTS_PER_OCTAVE) } : undefined;
+};
+
 const field = (midi: number, size: number, ring?: HandDrumHead['ring']): HandDrumHead => {
   const f = midiToFreq(midi);
-  const note = s(`note.${midi}`, [{ hz: f, decay: 2.4, level: 0.5 }, { hz: f * 2, decay: 1.6, level: 0.24 }, { hz: f * 3, decay: 1, level: 0.12 }]);
+  const voiced = s(`note.${midi}`, [{ hz: f, decay: 2.4, level: 0.5 }, { hz: f * 2, decay: 1.6, level: 0.24 }, { hz: f * 3, decay: 1, level: 0.12 }]);
+  const recording = panRecording(midi);
+  const note = recording ? { ...voiced, recording } : voiced;
   const head: HandDrumHead = { cxOfWidth: 0.5, cyOfHeight: 0.6, size, flatten: 0.62, look: 'steel', edgeAt: 2, center: note, edge: note };
   return ring ? { ...head, ring } : head;
 };
@@ -128,14 +147,14 @@ export const HAND_DRUMS: readonly HandDrum[] = [
     id: 'tabla', name: 'inst.tabla', heads: [
       {
         cxOfWidth: 0.33, cyOfHeight: 0.62, size: 0.17, flatten: 0.6, look: 'barrel', edgeAt: 0.6,
-        center: s('stroke.ge', [{ hz: 80, toHz: 98, decay: 0.7, level: 0.9 }], { type: 'lowpass', hz: 300, length: 0.03, level: 0.3 }),
-        edge: s('stroke.ka', [{ hz: 300, decay: 0.04, level: 0.3 }], { type: 'lowpass', hz: 900, length: 0.05, level: 0.4 }),
+        // Real strokes, all from one tabla (Freesound, mmiron's "tabla bols", CC0).
+        center: take(s('stroke.ge', [{ hz: 80, toHz: 98, decay: 0.7, level: 0.9 }], { type: 'lowpass', hz: 300, length: 0.03, level: 0.3 }), 'tabla-ge'),
+        edge: take(s('stroke.ka', [{ hz: 300, decay: 0.04, level: 0.3 }], { type: 'lowpass', hz: 900, length: 0.05, level: 0.4 }), 'tabla-ka'),
       },
       {
         // The dayan's black syahi tunes its modes into harmonics: a pitched, ringing drum.
         cxOfWidth: 0.66, cyOfHeight: 0.62, size: 0.13, flatten: 0.6, look: 'barrel', edgeAt: 0.55,
-        center: s('stroke.tin', [{ hz: 290, decay: 0.6, level: 0.5 }, { hz: 580, decay: 0.4, level: 0.3 }, { hz: 870, decay: 0.3, level: 0.2 }, { hz: 1160, decay: 0.2, level: 0.12 }]),
-        // A real "na" (Freesound, Ninad_P's tabla_na, CC0); tin, ge and ka are still synthesised.
+        center: take(s('stroke.tun', [{ hz: 290, decay: 0.6, level: 0.5 }, { hz: 580, decay: 0.4, level: 0.3 }, { hz: 870, decay: 0.3, level: 0.2 }, { hz: 1160, decay: 0.2, level: 0.12 }]), 'tabla-tun'),
         edge: take(s('stroke.na', [{ hz: 290, decay: 0.9, level: 0.45 }, { hz: 870, decay: 0.5, level: 0.25 }, { hz: 1450, decay: 0.3, level: 0.15 }], { type: 'bandpass', hz: 3000, length: 0.01, level: 0.3 }), 'tabla-na'),
       },
     ],

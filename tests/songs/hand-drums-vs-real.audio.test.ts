@@ -4,6 +4,7 @@ import { handDrumFor } from '@domain/drums/hand/hand-drum-catalog';
 import { SR } from '../../tools/calibrate/analyze.mjs';
 import { decode } from '../../tools/calibrate/decode.mjs';
 import { drumMetrics } from './drum-metrics';
+import { fundamental } from '../../tools/calibrate/pitch.mjs';
 
 /**
  * The hand drums that were synthesised, as they now play: from real takes (Freesound, CC0 — see CREDITS.md).
@@ -26,6 +27,7 @@ describe('The hand drums, from real takes', () => {
       }
     }
     expect(fileOf('tabla', 1, 'edge')).toBe('tabla-na');
+    for (const [h, part] of [[0, 'center'], [0, 'edge'], [1, 'center']] as const) expect(fileOf('tabla', h, part), `tabla ${h} ${part}`).toBeDefined();
   });
 
   it('sound like skins, not sines or hiss: a djembe bass that rings with its skin, slaps around a kilohertz', () => {
@@ -36,5 +38,22 @@ describe('The hand drums, from real takes', () => {
     expect(measure(fileOf('djembe', 0, 'edgeLeft')).centroid).toBeLessThan(3000);
     expect(measure(fileOf('cajon', 0, 'center')).lowHz).toBeLessThan(80);
     for (const h of [0, 1]) expect(measure(fileOf('bongos', h, 'edge')).centroid).toBeLessThan(3000);
+  });
+
+  it('a tabla whose ge booms low and rings, and a handpan whose every note plays its real take exactly in tune', () => {
+    const ge = measure(fileOf('tabla', 0, 'center'));
+    expect(ge.lowHz).toBeLessThan(200);
+    expect(ge.t30).toBeGreaterThan(0.25);
+    const pan = handDrumFor('handpan')?.heads ?? [];
+    expect(pan.length).toBe(9);
+    for (const head of pan) {
+      const midi = Number(head.center.label.replace('note.', ''));
+      const rec = head.center.recording;
+      expect(rec, `${midi}`).toBeDefined();
+      const audio = decode(`${DIR}/${rec?.layers[0]?.[0] ?? ''}.m4a`) as Float32Array;
+      const target = 440 * 2 ** ((midi - 69) / 12);
+      const heard = fundamental(audio.subarray(Math.round(0.1 * SR), Math.round(1.5 * SR)), target / (rec?.rate ?? 1)) * (rec?.rate ?? 1);
+      expect(Math.abs(1200 * Math.log2(heard / target)), `${midi}`).toBeLessThan(3);
+    }
   });
 });
