@@ -328,4 +328,4 @@ F/B rows (id — note):
 | X12 | Move a member's level slider while it plays | Heard at once; kept after letting go | |
 | X13 | Texture: Folk (heterophony) with saz, kanun, ney, kemençe, darbuka, def — Kâtibim | The ney leads; saz, kanun and kemençe play the same tune each its own way (the kanun re-striking long notes); the darbuka from the first bar, the def from section 3; no added chords | |
 | X14 | Level fixed at 1, then 5 | 1: the tune alone (and a Turkish lead drum); 5: everyone throughout | |
-
+| X15 | Drum kit page, then djembe, cajón, bongos, tabla (na) pages: play each stroke | Real drums: a kick that thumps, a snare that cracks without hiss, toms that ring, cymbals that shimmer; skins on the hand drums, no hiss on the slaps | |
