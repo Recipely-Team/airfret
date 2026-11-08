@@ -36,22 +36,54 @@ export function songDrumSpan(song: Song, chart: SongChart): { first: number; sta
   return { first, start, bars: Math.max(1, Math.ceil((chart.length - start) / song.beatsPerBar - 1e-6)) };
 }
 
-/** The drum kit's part for a song: a beat in its meter (a march beat for a march), `bars` long at its tempo. */
-export function grooveForSong(song: Song, bars: number): Groove {
+/** A bar's plan for a drum (see `drumBars`): 0 silent, 1 light, 2 its pattern, 3 that with a crash. */
+const BAR = { rest: 0, light: 1, full: 2, crash: 3 } as const;
+
+/**
+ * The drum kit's part for a song: a beat in its meter (a march beat for a march), `bars` long at its tempo — bar by
+ * bar as `plan` says when there is one (a band's build-up: light bars keep the kick and hi-hat, a crash opens a loud
+ * section, silent bars rest).
+ */
+export function grooveForSong(song: Song, bars: number, plan?: readonly number[], isMarch = false): Groove {
   const n = song.beatsPerBar;
-  const pattern = n === 4 && MARCH.test(song.title) ? MARCH_4 : KIT[n] ?? { subdiv: 1, lanes: { hihat: 'x'.repeat(n), kick: `X${'.'.repeat(n - 1)}`, snare: `${'.'.repeat(n - 1)}X` } };
-  return { id: `song-${song.id}`, title: song.title, about: song.about, bpm: song.bpm, beatsPerBar: n, subdiv: pattern.subdiv, bars, lanes: pattern.lanes };
+  const pattern = n === 4 && (isMarch || MARCH.test(song.title)) ? MARCH_4 : KIT[n] ?? { subdiv: 1, lanes: { hihat: 'x'.repeat(n), kick: `X${'.'.repeat(n - 1)}`, snare: `${'.'.repeat(n - 1)}X` } };
+  const lanes = plan ? plannedLanes(pattern.lanes, pattern.subdiv * n, plan) : pattern.lanes;
+  return { id: `song-${song.id}`, title: song.title, about: song.about, bpm: song.bpm, beatsPerBar: n, subdiv: pattern.subdiv, bars, lanes };
+}
+
+/** A one-bar kit pattern written out bar by bar to the plan. */
+function plannedLanes(lanes: Groove['lanes'], steps: number, plan: readonly number[]): Groove['lanes'] {
+  const rest = '.'.repeat(steps);
+  const out: Record<string, string> = {};
+  for (const [piece, lane] of Object.entries(lanes)) {
+    const bar = lane.replace(/\s+/g, '').slice(0, steps).padEnd(steps, '.');
+    out[piece] = plan.map((b) => (b === BAR.rest || (b === BAR.light && piece !== 'kick' && piece !== 'hihat') ? rest : bar)).join('');
+  }
+  out['crash'] = plan.map((b) => (b === BAR.crash ? `X${'.'.repeat(steps - 1)}` : rest)).join('');
+  return out;
 }
 
 /**
  * A hand drum's part for a song: its own traditional rhythm in the song's meter when it has one (a maqsum in 4, a
- * malfuf in 2, a karsilama in 9), else düm on the bar and tek between — `bars` long at the song's tempo.
+ * malfuf in 2, a karsilama in 9), else düm on the bar and tek between — `bars` long at the song's tempo; bar by bar
+ * as `plan` says when there is one (light bars keep only the düms).
  */
-export function rhythmForSong(song: Song, drumId: string, bars: number): HandRhythm {
+export function rhythmForSong(song: Song, drumId: string, bars: number, plan?: readonly number[]): HandRhythm {
   const n = song.beatsPerBar;
   const own = rhythmsFor(drumId).find((r) => r.beatsPerBar === n);
   const generic = HAND[n] ?? { subdiv: 1, phrase: ['D', ...Array.from({ length: n - 1 }, () => 'T')].join(' ') };
   const subdiv = own?.subdiv ?? generic.subdiv;
   const phrase = own?.phrase ?? generic.phrase;
-  return { id: `song-${song.id}`, title: song.title, about: song.about, bpm: song.bpm, beatsPerBar: n, subdiv, phrase, bars, drums: [drumId] };
+  return { id: `song-${song.id}`, title: song.title, about: song.about, bpm: song.bpm, beatsPerBar: n, subdiv, phrase: plan ? plannedPhrase(phrase, subdiv * n, plan) : phrase, bars, drums: [drumId] };
+}
+
+/** A hand-drum phrase (one or more bars) written out bar by bar to the plan: light bars keep the düms, silent bars rest. */
+function plannedPhrase(phrase: string, steps: number, plan: readonly number[]): string {
+  const tokens = phrase.trim().split(/\s+/);
+  const phraseBars = Math.max(1, Math.round(tokens.length / steps));
+  return plan.flatMap((b, i) => {
+    const bar = Array.from({ length: steps }, (_, k) => tokens[(i % phraseBars) * steps + k] ?? '.');
+    if (b === BAR.rest) return bar.map(() => '.');
+    return b === BAR.light ? bar.map((t) => (/^\d?D/.test(t) ? t : '.')) : bar;
+  }).join(' ');
 }

@@ -81,7 +81,7 @@ export class HandDrumStage implements InstrumentStage, StagePerformance {
     return [...rhythmsFor(this.drumId).map((r) => this.asSong(r)), ...all.filter(isMelody)];
   }
 
-  play(song: Song, audioNow: number): boolean {
+  play(song: Song, audioNow: number, drumPlan?: readonly number[]): boolean {
     const drum = handDrumFor(this.drumId);
     if (!drum) return false;
     const rhythm = rhythmsFor(this.drumId).find((r) => `${this.drumId}${SEPARATOR}${r.id}` === song.id);
@@ -91,7 +91,7 @@ export class HandDrumStage implements InstrumentStage, StagePerformance {
     // A song's drum part starts on its first full bar, in time with the tune's first note (as the tune starts).
     const span = songDrumSpan(song, chart.value);
     const firstAt = audioNow + TUNE_STARTS_AFTER + ((span.start - span.first) * 60) / song.bpm;
-    return this.performer.start(rhythmForSong(song, this.drumId, span.bars), drum, audioNow, firstAt);
+    return this.performer.start(rhythmForSong(song, this.drumId, span.bars, drumPlan), drum, audioNow, firstAt);
   }
 
   stop(): void {

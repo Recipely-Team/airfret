@@ -322,4 +322,10 @@ F/B rows (id — note):
 | X6 | Play, then switch to another browser tab for 10 s | It keeps playing; back on the tab, the cards catch up | |
 | X7 | Close, Escape or Back while it plays | Silence; the page underneath is as it was | |
 | X8 | The davul page: *Watch it play* | A davul (shell, ropes, strap); the tokmak swings into the middle on each düm, the çubuk taps the rim on each tek — clean strokes, no hiss | |
+| X9 | Band, İzmir Marşı, Auto: play it through | Section 1 of 4 · two dots: the tune, a bass, soft chords, a light beat; each stanza fuller; the bar before the last stanza thins (bass and beat drop); the last stanza with everyone, ending on a held chord and a final hit | |
+| X10 | Change a member's role (e.g. piano → held chords), then a guitar's pattern under ⋯ (arpeggio) | It plays from the top, arranged again; the card shows the choice; "Back to auto" undoes it | |
+| X11 | Set two instruments to the tune | The second becomes "tune, an octave away", and its card says why | |
+| X12 | Move a member's level slider while it plays | Heard at once; kept after letting go | |
+| X13 | Texture: Folk (heterophony) with saz, kanun, ney, kemençe, darbuka, def — Kâtibim | The ney leads; saz, kanun and kemençe play the same tune each its own way (the kanun re-striking long notes); the darbuka from the first bar, the def from section 3; no added chords | |
+| X14 | Level fixed at 1, then 5 | 1: the tune alone (and a Turkish lead drum); 5: everyone throughout | |
 
