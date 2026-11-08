@@ -37,6 +37,8 @@ export interface SoundOutputInterface {
   hitHandDrum(stroke: HandStroke, velocity: number, when: number): void;
   /** Loads a hand drum's recordings ahead of its first stroke (the synth plays until they are in). */
   prepareHandStrokes(strokes: readonly HandStroke[]): void;
+  /** Loads the drum kit's recordings ahead of its first stroke (the synth plays until they are in). */
+  prepareKit(): void;
   /** Stops a ringing open hi-hat (the cymbals close). */
   chokeHiHat(when: number): void;
   click(when: number, isAccent: boolean): void;

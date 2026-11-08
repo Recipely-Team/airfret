@@ -77,6 +77,12 @@ export class FakeSoundOutput implements SoundOutputInterface {
     this.handStrokes.push({ stroke, velocity, when });
   }
 
+  kitPrepared = 0;
+
+  prepareKit(): void {
+    this.kitPrepared++;
+  }
+
   hitDrum(request: DrumHitRequest): void {
     this.drumHits.push(request);
   }
