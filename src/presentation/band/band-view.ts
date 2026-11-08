@@ -95,7 +95,8 @@ export class BandView {
     const audioNow = this.host.sound.now;
     const now = performance.now() / MS;
     let isAnyPlaying = false;
-    for (const { member } of this.cards) if (member.perform(audioNow, now)) isAnyPlaying = true;
+    // A card not yet in its place (just added) waits a frame; it never holds up the others.
+    for (const card of this.cards) if (card.isFitted && card.member.perform(audioNow, now)) isAnyPlaying = true;
     if (!isAnyPlaying) {
       this.isPlaying = false;
       this.renderButton();
@@ -153,6 +154,8 @@ export class BandView {
     add.disabled = ids.length >= MAX_MEMBERS;
     add.onclick = () => this.picker.open(this.candidates(), this.host.members(), MAX_MEMBERS);
     this.grid.replaceChildren(...this.cards.map((c) => c.element), add);
+    // In the page now: each is sized before it plays a note (an instrument with no size can't place one).
+    for (const card of this.cards) card.fit();
     this.picker.render(this.candidates(), this.host.members(), MAX_MEMBERS);
     if (wasPlaying) void this.play();
   }

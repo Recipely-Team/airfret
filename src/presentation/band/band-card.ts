@@ -44,19 +44,27 @@ export class BandCard {
     this.role.textContent = text;
   }
 
-  draw(audioNow: number, now: number): void {
-    if (!this.ctx || !this.renderer) return;
+  /** Whether it has been sized to its place: until then it can neither play nor draw. */
+  get isFitted(): boolean {
+    return this.size.w > 0;
+  }
+
+  /** Sizes the canvas and the instrument to the card's place, when that changed (or first). */
+  fit(): void {
+    if (!this.ctx) return;
     const w = this.canvas.clientWidth;
     const h = this.canvas.clientHeight;
-    if (!w || !h) return;
-    if (w !== this.size.w || h !== this.size.h) {
-      this.size = { w, h };
-      const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
-      this.canvas.width = Math.round(w * dpr);
-      this.canvas.height = Math.round(h * dpr);
-      this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      this.member.fit(w, h);
-    }
-    this.member.draw(this.renderer, audioNow, now);
+    if (!w || !h || (w === this.size.w && h === this.size.h)) return;
+    this.size = { w, h };
+    const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
+    this.canvas.width = Math.round(w * dpr);
+    this.canvas.height = Math.round(h * dpr);
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.member.fit(w, h);
+  }
+
+  draw(audioNow: number, now: number): void {
+    this.fit();
+    if (this.renderer && this.isFitted) this.member.draw(this.renderer, audioNow, now);
   }
 }

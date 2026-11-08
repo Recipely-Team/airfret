@@ -177,6 +177,14 @@ projects.) *Guard:* the *Down only* strum filter, covered by `player.test.ts`
 
 ## Flow
 
+**Adding instruments to the band while it played silenced all but the first and blanked every card until Stop
+(owner's report, with a screenshot).** A card learnt its size when first drawn, but each frame played the parts
+before drawing: a guitar added mid-song tried to place its notes on a neck it didn't have yet and threw — every
+frame — so the members after it never played and nothing was drawn (and so never sized). *Fix:* a card is sized as
+soon as it is in the page; one not yet sized waits a frame instead of playing; a fretted member with no neck yet
+returns quietly. *Guard:* `band-members.test.ts` ("waits for its place on the page instead of stopping the band"),
+failing without the fix.
+
 **Switching to another tab stopped the music (owner's report).** Leaving the tab was treated as leaving the page:
 it silenced the engine — and even without that, self-play is moved on by animation frames, which a hidden tab
 doesn't get, so it ran dry 0.2 s later. *Fix:* a hidden tab keeps playing; a timer moves self-play and the band on

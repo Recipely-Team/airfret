@@ -1,7 +1,7 @@
 {
   "name": "airfret",
   "private": true,
-  "version": "0.31.1",
+  "version": "0.31.2",
   "type": "module",
   "scripts": {
     "predev": "node scripts/copy-mediapipe.mjs",
