@@ -8,6 +8,8 @@ const MIN_GAIN = 0.05;
 /** Cutting or stopping a note fades it this fast — short enough to feel immediate, long enough not to click. */
 const RELEASE_SECONDS = 0.03;
 const CENTS_PER_SEMITONE = 100;
+/** A looping note left unreleased stops by itself after this long, seconds (a lost key-up must not drone on). */
+const MAX_HOLD = 30;
 
 /**
  * **SamplePlayer** — voices an instrument from real recordings instead of the string synth.
@@ -67,8 +69,13 @@ export class SamplePlayer {
     const panner = this.ctx.createStereoPanner();
     panner.pan.value = Math.max(-1, Math.min(1, pan));
     source.connect(gain).connect(panner).connect(bus);
+    if (choice.loop) {
+      source.loop = true;
+      source.loopStart = choice.loop.start;
+      source.loopEnd = choice.loop.end;
+    }
     source.start(when);
-    source.stop(when + choice.buffer.duration + RELEASE_SECONDS);
+    source.stop(when + (choice.loop ? MAX_HOLD : choice.buffer.duration + RELEASE_SECONDS));
     this.active.set(this.key(r.voice, r.string), { source, gain, midi: r.midi, detune: choice.detune });
     return true;
   }

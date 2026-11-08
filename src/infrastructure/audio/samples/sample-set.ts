@@ -48,6 +48,8 @@ export class SampleSet {
     }
     if (!best || midi < best.ref.lo - MAX_STRETCH || midi > best.ref.hi + MAX_STRETCH) return null;
     const correction = Math.max(-MAX_TUNING_CORRECTION, Math.min(MAX_TUNING_CORRECTION, best.ref.cents));
-    return { buffer: best.buffer, detune: (midi - best.ref.midi) * CENTS_PER_SEMITONE + correction };
+    const detune = (midi - best.ref.midi) * CENTS_PER_SEMITONE + correction;
+    const { loopStart, loopEnd } = best.ref;
+    return loopStart !== undefined && loopEnd !== undefined && loopEnd > loopStart ? { buffer: best.buffer, detune, loop: { start: loopStart, end: loopEnd } } : { buffer: best.buffer, detune };
   }
 }

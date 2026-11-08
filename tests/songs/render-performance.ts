@@ -59,10 +59,10 @@ export function render(plucks: readonly PluckRequest[], inst: Instrument, { useS
   const setId = SAMPLE_SET_BY_INSTRUMENT[inst.id];
   const set = setId && useSamples && inst.isRecorded ? loadSet(setId) : null;
   const synth = new WorkletSandbox();
-  const active = new Map<string, { start: number; buffer: Float32Array; rate: number; gain: number; stopAt: number }>();
+  const active = new Map<string, Note>();
   let recorded = 0;
   let synthesised = 0;
-  const notes: { start: number; buffer: Float32Array; rate: number; gain: number; stopAt: number }[] = [];
+  const notes: Note[] = [];
   for (const r of [...plucks].sort((a, b) => a.when - b.when)) {
     const key = `${r.voice}:${r.string}`;
     const prev = active.get(key);
@@ -70,7 +70,7 @@ export function render(plucks: readonly PluckRequest[], inst: Instrument, { useS
     const choice = !r.isMuted && !r.isPalmMuted ? set?.choose(r.string, r.midi) : null;
     if (choice) {
       const buffer = choice.buffer.getChannelData(0);
-      const note = { start: r.when, buffer, rate: Math.pow(2, choice.detune / 1200), gain: Math.max(MIN_GAIN, Math.min(1, r.amp)) * SAMPLE_BUS, stopAt: Infinity };
+      const note = { start: r.when, buffer, rate: Math.pow(2, choice.detune / 1200), gain: Math.max(MIN_GAIN, Math.min(1, r.amp)) * SAMPLE_BUS, stopAt: Infinity, ...(choice.loop ? { loop: { start: Math.round(choice.loop.start * SR), end: Math.round(choice.loop.end * SR) } } : {}) };
       notes.push(note);
       active.set(key, note);
       synth.post({ type: 'damp', when: r.when, string: r.string });
@@ -86,15 +86,27 @@ export function render(plucks: readonly PluckRequest[], inst: Instrument, { useS
   return { audio: out, recorded, synthesised };
 }
 
+/** A recording sounding: re-pitched by `rate`, looping (as the player loops a held note) when it has a loop. */
+interface Note {
+  readonly start: number;
+  readonly buffer: Float32Array;
+  readonly rate: number;
+  readonly gain: number;
+  stopAt: number;
+  /** Loop points, in samples. */
+  readonly loop?: { readonly start: number; readonly end: number };
+}
+
 /** Adds one recording, re-pitched by resampling, cut with the player's exponential release. */
-function mixNote(out: Float32Array, n: { start: number; buffer: Float32Array; rate: number; gain: number; stopAt: number }): void {
+function mixNote(out: Float32Array, n: Note): void {
   const first = Math.round(n.start * SR);
-  const length = n.buffer.length / n.rate;
+  const length = n.loop ? out.length : n.buffer.length / n.rate;
   for (let i = 0; i < length && first + i < out.length; i++) {
     const t = n.start + i / SR;
     const release = t > n.stopAt ? Math.exp(-(t - n.stopAt) / RELEASE_SECONDS) : 1;
     if (release < 1e-4) break;
-    const pos = i * n.rate;
+    const raw = i * n.rate;
+    const pos = n.loop && raw >= n.loop.end ? n.loop.start + ((raw - n.loop.end) % (n.loop.end - n.loop.start)) : raw;
     const k = Math.floor(pos);
     const f = pos - k;
     const v = (n.buffer[k] ?? 0) * (1 - f) + (n.buffer[k + 1] ?? 0) * f;
