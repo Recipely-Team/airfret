@@ -74,6 +74,8 @@ function frettedMember(id: string, sound: SoundOutputInterface): BandMember {
     play: (song, audioNow) => performer.start(song, instrument, audioNow).isOk,
     stop: () => performer.stop(),
     perform: (audioNow, now) => {
+      // Not sized yet: no neck to place the notes on (`player.layout` is set by `fit`).
+      if (!(player.layout as typeof player.layout | undefined)) return performer.isPlaying;
       const frame = performer.isPlaying ? performer.update(player.layout, instrument, 0, audioNow) : null;
       showPerformance(player, frame, now);
       return frame !== null;
