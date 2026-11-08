@@ -6,8 +6,8 @@ export interface BandMember {
   readonly id: string;
   /** Sizes the instrument to its tile. */
   fit(w: number, h: number): void;
-  /** Starts its part; false when it has none (the song doesn't suit it). */
-  play(song: Song, audioNow: number): boolean;
+  /** Starts its part; false when it has none (the song doesn't suit it). A drum follows `drumPlan` bar by bar. */
+  play(song: Song, audioNow: number, drumPlan?: readonly number[]): boolean;
   stop(audioNow: number): void;
   /** Advances one frame: what it plays now shows; false once its part has ended. */
   perform(audioNow: number, now: number): boolean;

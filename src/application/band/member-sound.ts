@@ -11,7 +11,9 @@ const RING = 8;
  * instrument, volumes, the metronome) is left alone, so several members play side by side. `gain` sets its place
  * in the mix (the tune in front, the chords behind).
  */
-export function memberSound(instrumentId: string, band: EnsembleOutputInterface, sound: SoundOutputInterface, gain = 1): SoundOutputInterface {
+export function memberSound(instrumentId: string, band: EnsembleOutputInterface, sound: SoundOutputInterface, gain: number | (() => number) = 1): SoundOutputInterface {
+  // A function: the level is read at each note, so moving its slider is heard at once.
+  const level = typeof gain === 'function' ? gain : () => gain;
   // What each string (or key) is sounding: a new note on it, a damp or a fingertip ends the last.
   const ringing = new Map<number, number>();
   const end = (string: number, when: number) => {
@@ -36,7 +38,7 @@ export function memberSound(instrumentId: string, band: EnsembleOutputInterface,
       if (r.isMuted) return;
       end(r.string, r.when);
       ringing.set(r.string, r.midi);
-      band.play(instrumentId, r.midi, r.amp * gain, r.when, RING);
+      band.play(instrumentId, r.midi, r.amp * level(), r.when, RING);
     },
     retune: () => undefined,
     setVoiceVolume: () => undefined,
@@ -47,8 +49,8 @@ export function memberSound(instrumentId: string, band: EnsembleOutputInterface,
     },
     chuck: () => undefined,
     touch: (string, when) => end(string, when),
-    hitDrum: (request) => sound.hitDrum(request),
-    hitHandDrum: (stroke, velocity, when) => sound.hitHandDrum(stroke, velocity, when),
+    hitDrum: (request) => sound.hitDrum({ ...request, velocity: request.velocity * level() }),
+    hitHandDrum: (stroke, velocity, when) => sound.hitHandDrum(stroke, velocity * level(), when),
     prepareHandStrokes: (strokes) => sound.prepareHandStrokes(strokes),
     chokeHiHat: (when) => sound.chokeHiHat(when),
     click: () => undefined,

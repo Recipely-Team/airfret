@@ -4,6 +4,7 @@ import { HiHatPedalMode } from '@domain/input/hihat-pedal-mode';
 import { LessonMode } from '@domain/lessons/session/lesson-mode';
 import type { Settings } from '@domain/settings/settings';
 import { StrumFilter } from '@domain/settings/strum-filter';
+import { BandStyle } from '@domain/band/band-style';
 
 /** First-run settings. */
 export const DEFAULT_SETTINGS: Settings = {
@@ -34,5 +35,8 @@ export const DEFAULT_SETTINGS: Settings = {
   hasSeenExplore: false,
   ensemble: [],
   band: ['acoustic', 'piano', 'clarinet', 'bass', 'davul'],
+  bandStyle: BandStyle.auto,
+  bandEnergy: null,
+  bandChoices: {},
   best: {},
 };

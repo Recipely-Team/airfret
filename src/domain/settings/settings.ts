@@ -4,6 +4,8 @@ import type { PedalBindings } from '@domain/input/pedal-bindings';
 import type { Song } from '@domain/lessons/catalog/song';
 import type { LessonMode } from '@domain/lessons/session/lesson-mode';
 import type { StrumFilter } from '@domain/settings/strum-filter';
+import type { BandStyle } from '@domain/band/band-style';
+import type { MemberChoice } from '@domain/band/member-choice';
 
 /** Everything the player can configure; persisted between sessions. */
 export interface Settings {
@@ -46,6 +48,11 @@ export interface Settings {
   readonly ensemble: readonly string[];
   /** The band page's members (instrument ids), in the order they are shown. */
   readonly band: readonly string[];
+  /** The band's texture (auto, full, quiet, folk, march) and level (1–5; null: building up over the song). */
+  readonly bandStyle: BandStyle;
+  readonly bandEnergy: number | null;
+  /** What the player chose for each member (role, pattern, level, entry), by instrument id. */
+  readonly bandChoices: Readonly<Record<string, MemberChoice>>;
   /** Best accuracy (0–1) per song id. */
   readonly best: Readonly<Record<string, number>>;
 }
