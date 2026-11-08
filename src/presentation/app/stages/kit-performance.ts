@@ -36,7 +36,7 @@ export class KitPerformance implements StagePerformance {
     })), ...all.filter((s) => s.instrument !== DRUMS_ID && (s.mode === PlayMode.note || s.mode === PlayMode.chord))];
   }
 
-  play(song: Song, audioNow: number): boolean {
+  play(song: Song, audioNow: number, drumPlan?: readonly number[]): boolean {
     const groove = GROOVES.find((g) => `${PREFIX}${g.id}` === song.id);
     if (groove) return this.performer.start(groove, audioNow);
     const chart = parseSong(song, false);
@@ -44,7 +44,7 @@ export class KitPerformance implements StagePerformance {
     // A song's beat starts on its first full bar, in time with the tune's first note.
     const span = songDrumSpan(song, chart.value);
     const firstAt = audioNow + TUNE_STARTS_AFTER + ((span.start - span.first) * 60) / song.bpm;
-    return this.performer.start(grooveForSong(song, span.bars), audioNow, firstAt);
+    return this.performer.start(grooveForSong(song, span.bars, drumPlan), audioNow, firstAt);
   }
 
   stop(): void {

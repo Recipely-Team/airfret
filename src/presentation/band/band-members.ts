@@ -40,7 +40,7 @@ function stageMember(id: string, stage: InstrumentStage): BandMember {
   return {
     id,
     fit: (w, h) => stage.fit(w, h, { ...DEFAULT_SETTINGS, instrument: id, pianoShift: 0 }),
-    play: (song, audioNow) => performance?.play(song, audioNow) ?? false,
+    play: (song, audioNow, drumPlan) => performance?.play(song, audioNow, drumPlan) ?? false,
     stop: (audioNow) => performance?.stop(audioNow),
     perform: (audioNow) => (performance?.isPlaying ?? false) && (performance?.perform(audioNow) ?? false),
     draw: (renderer, _audioNow, now) => stage.draw(renderer, now, null, NO_CAMERA),
@@ -53,7 +53,7 @@ function kitMember(sound: SoundOutputInterface): BandMember {
   return {
     id: DRUMS_ID,
     fit: (w, h) => drums.configure(computeKitLayout(w, h, false), w, h, DEFAULT_SETTINGS.hihatMode),
-    play: (song, audioNow) => kit.play(song, audioNow),
+    play: (song, audioNow, drumPlan) => kit.play(song, audioNow, drumPlan),
     stop: () => kit.stop(),
     perform: (audioNow) => kit.isPlaying && kit.perform(audioNow),
     draw: (renderer, _audioNow, now) => renderer.drums(drums, null, now, null, NO_CAMERA),

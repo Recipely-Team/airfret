@@ -6,7 +6,7 @@ import type { GrooveHit } from '@domain/drums/grooves/groove-hit';
 const LEVEL = { accent: 1, hit: 0.75, ghost: 0.3 } as const;
 const REST = '.';
 
-/** A groove's hits, every lane looped to `bars` bars, a crash opening it and closing it on the next downbeat. */
+/** A groove's hits, every lane looped to `bars` bars, a crash with its first hit and one closing it on the next downbeat. */
 export function parseGroove(g: Groove): GrooveHit[] {
   const hits: GrooveHit[] = [];
   const stepsPerBar = g.beatsPerBar * g.subdiv;
@@ -22,7 +22,9 @@ export function parseGroove(g: Groove): GrooveHit[] {
     }
   }
   const end = g.bars * g.beatsPerBar;
-  hits.push({ beat: 0, piece: DrumPiece.crash, velocity: LEVEL.accent, articulation: DrumArticulation.normal });
+  // The opening crash comes with the first hit (a groove written out bar by bar may begin with silent bars).
+  const first = Math.min(end, ...hits.map((h) => h.beat));
+  if (!hits.some((h) => h.piece === DrumPiece.crash && Math.abs(h.beat - first) < 1e-6)) hits.push({ beat: first, piece: DrumPiece.crash, velocity: LEVEL.accent, articulation: DrumArticulation.normal });
   hits.push({ beat: end, piece: DrumPiece.crash, velocity: LEVEL.accent, articulation: DrumArticulation.normal });
   hits.push({ beat: end, piece: DrumPiece.kick, velocity: LEVEL.accent, articulation: DrumArticulation.normal });
   return hits.sort((a, b) => a.beat - b.beat);

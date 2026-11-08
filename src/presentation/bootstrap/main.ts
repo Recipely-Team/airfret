@@ -89,8 +89,8 @@ function bootstrap(): void {
     sound,
     ensemble,
     songs: () => songLibrary(store.value),
-    members: () => store.value.band,
-    setMembers: (ids) => store.update({ band: ids }),
+    settings: () => store.value,
+    update: (patch) => store.update(patch),
     startAudio: () => app?.startAudio() ?? Promise.resolve(false),
     onClose: () => router.navigate({ kind: 'home' }),
   });
