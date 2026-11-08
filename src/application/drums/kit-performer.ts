@@ -29,6 +29,8 @@ export class KitPerformer {
 
   /** Starts `groove`; its first beat lands at `firstAt` (audio clock), by default just after now. */
   start(groove: Groove, audioNow: number, firstAt = audioNow + FIRST_AFTER): boolean {
+    // The kit's recordings load now, while the first beat is still ahead.
+    this.sound.prepareKit();
     const spb = 60 / groove.bpm;
     const t0 = firstAt;
     this.hits = parseGroove(groove).map((h) => ({ ...h, at: t0 + h.beat * spb }));

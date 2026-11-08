@@ -25,7 +25,8 @@ export class MotionSampler {
     const w = GRID_WIDTH;
     const h = Math.max(1, Math.round((GRID_WIDTH * video.videoHeight) / video.videoWidth));
     const canvas = this.canvasOf(w, h);
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    // Each canvas kind's own context (a call on the union of the two leaves the context's type unresolved for lint).
+    const ctx = canvas instanceof HTMLCanvasElement ? canvas.getContext('2d', { willReadFrequently: true }) : canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
     ctx.setTransform(-1, 0, 0, 1, w, 0);
     ctx.drawImage(video, 0, 0, w, h);

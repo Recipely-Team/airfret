@@ -48,6 +48,7 @@ function stageMember(id: string, stage: InstrumentStage): BandMember {
 }
 
 function kitMember(sound: SoundOutputInterface): BandMember {
+  sound.prepareKit();
   const drums = new DrumPlayer(sound);
   const kit = new KitPerformance(drums, sound);
   return {

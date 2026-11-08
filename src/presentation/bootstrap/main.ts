@@ -1,5 +1,6 @@
 import { WebAudioEnsemble } from '@infrastructure/audio/ensemble/web-audio-ensemble';
 import { BandView } from '@presentation/band/band-view';
+import { DRUMS_ID } from '@domain/drums/drums-id';
 import { keepPlayingWhileHidden } from '@presentation/app/keep-playing-hidden';
 import { songLibrary } from '@application/lessons/song-library';
 import { installPolyfills } from '@presentation/bootstrap/polyfills';
@@ -104,6 +105,8 @@ function bootstrap(): void {
       return;
     }
     band.close();
+    // The drum kit's recordings load as its page opens, before the first stroke.
+    if (route.kind === 'instrument' && route.instrument === DRUMS_ID) sound.prepareKit();
     // Leaving an instrument's page (back, home, another instrument) silences it: nothing plays on behind the player.
     const base = app?.baseRoute;
     if (app && base?.kind === 'instrument' && (route.kind === 'home' || (route.kind === 'instrument' && route.instrument !== base.instrument))) {

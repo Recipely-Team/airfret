@@ -3,6 +3,7 @@ export const AssetPath = {
   stringWorklet: 'worklets/strings.js',
   /** Hand-drum recordings, one file per take (`<name>.m4a`). */
   handDrumSamples: 'samples/hand-drums/',
+  kitSamples: 'samples/kit/',
   mediapipeWasm: 'mediapipe',
   handModel: 'models/hand_landmarker.task',
 } as const;
