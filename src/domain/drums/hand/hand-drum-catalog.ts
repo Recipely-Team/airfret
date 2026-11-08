@@ -5,7 +5,7 @@ import { midiToFreq } from '@domain/music/pitch';
 
 /**
  * Every hand drum, as data the one voice (`HandDrumVoice`) and the one stage play. The darbuka, def, bendir, davul
- * and congas play real recordings (see CREDITS.md); the others are synthesised, pitches and decays set by ear from each drum's character: the membrane drums' bass strokes sag in pitch as
+ * congas, cajón, bongos and djembe play real recordings (see CREDITS.md), the tabla its na; the rest is synthesised, pitches and decays set by ear from each drum's character: the membrane drums' bass strokes sag in pitch as
  * the skin settles, their edge strokes ring in the body's partials over a click; frame drums add their jingles or
  * snare strings as noise; the handpan's fields are tuned notes with their octave and compound-fifth partials.
  */
@@ -35,6 +35,20 @@ const barrel = (cx: number, size: number, bassHz: number, toneHz: number, names:
 });
 
 const CONGA_STROKES = { center: 'stroke.bass', edge: 'stroke.open', left: 'stroke.slap' };
+
+/** A stroke voiced by a real take (`file` in samples/hand-drums), at `rate` and `gain`; its synth voice stands in while it loads. */
+const take = (stroke: HandStroke, file: string, rate = 1, gain = 1): HandStroke => ({ ...stroke, recording: { layers: [[file]], ...(rate !== 1 ? { rate } : {}), ...(gain !== 1 ? { gain } : {}) } });
+
+/**
+ * A bongo with a real open tone (Freesound, curesforbrokenhearts' LP Matador macho and hembra, CC0): the open stroke
+ * as recorded, the middle a touch deeper, the slap — not recorded — the take played higher and quieter.
+ */
+const recordedBongo = (head: HandDrumHead, file: string): HandDrumHead => ({
+  ...head,
+  center: take(head.center, file, 0.94),
+  edge: take(head.edge, file),
+  edgeLeft: take(head.edgeLeft ?? head.edge, file, 1.12, 0.75),
+});
 
 /**
  * A conga or tumba with VSCO 2 CE's recordings (CC0): open hits at three strengths (two takes of the middle one)
@@ -85,6 +99,15 @@ const DAVUL: HandDrumHead = {
   edgeLeft: { ...s('stroke.tek', [{ hz: 380, decay: 0.06, level: 0.3 }], { type: 'highpass', hz: 3000, length: 0.06, level: 0.5 }), recording: { layers: [['davul-tek']], rate: 1.06, gain: 0.8 } },
 };
 
+/**
+ * The djembe with real strokes (Freesound, PanPiper5's Djembe Bass and Djembe Slap, CC0): the bass and the slap as
+ * recorded, the open tone the slap played lower and longer (no clean tone take was found).
+ */
+function djembe(): HandDrumHead {
+  const head = barrel(0.5, 0.25, 75, 330, { center: 'stroke.bass', edge: 'stroke.tone', left: 'stroke.slap' });
+  return { ...head, look: 'goblet', flatten: 0.55, center: take(head.center, 'djembe-bass'), edge: take(head.edge, 'djembe-slap', 0.85, 0.9), edgeLeft: take(head.edgeLeft ?? head.edge, 'djembe-slap') };
+}
+
 export const HAND_DRUMS: readonly HandDrum[] = [
   { id: 'darbuka', name: 'inst.darbuka', heads: [DARBUKA] },
   { id: 'def', name: 'inst.def', heads: [recordedFrame(frame(95, { type: 'highpass', hz: 6200, length: 0.35, level: 0.22 }, { center: 'stroke.doum', edge: 'stroke.tek', left: 'stroke.ka' }), ['def-doum'], ['def-tek', 'def-tek-b', 'def-tek-c'])] },
@@ -93,13 +116,14 @@ export const HAND_DRUMS: readonly HandDrum[] = [
   {
     id: 'cajon', name: 'inst.cajon', heads: [{
       cxOfWidth: 0.5, cyOfHeight: 0.58, size: 0.22, flatten: 1.25, look: 'box', edgeAt: 0.62,
-      center: s('stroke.bass', [{ hz: 85, toHz: 70, decay: 0.25, level: 0.95 }], { type: 'lowpass', hz: 420, length: 0.04, level: 0.4 }),
-      edge: s('stroke.slap', [{ hz: 350, decay: 0.05, level: 0.25 }], { type: 'bandpass', hz: 4000, length: 0.18, level: 0.55 }),
+      // Real bass and slap (Freesound, bikesnbassboi's cajonbass and cajonsnare, CC0).
+      center: take(s('stroke.bass', [{ hz: 85, toHz: 70, decay: 0.25, level: 0.95 }], { type: 'lowpass', hz: 420, length: 0.04, level: 0.4 }), 'cajon-bass'),
+      edge: take(s('stroke.slap', [{ hz: 350, decay: 0.05, level: 0.25 }], { type: 'bandpass', hz: 4000, length: 0.18, level: 0.55 }), 'cajon-slap'),
     }],
   },
   { id: 'congas', name: 'inst.congas', heads: [recordedConga(barrel(0.3, 0.17, 110, 330, CONGA_STROKES), 'conga'), recordedConga(barrel(0.7, 0.19, 90, 245, CONGA_STROKES), 'tumba')] },
-  { id: 'bongos', name: 'inst.bongos', heads: [barrel(0.38, 0.11, 300, 520, { center: 'stroke.open', edge: 'stroke.open', left: 'stroke.slap' }), barrel(0.63, 0.14, 230, 400, { center: 'stroke.open', edge: 'stroke.open', left: 'stroke.slap' })] },
-  { id: 'djembe', name: 'inst.djembe', heads: [{ ...barrel(0.5, 0.25, 75, 330, { center: 'stroke.bass', edge: 'stroke.tone', left: 'stroke.slap' }), look: 'goblet', flatten: 0.55 }] },
+  { id: 'bongos', name: 'inst.bongos', heads: [recordedBongo(barrel(0.38, 0.11, 300, 520, { center: 'stroke.open', edge: 'stroke.open', left: 'stroke.slap' }), 'bongo-macho'), recordedBongo(barrel(0.63, 0.14, 230, 400, { center: 'stroke.open', edge: 'stroke.open', left: 'stroke.slap' }), 'bongo-hembra')] },
+  { id: 'djembe', name: 'inst.djembe', heads: [djembe()] },
   {
     id: 'tabla', name: 'inst.tabla', heads: [
       {
@@ -111,7 +135,8 @@ export const HAND_DRUMS: readonly HandDrum[] = [
         // The dayan's black syahi tunes its modes into harmonics: a pitched, ringing drum.
         cxOfWidth: 0.66, cyOfHeight: 0.62, size: 0.13, flatten: 0.6, look: 'barrel', edgeAt: 0.55,
         center: s('stroke.tin', [{ hz: 290, decay: 0.6, level: 0.5 }, { hz: 580, decay: 0.4, level: 0.3 }, { hz: 870, decay: 0.3, level: 0.2 }, { hz: 1160, decay: 0.2, level: 0.12 }]),
-        edge: s('stroke.na', [{ hz: 290, decay: 0.9, level: 0.45 }, { hz: 870, decay: 0.5, level: 0.25 }, { hz: 1450, decay: 0.3, level: 0.15 }], { type: 'bandpass', hz: 3000, length: 0.01, level: 0.3 }),
+        // A real "na" (Freesound, Ninad_P's tabla_na, CC0); tin, ge and ka are still synthesised.
+        edge: take(s('stroke.na', [{ hz: 290, decay: 0.9, level: 0.45 }, { hz: 870, decay: 0.5, level: 0.25 }, { hz: 1450, decay: 0.3, level: 0.15 }], { type: 'bandpass', hz: 3000, length: 0.01, level: 0.3 }), 'tabla-na'),
       },
     ],
   },
