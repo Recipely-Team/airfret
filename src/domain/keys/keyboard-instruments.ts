@@ -6,13 +6,13 @@ import { PIANO, PIANO_LOWEST_MIDI } from '@domain/keys/piano';
 import { PIANO_ID } from '@domain/keys/piano-id';
 
 /**
- * A harpsichord: strings plucked by quills, so the string synth voices it truly — bright, nasal (plucked near
- * the end), no dynamics, damped when the key rises. It shares the piano's 88 engine strings (key k = string k)
+ * A harpsichord: strings plucked by quills — bright, nasal (plucked near the end), no dynamics, damped when the key
+ * rises. It plays a real French harpsichord (VCSL, CC0); the string synth stands in while it loads. It shares the piano's 88 engine strings (key k = string k)
  * but its keyboard runs F1–F6, five octaves like the classic French double manual.
  */
 const HARPSICHORD: Instrument = {
   ...PIANO, id: 'harpsichord', name: 'inst.harpsichord', t60: 7, t60Exponent: 0.55, bright: 0.96, pick: 0.05, level: 0.6,
-  chain: ChainKind.harpsichord, defaultMode: PlayMode.note, voice: 'fitted', isRecorded: false,
+  chain: ChainKind.harpsichord, defaultMode: PlayMode.note, voice: 'recorded', isRecorded: true,
 };
 
 /**

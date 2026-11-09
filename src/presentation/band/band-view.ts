@@ -1,7 +1,9 @@
 import { memberSound } from '@application/band/member-sound';
 import { arrangeBand } from '@domain/band/arrange-band';
 import type { BandArrangement } from '@domain/band/band-arrangement';
+import { BandHarmony } from '@domain/band/band-harmony';
 import { BandStyle } from '@domain/band/band-style';
+import type { BandSection } from '@domain/band/form/band-section';
 import type { MemberChoice } from '@domain/band/member-choice';
 import { sectionAt } from '@domain/band/parts/entries';
 import { BandRole } from '@domain/band/seating/band-role';
@@ -37,6 +39,7 @@ interface BandSettings {
   readonly band: readonly string[];
   readonly bandStyle: BandStyle;
   readonly bandEnergy: number | null;
+  readonly bandHarmony: BandHarmony;
   readonly bandChoices: Readonly<Record<string, MemberChoice>>;
 }
 
@@ -66,6 +69,7 @@ export class BandView {
   private readonly songSelect = byId<HTMLSelectElement>('bandSong');
   private readonly styleSelect = byId<HTMLSelectElement>('bandStyle');
   private readonly energySelect = byId<HTMLSelectElement>('bandEnergy');
+  private readonly harmonySelect = byId<HTMLSelectElement>('bandHarmony');
   private readonly sectionLabel = byId('bandSection');
   private readonly playButton = byId<HTMLButtonElement>('bandPlay');
   private readonly picker = new BandPicker((id) => this.toggle(id));
@@ -83,6 +87,7 @@ export class BandView {
     this.songSelect.onchange = () => this.rearrange(() => (this.songId = this.songSelect.value));
     this.styleSelect.onchange = () => this.rearrange(() => host.update({ bandStyle: this.styleSelect.value as BandStyle }));
     this.energySelect.onchange = () => this.rearrange(() => host.update({ bandEnergy: this.energySelect.value === AUTO ? null : Number(this.energySelect.value) }));
+    this.harmonySelect.onchange = () => this.rearrange(() => host.update({ bandHarmony: this.harmonySelect.value as BandHarmony }));
     byId('bandClose').onclick = () => host.onClose();
   }
 
@@ -161,7 +166,7 @@ export class BandView {
     const song = this.song();
     const chart = song ? parseSong(song, false) : null;
     const st = this.host.settings();
-    this.arrangement = song && chart?.isOk ? arrangeBand(song, chart.value, this.cards.map((c) => c.member.id), st.bandStyle, st.bandEnergy, st.bandChoices) : null;
+    this.arrangement = song && chart?.isOk ? arrangeBand(song, chart.value, this.cards.map((c) => c.member.id), st.bandStyle, st.bandEnergy, st.bandChoices, st.bandHarmony) : null;
     const sections = this.arrangement?.sections.length ?? 0;
     this.arrangement?.seats.forEach((seat, i) => {
       this.gains.set(seat.id, seat.gain);
@@ -176,7 +181,7 @@ export class BandView {
     if (wasPlaying) this.stop();
     const ids = this.host.settings().band.slice(0, MAX_MEMBERS);
     this.host.ensemble.prepare(ids);
-    this.cards = ids.map((id) => new BandCard(createBandMember(id, memberSound(id, this.host.ensemble, this.host.sound, () => this.gains.get(id) ?? 1)), profileOf(id), {
+    this.cards = ids.map((id) => new BandCard(createBandMember(id, memberSound(id, this.host.ensemble, this.host.sound, () => (this.gains.get(id) ?? 1) * this.levelNow(id))), profileOf(id), {
       remove: () => this.toggle(id),
       choose: (choice) => this.rearrange(() => this.choose(id, choice)),
       level: (level, isFinal) => this.setLevel(id, level, isFinal),
@@ -242,20 +247,33 @@ export class BandView {
     const st = this.host.settings();
     this.styleSelect.replaceChildren(...Object.values(BandStyle).map((s) => new Option(t(`band.style.${s}`), s, false, s === st.bandStyle)));
     this.energySelect.replaceChildren(new Option(t('band.energy.auto'), AUTO), ...ENERGY_LEVELS.map((n) => new Option(t(`band.energy.${n}`), String(n), false, n === st.bandEnergy)));
+    this.harmonySelect.replaceChildren(...Object.values(BandHarmony).map((h) => new Option(t(`band.harmony.${h}`), h, false, h === st.bandHarmony)));
     this.renderButton();
+  }
+
+  /** The section the band is playing (none when stopped). */
+  private section(): BandSection | undefined {
+    const a = this.arrangement;
+    const song = this.song();
+    if (!a || !song || !this.isPlaying) return undefined;
+    const beat = (a.sections[0]?.start ?? 0) + ((this.host.sound.now - this.startedAt - FIRST_NOTE_AFTER) * song.bpm) / SECONDS_PER_MINUTE;
+    return sectionAt(a.sections, Math.max(0, beat));
+  }
+
+  /** A member's level in the section playing, against its seat's: up where it took the tune over, down where it gave it. */
+  private levelNow(id: string): number {
+    const levels = this.arrangement?.parts.find((p) => p.seat.id === id)?.levels;
+    return levels?.[this.section()?.index ?? 0] ?? 1;
   }
 
   /** Where the band is in the song — section and how full it plays — or, stopped, how the song is laid out. */
   private renderSection(): void {
     const a = this.arrangement;
-    const song = this.song();
-    if (!a || !song || !a.sections.length) {
+    if (!a || !this.song() || !a.sections.length) {
       this.sectionLabel.textContent = '';
       return;
     }
-    const first = a.sections[0]?.start ?? 0;
-    const beat = first + ((this.host.sound.now - this.startedAt - FIRST_NOTE_AFTER) * song.bpm) / SECONDS_PER_MINUTE;
-    const section = this.isPlaying ? sectionAt(a.sections, Math.max(0, beat)) : undefined;
+    const section = this.section();
     this.sectionLabel.textContent = section
       ? `${t('band.section', { k: section.index + 1, n: a.sections.length })} · ${'●'.repeat(section.energy)}${'○'.repeat(5 - section.energy)}`
       : t('band.sections', { n: a.sections.length });

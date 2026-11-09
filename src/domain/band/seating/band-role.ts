@@ -5,6 +5,8 @@
  *   own idiom (a plucked instrument re-striking long notes, a wind joining them into one breath), as a folk ensemble does;
  * - **counter** an inner line under the tune, moving where the tune holds; **harmony** the chords in a pattern;
  *   **pad** the chords held;
+ * - **drone** the song's home note (its karar) held, with its fifth on a chord instrument — a kemençe's or a zurna's
+ *   dem; **fills** short runs or stabs only where the tune holds or rests, at the fuller levels (punctuation);
  * - **bass** the lowest voice; **rhythm** the beat; **off** silent.
  */
 export const BandRole = {
@@ -14,6 +16,8 @@ export const BandRole = {
   counter: 'counter',
   harmony: 'harmony',
   pad: 'pad',
+  drone: 'drone',
+  fills: 'fills',
   bass: 'bass',
   rhythm: 'rhythm',
   off: 'off',

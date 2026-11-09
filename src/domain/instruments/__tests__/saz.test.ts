@@ -57,8 +57,8 @@ describe('The saz (baglama)', () => {
     expect(sound.plucks.map((p) => +(p.midi - (saz.tuning[p.string] ?? 0)).toFixed(2))).toEqual([1.51, 1.51, 1.51]);
   });
 
-  it('offers notes and free play, not guitar chords, and plays only through its synth', () => {
+  it('offers notes and free play, not guitar chords, and plays real baglama recordings', () => {
     expect(saz.modes).toEqual([PlayMode.note, PlayMode.free]);
-    expect(saz.isRecorded).toBe(false);
+    expect(saz.isRecorded).toBe(true);
   });
 });

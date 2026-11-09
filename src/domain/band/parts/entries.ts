@@ -6,9 +6,10 @@ import { DRUMS_ID } from '@domain/drums/drums-id';
 
 /**
  * The energy at which each role comes in (the research report's texture plan): the tune from the first note; at 2 a
- * bass, chords and the beat; at 3 an inner line; at 4 the held pads and the doublings — the full band.
+ * bass, chords and the beat; at 3 an inner line; at 4 the held pads, the doublings and the fills — the full band. A
+ * drone holds from the first note, under everything.
  */
-const ENTRY: Readonly<Record<BandRole, number>> = { melody: 1, heterophony: 2, harmony: 2, bass: 2, rhythm: 2, counter: 3, double: 4, pad: 4, off: Infinity };
+const ENTRY: Readonly<Record<BandRole, number>> = { melody: 1, heterophony: 2, harmony: 2, bass: 2, rhythm: 2, counter: 3, double: 4, pad: 4, fills: 4, drone: 1, off: Infinity };
 /** Held chords come in with the chords when no one plays chords in a pattern. */
 const PAD_ALONE = 2;
 /** In a Turkish ensemble the leading drum keeps the usul from the first bar; the others join at 3. */

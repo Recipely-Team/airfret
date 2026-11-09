@@ -54,6 +54,10 @@ const SYNTH_LIMITS: Record<string, { decayLog: number; profileDb: number }> = {
   banjo: { decayLog: 0.55, profileDb: 32 },
   // Measured 2026-11-07 against the short-neck baglama notes: the plain string synth stands in for a skin-topped lute.
   kopuz: { decayLog: 1.1, profileDb: 30 },
+  // Measured 2026-11-10 against their new recordings (FreePats' ukulele; the bağlama set for the saz): the synths now
+  // only fill in while the recordings load (and the saz above G4). The saz's tone is far from the bağlama's.
+  ukulele: { decayLog: 1.25, profileDb: 11.5 },
+  saz: { decayLog: 0.7, profileDb: 40 },
   // Measured 2026-11-06 against the KW upright: decay ×2.9 too short, tone colour 14.3 dB off.
   piano: { decayLog: 1.1, profileDb: 14.5 },
 };

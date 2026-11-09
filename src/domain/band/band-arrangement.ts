@@ -8,6 +8,9 @@ export interface BandArrangement {
   readonly seats: readonly BandSeat[];
   readonly sections: readonly BandSection[];
   readonly plan: BandPlan;
-  /** Per seat, in order: its part as a song (a drum: the song itself) and, for a drum, its plan bar by bar. */
-  readonly parts: readonly { readonly seat: BandSeat; readonly song: Song; readonly drumPlan?: readonly number[] }[];
+  /**
+   * Per seat, in order: its part as a song (a drum: the song itself), for a drum its plan bar by bar, and — when the
+   * tune passes around — its level per section against its seat's (taking the tune: up; handing it over: down).
+   */
+  readonly parts: readonly { readonly seat: BandSeat; readonly song: Song; readonly drumPlan?: readonly number[]; readonly levels?: readonly number[] }[];
 }
