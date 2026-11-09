@@ -37,7 +37,7 @@ const IZMIR_STANZA =
  * file whose rights are stated (docs/song-sources.md), never from memory.
  */
 export const TURKISH_MELODIES: readonly Song[] = [
-  { id: 'istiklal-marsi', title: '\u0130stiklal Mar\u015f\u0131', credit: 'credit.ungor', level: 2, bpm: 80, beatsPerBar: 4, mode: PlayMode.note, instrument: 'nylon',
+  { id: 'istiklal-marsi', isMarch: true, title: '\u0130stiklal Mar\u015f\u0131', credit: 'credit.ungor', level: 2, bpm: 80, beatsPerBar: 4, mode: PlayMode.note, instrument: 'nylon',
     notes: `r:3 D4:1 ${ANTHEM_VERSE}G4+G2:3 D4:1 ${ANTHEM_VERSE}G4+G2:3`, about: 'about.istiklalMarsi' },
   { id: 'katibim', title: '\u00dcsk\u00fcdar\u2019a Gider \u0130ken (K\u00e2tibim)', credit: 'credit.traditional', level: 2, bpm: 72, beatsPerBar: 2, mode: PlayMode.note, instrument: 'nylon',
     notes: `${KATIBIM_VERSE}C5+C3:0.5 C5:0.5 Bb4:0.5 C5:0.5 D5+G2:0.25 Eb5:0.25 D5:0.25 C5:0.25 Bb4:0.25 A4:0.25 G4:0.5 ` +
@@ -45,7 +45,7 @@ export const TURKISH_MELODIES: readonly Song[] = [
       'G4+G2:0.75 A4:0.25 Bb4:0.5 C5:0.5 D5+G2:0.25 Eb5:0.25 D5:0.25 C5:0.25 Bb4:0.25 A4:0.25 G4:0.5 ' +
       'A4+D3:0.25 C5:0.25 Bb4:0.25 A4:0.25 A4:0.25 G4:0.25 F#4:0.25 G4:0.25 G4+G2:2',
     about: 'about.katibim' },
-  { id: 'izmir-marsi', title: '\u0130zmir Mar\u015f\u0131', credit: 'credit.traditional', level: 1, bpm: 112, beatsPerBar: 4, mode: PlayMode.note, instrument: 'acoustic',
+  { id: 'izmir-marsi', isMarch: true, title: '\u0130zmir Mar\u015f\u0131', credit: 'credit.traditional', level: 1, bpm: 112, beatsPerBar: 4, mode: PlayMode.note, instrument: 'acoustic',
     notes: `${IZMIR_STANZA}r:0.5 ${IZMIR_STANZA}r:0.5 ${IZMIR_STANZA}r:0.5 ${IZMIR_STANZA}`.trim().replace(/A4\+A2:1\.5$/, 'A4+A2:4'),
     about: 'about.izmirMarsi' },
   { id: 'genc-osman', title: 'Gen\u00e7 Osman T\u00fcrk\u00fcs\u00fc', credit: 'credit.traditional', level: 2, bpm: 100, beatsPerBar: 4, mode: PlayMode.note, instrument: 'nylon',

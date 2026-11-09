@@ -28,6 +28,8 @@ export interface Song {
   readonly notes?: string;
   /** i18n key of a one-line description. */
   readonly about: string;
+  /** A Western-tonal march (the national marches): a band keeps its own chords — never quartal harmony. */
+  readonly isMarch?: boolean;
   /** Position in the beginner course (1, 2, …); absent for library songs. */
   readonly course?: number;
   /** i18n keys of the practical tips shown before the lesson. */

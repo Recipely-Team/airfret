@@ -1,4 +1,4 @@
-import type { ChordSpan } from '@domain/band/parts/chord-span';
+import type { ChordSpan } from '@domain/band/harmony/chord-span';
 import { PlayMode } from '@domain/instruments/play-mode';
 import type { Song } from '@domain/lessons/catalog/song';
 import type { SongChart } from '@domain/lessons/chart/song-chart';

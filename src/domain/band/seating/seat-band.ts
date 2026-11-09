@@ -15,7 +15,7 @@ const HIGH_ONLY = 72;
 const MAX_BASSES = 2;
 /** Held inner voices take the chord's third, fifth and root in turn. */
 const INNER_VOICES = 3;
-const NOTE_ROLES: ReadonlySet<BandRole> = new Set([BandRole.melody, BandRole.double, BandRole.heterophony, BandRole.counter, BandRole.harmony, BandRole.pad, BandRole.bass]);
+const NOTE_ROLES: ReadonlySet<BandRole> = new Set([BandRole.melody, BandRole.double, BandRole.heterophony, BandRole.counter, BandRole.harmony, BandRole.pad, BandRole.drone, BandRole.fills, BandRole.bass]);
 
 /**
  * Seats a band for a tune (its lowest and highest notes) — the arranger's rules from the research report, with the

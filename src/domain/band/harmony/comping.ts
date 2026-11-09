@@ -1,4 +1,4 @@
-import type { ChordSpan } from '@domain/band/parts/chord-span';
+import type { ChordSpan } from '@domain/band/harmony/chord-span';
 import type { PartEvent } from '@domain/band/parts/part-event';
 import { BandPattern } from '@domain/band/seating/band-pattern';
 

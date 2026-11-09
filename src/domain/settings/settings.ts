@@ -4,6 +4,7 @@ import type { PedalBindings } from '@domain/input/pedal-bindings';
 import type { Song } from '@domain/lessons/catalog/song';
 import type { LessonMode } from '@domain/lessons/session/lesson-mode';
 import type { StrumFilter } from '@domain/settings/strum-filter';
+import type { BandHarmony } from '@domain/band/band-harmony';
 import type { BandStyle } from '@domain/band/band-style';
 import type { MemberChoice } from '@domain/band/member-choice';
 
@@ -51,6 +52,8 @@ export interface Settings {
   /** The band's texture (auto, full, quiet, folk, march) and level (1–5; null: building up over the song). */
   readonly bandStyle: BandStyle;
   readonly bandEnergy: number | null;
+  /** How the band's chords are built: the song's triads, or in fourths (Ilerici's quartal harmony). */
+  readonly bandHarmony: BandHarmony;
   /** What the player chose for each member (role, pattern, level, entry), by instrument id. */
   readonly bandChoices: Readonly<Record<string, MemberChoice>>;
   /** Best accuracy (0–1) per song id. */
