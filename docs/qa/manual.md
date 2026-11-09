@@ -332,3 +332,4 @@ F/B rows (id — note):
 | X16 | Ukulele, saz and harpsichord pages: play up and down the range | Real recordings (in tune); the saz's top notes (above G4) still the synth |
 | X17 | Band: flute, clarinet, trumpet, horn, tuba, kanun, davul on İzmir Marşı (auto) | Stanza 2 the clarinet leads, stanza 3 the trumpet, each heard in front; the flute steps back to their job; the last stanza everyone with the flute on top | |
 | X18 | Band: a member set to "drone", another to "fills"; then Harmony "fourths (quartal)" on Kâtibim, and on İzmir Marşı | Drone: the home note held under everything from bar 1; fills only where the tune holds or rests, from level 4; Kâtibim in open fourths, ending on a fourth; İzmir Marşı keeps its own chords | |
+| X19 | Gençlik Marşı: play it on its own, then in the band | Dağ başını duman almış, in D major: two halves each played twice, ending on a held D; the band keeps it in triads even with quartal harmony chosen | |
