@@ -25,6 +25,7 @@ export function rolesFor(profile: InstrumentProfile): readonly BandRole[] {
   if (profile.isDrum) return [BandRole.rhythm, BandRole.off];
   const roles: BandRole[] = [BandRole.melody, BandRole.double, BandRole.heterophony];
   roles.push(profile.isMonophonic ? BandRole.counter : BandRole.harmony, BandRole.pad);
+  roles.push(BandRole.fills, BandRole.drone);
   if (profile.low <= CAN_BASS_FROM) roles.push(BandRole.bass);
   roles.push(BandRole.off);
   return roles;

@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { arrangeBand } from '@domain/band/arrange-band';
 import type { BandArrangement } from '@domain/band/band-arrangement';
 import { BandStyle } from '@domain/band/band-style';
-import { chordTimeline } from '@domain/band/parts/chord-timeline';
+import { chordTimeline } from '@domain/band/harmony/chord-timeline';
+import { sectionAt } from '@domain/band/parts/entries';
 import { BandRole } from '@domain/band/seating/band-role';
 import type { Song } from '@domain/lessons/catalog/song';
 import { SONGS } from '@domain/lessons/catalog/song-catalog';
@@ -21,6 +22,13 @@ const song = (id: string) => SONGS.find((s) => s.id === id) as Song;
 const notesOf = (part: Song) => chartOf(part).targets.flatMap((t) => (t.midi === undefined ? [] : [{ beat: t.beat, dur: t.dur, midis: [t.midi, ...(t.harmony ?? [])] }]));
 const partOf = (a: BandArrangement, role: string) => a.parts.find((p) => p.seat.role === role);
 const EPS = 1e-6;
+/** What a seat does at a beat: its own role, unless the tune passed to it there (melody) or from it (the job it took). */
+const roleAt = (a: BandArrangement, id: string, beat: number) => {
+  const seat = a.seats.find((x) => x.id === id);
+  const turn = a.plan.leads?.[sectionAt(a.sections, beat)?.index ?? -1];
+  if (turn?.lead === id) return BandRole.melody;
+  return turn && seat?.role === BandRole.melody ? turn.gives.role : seat?.role;
+};
 
 const BANDS = [
   ['clarinet', 'acoustic', 'piano', 'bass', 'drums'],
@@ -40,16 +48,20 @@ describe('A band arrangement, by the arranger’s checks', () => {
       const chordAt = (beat: number) => chords.find((c) => beat >= c.beat - EPS && beat < c.end - EPS);
       const tuneAt = (beat: number) => tune.find((t) => beat >= t.beat - EPS && beat < t.beat + t.dur - EPS);
 
-      it(`${id} · ${band.join(' ')}: one instrument carries every note of the tune`, () => {
-        const lead = partOf(a, BandRole.melody);
-        expect(lead).toBeDefined();
-        const played = notesOf(lead!.song);
-        for (const t of tune) expect(played.some((n) => Math.abs(n.beat - t.beat) < EPS && n.midis[0] === t.midi), `${t.beat}`).toBe(true);
+      it(`${id} · ${band.join(' ')}: one instrument carries every note of the tune (in its octave, where it takes it over)`, () => {
+        expect(partOf(a, BandRole.melody)).toBeDefined();
+        for (const t of tune) {
+          const turn = a.plan.leads?.[sectionAt(a.sections, t.beat)?.index ?? -1];
+          const lead = turn ? a.parts.find((p) => p.seat.id === turn.lead) : partOf(a, BandRole.melody);
+          const played = notesOf(lead!.song);
+          expect(played.some((n) => Math.abs(n.beat - t.beat) < EPS && n.midis[0] === (t.midi ?? 0) + (turn?.shift ?? 0)), `${t.beat}`).toBe(true);
+        }
       });
 
       it(`${id} · ${band.join(' ')}: chords are the song's chords, voiced under the tune and clear of the low interval limits`, () => {
-        for (const p of a.parts.filter((x) => x.seat.role === BandRole.harmony || x.seat.role === BandRole.pad)) {
-          for (const n of notesOf(p.song)) {
+        const isChordal = (id: string, beat: number) => [BandRole.harmony, BandRole.pad].includes(roleAt(a, id, beat) as 'harmony');
+        for (const p of a.parts) {
+          for (const n of notesOf(p.song).filter((x) => isChordal(p.seat.id, x.beat))) {
             const c = chordAt(n.beat);
             if (!c) continue;
             for (const m of n.midis) expect(c.tones, `${p.seat.id} ${n.beat} ${m}`).toContain(((m % 12) + 12) % 12);
@@ -64,14 +76,15 @@ describe('A band arrangement, by the arranger’s checks', () => {
               if (gap === 4) expect(low).toBeGreaterThanOrEqual(47);
             }
             const t = tuneAt(n.beat);
-            if (t?.midi !== undefined && p.seat.kind !== 'mallet') expect(Math.max(...n.midis), `${p.seat.id} at ${n.beat} under ${t.midi}`).toBeLessThan(t.midi);
+            const heard = (t?.midi ?? 0) + (a.plan.leads?.[sectionAt(a.sections, n.beat)?.index ?? -1]?.shift ?? 0);
+            if (t?.midi !== undefined && p.seat.kind !== 'mallet') expect(Math.max(...n.midis), `${p.seat.id} at ${n.beat} under ${heard}`).toBeLessThan(heard);
           }
         }
       });
 
       it(`${id} · ${band.join(' ')}: the bass is the lowest voice, and no role outweighs the tune`, () => {
         const bass = partOf(a, BandRole.bass);
-        const comps = a.parts.filter((x) => x.seat.role === BandRole.harmony || x.seat.role === BandRole.pad).flatMap((x) => notesOf(x.song));
+        const comps = a.parts.flatMap((x) => notesOf(x.song).filter((n) => [BandRole.harmony, BandRole.pad].includes(roleAt(a, x.seat.id, n.beat) as 'harmony')));
         for (const b of bass ? notesOf(bass.song) : []) {
           const over = comps.filter((c) => c.beat < b.beat + b.dur - EPS && c.beat + c.dur > b.beat + EPS);
           for (const c of over) expect(b.midis[0]).toBeLessThan(Math.min(...c.midis));

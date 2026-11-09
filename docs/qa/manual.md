@@ -330,3 +330,5 @@ F/B rows (id — note):
 | X14 | Level fixed at 1, then 5 | 1: the tune alone (and a Turkish lead drum); 5: everyone throughout | |
 | X15 | Drum kit page, then djembe, cajón, bongos, tabla, handpan pages: play each stroke and note | Real drums: a kick that thumps, a snare that cracks without hiss, a rim click that knocks (cross-stick, quieter than the snare), toms that ring, cymbals that shimmer; skins on the hand drums, no hiss on the slaps | |
 | X16 | Ukulele, saz and harpsichord pages: play up and down the range | Real recordings (in tune); the saz's top notes (above G4) still the synth |
+| X17 | Band: flute, clarinet, trumpet, horn, tuba, kanun, davul on İzmir Marşı (auto) | Stanza 2 the clarinet leads, stanza 3 the trumpet, each heard in front; the flute steps back to their job; the last stanza everyone with the flute on top | |
+| X18 | Band: a member set to "drone", another to "fills"; then Harmony "fourths (quartal)" on Kâtibim, and on İzmir Marşı | Drone: the home note held under everything from bar 1; fills only where the tune holds or rests, from level 4; Kâtibim in open fourths, ending on a fourth; İzmir Marşı keeps its own chords | |
