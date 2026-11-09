@@ -251,7 +251,7 @@ Layers and rules: `CLAUDE.md`, `architecture.md`.
 - `key-press-detector.ts` — A press: the fingertip dips this far (share of the hand's size) below where that finger rests.
 - `key-press.ts` — A key going down: which, how hard (0–1), and where within the frame it happened (0–1).
 - `keyboard-instrument.ts` — An instrument played from a keyboard: its sound, the keys it has, and how its keys respond and look.
-- `keyboard-instruments.ts` — A harpsichord: strings plucked by quills, so the string synth voices it truly — bright, nasal (plucked near
+- `keyboard-instruments.ts` — A harpsichord: strings plucked by quills — bright, nasal (plucked near the end), no dynamics, damped when the 
 - `keyboard-layout.ts` — The keyboard on screen, and the two lines a fingertip presses keys through.
 - `piano-id.ts` — The instrument id that switches the app to the piano.
 - `piano-key.ts` — One key on screen: its note and its rectangle. Black keys are shorter and sit on top of the whites.

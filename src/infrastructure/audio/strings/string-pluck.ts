@@ -13,8 +13,12 @@ const PalmMuted = { t60: 0.25, brightness: 0.5 } as const;
 /** Nail vs fleshy pad: the nail adds brightness and a pick-like tick; the pad rounds the attack off. */
 const ATTACK_BRIGHTNESS = { nail: 0.12, pad: -0.18 } as const;
 /** Banjo: fitted to its recordings (tools/calibrate/fit.mjs; at the top of the searched range). */
-/** String stiffness (inharmonicity) per chain: a piano's thick steel strings are among the stiffest. */
-const STIFFNESS = { acoustic: 0.12, nylon: 0.05, clean: 0.1, drive: 0.1, bass: 0.22, banjo: 0.35, piano: 0.3, saz: 0.18, kopuz: 0.12, ukulele: 0.05, mandolin: 0.12, balalaika: 0.1, bouzouki: 0.14, harpsichord: 0.08 } as const;
+/**
+ * String stiffness (inharmonicity) per chain: a piano's thick steel strings are among the stiffest. The mandolin's and
+ * bouzouki's fitted 2026-11-10 to real notes (Freesound CC0: Taku19810729's mandolin scale, JustMog's bouzouki):
+ * inharmonicity 3.5 → 1.7 and 6.7 → 3.8, tone colour closer too.
+ */
+const STIFFNESS = { acoustic: 0.12, nylon: 0.05, clean: 0.1, drive: 0.1, bass: 0.22, banjo: 0.35, piano: 0.3, saz: 0.18, kopuz: 0.12, ukulele: 0.05, mandolin: 0.35, balalaika: 0.1, bouzouki: 0.35, harpsichord: 0.08 } as const;
 /** Decay laws are stated at 110 Hz: T60(f) = t60 · (110 / f)^t60Exponent. */
 const DECAY_REFERENCE_HZ = 110;
 const STEREO_WIDTH = 0.5;
