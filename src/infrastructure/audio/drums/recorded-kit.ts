@@ -23,7 +23,8 @@ interface KitManifest {
  * @remarks
  * - Measured against the recordings, the synthesised kit was far off: a snare and cymbals twice as bright (all hiss),
  *   toms an octave high and cut to a quarter of their ring, a ride ringing 0.5 s instead of 3.7 s — so the synth now
- *   only stands in while the recordings load, and for the rim click the kit wasn't recorded with.
+ *   only stands in while the recordings load. The rim click (cross-stick), which the kit wasn't recorded with, comes
+ *   from two CC0 recordings (`tools/samples/kit-rim.mjs`).
  */
 export class RecordedKit {
   private manifest: KitManifest | null = null;
@@ -55,7 +56,7 @@ export class RecordedKit {
 
   hit(r: DrumHitRequest): void {
     const key = keyOf(r);
-    const buffer = key ? this.take(key, r.velocity) : undefined;
+    const buffer = this.take(key, r.velocity);
     if (!buffer) {
       this.prepare();
       this.synth.hit(r);
@@ -100,10 +101,10 @@ export class RecordedKit {
   }
 }
 
-/** The recording a stroke plays: by piece and articulation; none for the rim click (the synth plays it). */
-function keyOf(r: DrumHitRequest): string | undefined {
+/** The recording a stroke plays: by piece and articulation. */
+function keyOf(r: DrumHitRequest): string {
   switch (r.piece) {
-    case DrumPiece.snare: return r.articulation === DrumArticulation.rim ? undefined : 'snare';
+    case DrumPiece.snare: return r.articulation === DrumArticulation.rim ? 'rim' : 'snare';
     case DrumPiece.hihat: return r.articulation === DrumArticulation.hatOpen ? 'hatOpen' : r.articulation === DrumArticulation.hatPedal ? 'hatPedal' : 'hatClosed';
     case DrumPiece.ride: return r.articulation === DrumArticulation.bell ? 'bell' : 'ride';
     default: return r.piece;

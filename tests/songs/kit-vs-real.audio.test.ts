@@ -17,7 +17,7 @@ const measure = (piece: string) => drumMetrics(decode(`${KIT}/${manifest.pieces[
 
 describe('The drum kit, against a real kit', () => {
   it('has every piece the kit page plays, in four strength bands of two takes', () => {
-    for (const piece of ['kick', 'snare', 'tom1', 'tom2', 'floor', 'hatClosed', 'hatPedal', 'hatOpen', 'crash', 'ride', 'bell']) {
+    for (const piece of ['kick', 'snare', 'tom1', 'tom2', 'floor', 'hatClosed', 'hatPedal', 'hatOpen', 'crash', 'ride', 'bell', 'rim']) {
       expect(manifest.pieces[piece], piece).toHaveLength(4);
       for (const band of manifest.pieces[piece] ?? []) expect(band).toHaveLength(2);
     }
@@ -31,6 +31,15 @@ describe('The drum kit, against a real kit', () => {
     expect(snare.centroid).toBeGreaterThan(2000);
     expect(snare.centroid).toBeLessThan(5000);
     expect(snare.t30).toBeGreaterThan(0.1);
+  });
+
+  it('a rim click that knocks: short, wood-and-metal bright, a step under the snare', () => {
+    const rim = measure('rim');
+    expect(rim.t30).toBeLessThan(0.2);
+    expect(rim.centroid).toBeGreaterThan(2500);
+    expect(rim.centroid).toBeLessThan(6000);
+    const peak = (piece: string) => Math.max(...(decode(`${KIT}/${manifest.pieces[piece]?.[3]?.[0] ?? ''}.m4a`) as Float32Array).map(Math.abs));
+    expect(peak('rim')).toBeLessThan(peak('snare'));
   });
 
   it('toms tuned high to low that ring half a second and more', () => {
