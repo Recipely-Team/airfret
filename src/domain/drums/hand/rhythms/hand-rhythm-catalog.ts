@@ -58,6 +58,29 @@ export const HAND_RHYTHMS: readonly HandRhythm[] = [
     phrase: '0D 3D 5D 8D 5D 3D 0D 2D 4D 7D 4D 2D' },
   { id: 'heartbeat', title: 'rhythm.heartbeat', about: 'rhythm.heartbeat.about', bpm: 84, beatsPerBar: 4, subdiv: 2, bars: BARS, drums: ['handpan'],
     phrase: '0D . 0d 4D . 3D 1D . 0D . 0d 5D . 4D 3D 2D' },
+  // The Turkish usul, one step a time unit (zaman), as two sources give them stroke for stroke (Neyzenim 'Usuller';
+  // salihbora.com 'Usul nedir'): nim sofyan, semai, sofyan, yuruk semai, devr-i hindi, duyek, aksak, evfer, aksak
+  // semai — and curcuna, aksak semai's fast form. Each bar as written, then with ghost strokes in its rests.
+  { id: 'sofyan', title: 'rhythm.sofyan', about: 'rhythm.sofyan.about', bpm: 96, beatsPerBar: 4, subdiv: 1, bars: BARS, drums: GOBLET_AND_FRAME,
+    phrase: 'D . T K D k T K' },
+  { id: 'nim-sofyan', title: 'rhythm.nimSofyan', about: 'rhythm.nimSofyan.about', bpm: 112, beatsPerBar: 2, subdiv: 1, bars: BARS, drums: GOBLET_AND_FRAME,
+    phrase: 'D T D T D k T k' },
+  { id: 'semai', title: 'rhythm.semai', about: 'rhythm.semai.about', bpm: 132, beatsPerBar: 3, subdiv: 1, bars: BARS, drums: GOBLET_AND_FRAME,
+    phrase: 'D T T D T T D k T k T k' },
+  { id: 'yuruk-semai', title: 'rhythm.yurukSemai', about: 'rhythm.yurukSemai.about', bpm: 180, beatsPerBar: 6, subdiv: 1, bars: BARS, drums: GOBLET_AND_FRAME,
+    phrase: 'D T T D T . D T T D T k' },
+  { id: 'devr-i-hindi', title: 'rhythm.devriHindi', about: 'rhythm.devriHindi.about', bpm: 200, beatsPerBar: 7, subdiv: 1, bars: BARS, drums: GOBLET_AND_FRAME,
+    phrase: 'D T T D . T . D T T D k T k' },
+  { id: 'duyek', title: 'rhythm.duyek', about: 'rhythm.duyek.about', bpm: 176, beatsPerBar: 8, subdiv: 1, bars: BARS, drums: GOBLET_AND_FRAME,
+    phrase: 'D T . T D . T . D T k T D k T k' },
+  { id: 'aksak', title: 'rhythm.aksak', about: 'rhythm.aksak.about', bpm: 210, beatsPerBar: 9, subdiv: 1, bars: BARS, drums: GOBLET_AND_FRAME,
+    phrase: 'D . T K D . T . T D k T K D k T k T' },
+  { id: 'evfer', title: 'rhythm.evfer', about: 'rhythm.evfer.about', bpm: 190, beatsPerBar: 9, subdiv: 1, bars: BARS, drums: GOBLET_AND_FRAME,
+    phrase: 'D . T K D . T T . D k T K D k T T k' },
+  { id: 'aksak-semai', title: 'rhythm.aksakSemai', about: 'rhythm.aksakSemai.about', bpm: 200, beatsPerBar: 10, subdiv: 1, bars: BARS, drums: GOBLET_AND_FRAME,
+    phrase: 'D . T K . D . T . T D k T K k D k T k T' },
+  { id: 'curcuna', title: 'rhythm.curcuna', about: 'rhythm.curcuna.about', bpm: 330, beatsPerBar: 10, subdiv: 1, bars: BARS, drums: GOBLET_AND_FRAME,
+    phrase: 'D . T K . D . T . T D k T K k D k T k T' },
 ];
 
 /** The rhythms a hand drum plays, its first the one it opens on. */
