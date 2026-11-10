@@ -31,4 +31,20 @@ describe('The rhythms the hand drums play by themselves', () => {
     expect(parseRhythm('0D+1T', 1, 1, 1)!.map((x) => x.head)).toEqual([0, 1]);
     expect(parseRhythm('D Q', 2, 1, 1)).toBeNull();
   });
+  it('play the Turkish usul stroke for stroke as the sources give them (düm D, tek T, ke K), one step a time unit', () => {
+    // Neyzenim "Usuller" (durations) and salihbora.com "Usul nedir" agree on each of these.
+    const SOURCES: Readonly<Record<string, string>> = {
+      'nim-sofyan': 'D T', semai: 'D T T', sofyan: 'D . T K', 'yuruk-semai': 'D T T D T .', 'devr-i-hindi': 'D T T D . T .',
+      duyek: 'D T . T D . T .', aksak: 'D . T K D . T . T', evfer: 'D . T K D . T T .', 'aksak-semai': 'D . T K . D . T . T', curcuna: 'D . T K . D . T . T',
+    };
+    for (const [id, grid] of Object.entries(SOURCES)) {
+      const r = HAND_RHYTHMS.find((x) => x.id === id);
+      const steps = grid.split(' ').length;
+      expect(r?.beatsPerBar, id).toBe(steps);
+      expect(r?.phrase.split(' ').slice(0, steps).join(' '), id).toBe(grid);
+      // The variation bar keeps every düm and tek where it was: only ghost strokes are added.
+      const second = r?.phrase.split(' ').slice(steps, steps * 2) ?? [];
+      grid.split(' ').forEach((g, k) => (g === '.' ? expect(second[k]).toMatch(/^[.a-z]/) : expect(second[k], `${id} ${k}`).toBe(g)));
+    }
+  });
 });
