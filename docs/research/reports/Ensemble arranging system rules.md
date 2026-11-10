@@ -108,7 +108,7 @@ Status key: **S** = sourced (cited above), **I** = engineering inference built f
 | `bass-8ths`, `bass-octave` | Driving roots; octave alternation | E4+ rock or dance | U |
 | `tremolo` | Repeated re-strikes on long notes | Kanun, saz, mandolin-like heterophony | I |
 | usul grids | düyek `D T - T D - T -`; semai `D T T`; devr-i hindi `D T T D - T -`; evfer `D - T k D - T T -`; aksak family grouped 2+2+2+3 | Turkish rhythm role | S |
-| usul grids (unverified) | sofyan `D - T k`; nim sofyan `D T`; yürük semai `D - T D T -`; aksak semai and curcuna 3+2+2+3; ceng-i harbî unknown | Turkish rhythm role | U |
+| usul grids (verified 2026-11-10) | nim sofyan `D T`; semai `D T T`; sofyan `D - T K`; yürük semai `D T T D T -` (the earlier unverified `D - T D T -` was wrong); aksak `D - T K D - T - T`; aksak semai `D - T K - D - T - T`, curcuna the same at 10/16 — Neyzenim *Usuller* and salihbora.com *Usul nedir* agree stroke for stroke; ceng-i harbî and devr-i turan still single-sourced | Turkish rhythm role (`hand-rhythm-catalog.ts`) | S |
 
 ### Per-section texture plan (energy E1–E5)
 
